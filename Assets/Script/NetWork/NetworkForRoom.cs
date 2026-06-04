@@ -5,7 +5,7 @@ using Photon.Realtime;
 using TMPro;
 
 namespace HanafudaPoker.Networks
-{
+{ 
     public class NetworkForRoom : MonoBehaviourPunCallbacks
     {
         [SerializeField] private TextMeshProUGUI playerNameListText;
@@ -28,6 +28,7 @@ namespace HanafudaPoker.Networks
             UpdatePlayerList();
         }
 
+        [PunRPC]
         public void UpdatePlayerList()
         {
             playerList = PhotonNetwork.PlayerList;
@@ -43,6 +44,13 @@ namespace HanafudaPoker.Networks
         {
             PhotonNetwork.NickName = inputedName.text;
             UpdatePlayerList();
+            photonView.RPC(nameof(UpdatePlayerList), RpcTarget.All);
+        }
+
+        [PunRPC]
+        private void RPCSendMessage(string message)
+        {
+            Debug.Log(message + " via photon");
         }
 
         // ---------------for debug--------------
@@ -51,7 +59,14 @@ namespace HanafudaPoker.Networks
         public override void OnConnectedToMaster() {
             // "Room"という名前のルームに参加する（ルームが存在しなければ作成して参加する）
             PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
-            Debug.Log("Joined To Room");
+            Debug.Log("Joined To Master Server");
+        }
+
+        public override void OnJoinedRoom()
+        {
+            PhotonNetwork.NickName = "Player" + PhotonNetwork.LocalPlayer.ActorNumber;
+            UpdatePlayerList();
+            Debug.Log("Joied To Room");
         }
     }
 }
