@@ -20,29 +20,44 @@ namespace HanafudaPoker.Games
         // 手札はPlayers内にあるので、呼ぶときはPlayers[0].HandCards
 
         // その他
-        public TurnState turnState; // 現在がどんなターンなのかを管理する
+        public TurnState currentState; // 現在がどんなターンなのかを管理する
         private TurnState prevState_Debug;
+        private TurnState previousState;
         private int round;
 
 
         // インスタンス
         private UIManager uiManager;
         private UIDebug uiDebug;
-        private NetworkManager networkManager;
+        [SerializeField]private NetworkManager networkManager;
 
         private void Start()
         {
-            Initialize(); 
-            SetInstances();
+            
             // ネット対戦にする前段階のデバッグ用initialize
             Players = new PlayerData[4];
             for(int i = 0; i < 4; i++)
             {
                 Players[i] = new PlayerData(i);
             }
+
+
+            Initialize(); 
+            SetInstances();
         }
 
         private void Update()
+        {
+            if(currentState != previousState)
+            {
+                OnEnterState(currentState);
+                previousState = currentState;
+            }
+
+            OnUpdateState(currentState);
+        }
+
+        private void OnEnterState(TurnState turnState)
         {
             // デバッグ用
             if(turnState != prevState_Debug)
@@ -59,12 +74,17 @@ namespace HanafudaPoker.Games
             {
                 case TurnState.BeforeGame:
                     ResetFields();
-                    turnState = TurnState.CreateDeck;
+
+                    SetTurnIfMasterClient(TurnState.CreateDeck);
                 break;
                 
                 case TurnState.CreateDeck:
-                    Deck = CardMovementManager.CreateDeck();
-                    turnState = TurnState.Shuffling;
+                    if(networkManager.IsMasterClient())
+                    {
+                        Deck = CardMovementManager.CreateDeck();
+                    }
+                
+                    SetTurnIfMasterClient(TurnState.Shuffling);
                 break;
 
                 case TurnState.Shuffling:
@@ -72,53 +92,25 @@ namespace HanafudaPoker.Games
                     {
                         CardMovementManager.ShuffleDeck(Deck);
                         // マスタークライアントはシャッフルしたでーたを送信する必要がある
-
+                        networkManager.SetDeck(Deck);
                     }
 
-                    // TurnState.DealCards
+                    SetTurnIfMasterClient(TurnState.DealCards);
                 break;
 
                 case TurnState.DealCards:
-                    CardMovementManager.DealCards(Deck, FieldCard, Players);
-                    FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
-
                     networkManager.ResetPlayersReady();
-
-                    networkManager.SetTurnState(TurnState.WaitForFirstChange);
-                break;
-                
-                
-                case TurnState.WaitForFirstChange:
 
                     if(networkManager.IsMasterClient())
                     {
-                        if(networkManager.IsEveryoneReady())
-                        {
-                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-                            // 次のターンに進むのであれこれ処理
-                            ShowFirstFieldCard();
-                            
-                            networkManager.ResetPlayersReady();
-
-                            uiDebug.ShowWillChange();
-                            turnState = TurnState.WaitForSecondChange;
-                        }
+                        CardMovementManager.DealCards(Deck, FieldCard, Players);
                     }
+                    SetTurnIfMasterClient(TurnState.ShowField);
                 break;
 
-                case TurnState.WaitForSecondChange:
-                
-                    if(networkManager.IsEveryoneReady())
-                    {
-                        CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-
-                        ShowSecondFieldCard();
-
-                        networkManager.ResetPlayersReady();
-
-                        uiDebug.ShowWillChange();
-                        turnState = TurnState.ShowResult;
-                    }
+                case TurnState.ShowField: 
+                    FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
+                    SetTurnIfMasterClient(TurnState.WaitForFirstChange);
                 break;
 
                 case TurnState.ShowResult:
@@ -138,8 +130,60 @@ namespace HanafudaPoker.Games
 
 
                     // こいこいはこのタイミングで
-                    turnState = TurnState.WaitForNextRound;
+                    SetTurnIfMasterClient(TurnState.WaitForNextRound);
                 break;
+
+                case TurnState.Other:
+                    // ボタン押したらスタート的な
+                    // このクラスできてすぐUpdate内をループするのは少し不安なので緩衝材としてOtherを作りました。
+                break;
+
+                default:
+                break;
+            }
+        }
+
+        private void OnUpdateState(TurnState turnState)
+        {
+            switch(turnState)
+            {
+                case TurnState.WaitForFirstChange:
+
+                    if(networkManager.IsMasterClient())
+                    {
+                        if(networkManager.IsEveryoneReady())
+                        {
+                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
+                            // 次のターンに進むのであれこれ処理
+                            ShowFirstFieldCard();
+                            
+                            networkManager.ResetPlayersReady();
+
+                            uiDebug.ShowWillChange();
+                            SetTurnIfMasterClient(TurnState.ShowResult);
+                        }
+                    }
+                break;
+
+                case TurnState.WaitForSecondChange:
+                
+                    if(networkManager.IsMasterClient())
+                    {
+                        if(networkManager.IsEveryoneReady())
+                        {
+                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
+
+                            ShowSecondFieldCard();
+
+                            networkManager.ResetPlayersReady();
+
+                            uiDebug.ShowWillChange();
+                            SetTurnIfMasterClient(TurnState.ShowResult);
+                        }
+                    }
+                break;
+
+                
 
                 case TurnState.WaitForNextRound:
 
@@ -155,16 +199,8 @@ namespace HanafudaPoker.Games
                             // シーン遷移とか
                         }
 
-                        turnState = TurnState.BeforeGame;
+                        SetTurnIfMasterClient(TurnState.BeforeGame);
                     }
-                break;
-
-                case TurnState.Other:
-                    // ボタン押したらスタート的な
-                    // このクラスできてすぐUpdate内をループするのは少し不安なので緩衝材としてOtherを作りました。
-                break;
-
-                default:
                 break;
             }
         }
@@ -181,7 +217,7 @@ namespace HanafudaPoker.Games
 
         private void Initialize()
         {
-            turnState = prevState_Debug = TurnState.BeforeGame;
+            currentState = prevState_Debug = TurnState.BeforeGame;
             Deck = new List<CardData>();
             FieldCard = new List<CardData>();
             DiscardPile = new List<CardData>();
@@ -219,6 +255,14 @@ namespace HanafudaPoker.Games
             };
             uiDebug.ShowYaku(emptyList);
         }
+
+        private void SetTurnIfMasterClient(TurnState state)
+        {
+            if(networkManager.IsMasterClient())
+            {
+                networkManager.SetTurnState(state);
+            }
+        }
     }
 
     public enum TurnState
@@ -228,6 +272,7 @@ namespace HanafudaPoker.Games
         CreateDeck,
         Shuffling,
         DealCards,
+        ShowField,
         WaitForFirstChange,
         WaitForSecondChange,
         ShowResult,

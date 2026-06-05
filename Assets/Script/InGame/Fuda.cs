@@ -88,5 +88,16 @@ namespace HanafudaPoker.Cards
 
             return list;
         }
+
+        public static int[] GetIDsByList(List<CardData> c)
+        {
+            int[] ids = new int[c.Count];
+            for(int i = 0; i < c.Count; i++)
+            {
+                ids[i] = c[i].CardID;
+            }
+
+            return ids;
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace HanafudaPoker.Games
     {
         private GameManager gameManager;
 
-        public void Start()
+        public void Awake()
         {
             SetInstance();
         }
@@ -23,11 +23,6 @@ namespace HanafudaPoker.Games
         }
 
         public bool IsMasterClient()
-        {
-            return PhotonNetwork.IsMasterClient;
-        }
-
-        private bool CheckMasterClient()
         {
             return PhotonNetwork.IsMasterClient;
         }
@@ -87,10 +82,13 @@ namespace HanafudaPoker.Games
             if (!PhotonNetwork.IsMasterClient)
                 return;
 
+            // CardData to ID
+            int[] idsOfDeck = CardDataBase.GetIDsByList(deck);
+
             photonView.RPC(
                 nameof(RPC_SetDeck),
                 RpcTarget.All,
-                deck
+                idsOfDeck
             );
         }
 
@@ -99,10 +97,13 @@ namespace HanafudaPoker.Games
             if (!PhotonNetwork.IsMasterClient)
                 return;
 
+            // CardData to ID
+            int[] idsOfField = CardDataBase.GetIDsByList(field);
+
             photonView.RPC(
                 nameof(RPC_SetFieldCards),
                 RpcTarget.All,
-                field
+                idsOfField
             );
         }
 
@@ -115,18 +116,10 @@ namespace HanafudaPoker.Games
             if (!PhotonNetwork.IsMasterClient)
                 return;
 
-            int[] handsInt0 = new int[GameConst.HAND_CARD_NUMBER];
-            int[] handsInt1 = new int[GameConst.HAND_CARD_NUMBER];
-            int[] handsInt2 = new int[GameConst.HAND_CARD_NUMBER];
-            int[] handsInt3 = new int[GameConst.HAND_CARD_NUMBER];
-
-            for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
-            {
-                handsInt0[i] = hands0[i].CardID;
-                handsInt1[i] = hands1[i].CardID;
-                handsInt2[i] = hands2[i].CardID;
-                handsInt3[i] = hands3[i].CardID;
-            }
+            int[] handsInt0 = CardDataBase.GetIDsByList(hands0);
+            int[] handsInt1 = CardDataBase.GetIDsByList(hands1);
+            int[] handsInt2 = CardDataBase.GetIDsByList(hands2);
+            int[] handsInt3 = CardDataBase.GetIDsByList(hands3);
             
             photonView.RPC(
                 nameof(RPC_SetPlayersHandCards),
@@ -171,19 +164,19 @@ namespace HanafudaPoker.Games
         [PunRPC]
         private void RPC_SetTurnState(TurnState state)
         {
-            gameManager.turnState = state;
+            gameManager.currentState = state;
         }
 
         [PunRPC]
-        private void RPC_SetDeck(List<CardData> deck)
+        private void RPC_SetDeck(int[] deck)
         {
-            gameManager.Deck = deck;
+            gameManager.Deck = CardDataBase.GetCardDataListByID(deck);
         }  
 
         [PunRPC]
-        private void RPC_SetFieldCards(List<CardData> field)
+        private void RPC_SetFieldCards(int[] field)
         {
-            gameManager.FieldCard = field;
+            gameManager.FieldCard = CardDataBase.GetCardDataListByID(field);
         }
 
         [PunRPC]
