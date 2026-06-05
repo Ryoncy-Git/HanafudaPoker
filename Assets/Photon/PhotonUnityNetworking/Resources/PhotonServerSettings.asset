@@ -46,6 +46,13 @@ MonoBehaviour:
   - SetPlayerWillChangeCard
   - GoToNextTurn
   - ResetPlayersReady
+  - RPC_ResetPlayersReady
+  - RPC_SetDeck
+  - RPC_SetFieldCards
+  - RPC_SetPlayerReady
+  - RPC_SetPlayersHandCards
+  - RPC_SetPlayerWillChangeCard
+  - RPC_SetTurnState
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

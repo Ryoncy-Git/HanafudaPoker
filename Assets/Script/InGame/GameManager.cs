@@ -20,7 +20,7 @@ namespace HanafudaPoker.Games
         // 手札はPlayers内にあるので、呼ぶときはPlayers[0].HandCards
 
         // その他
-        private TurnState turnState; // 現在がどんなターンなのかを管理する
+        public TurnState turnState; // 現在がどんなターンなのかを管理する
         private TurnState prevState_Debug;
         private int round;
 
@@ -84,28 +84,31 @@ namespace HanafudaPoker.Games
 
                     networkManager.ResetPlayersReady();
 
-                    turnState = TurnState.WaitForFirstChange;
+                    networkManager.SetTurnState(TurnState.WaitForFirstChange);
                 break;
                 
                 
                 case TurnState.WaitForFirstChange:
 
-                    if(networkManager.IsEveryoneReady)
+                    if(networkManager.IsMasterClient())
                     {
-                        CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-                        // 次のターンに進むのであれこれ処理
-                        ShowFirstFieldCard();
-                        
-                        networkManager.ResetPlayersReady();
+                        if(networkManager.IsEveryoneReady())
+                        {
+                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
+                            // 次のターンに進むのであれこれ処理
+                            ShowFirstFieldCard();
+                            
+                            networkManager.ResetPlayersReady();
 
-                        uiDebug.ShowWillChange();
-                        turnState = TurnState.WaitForSecondChange;
+                            uiDebug.ShowWillChange();
+                            turnState = TurnState.WaitForSecondChange;
+                        }
                     }
                 break;
 
                 case TurnState.WaitForSecondChange:
                 
-                    if(networkManager.IsEveryoneReady)
+                    if(networkManager.IsEveryoneReady())
                     {
                         CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
 
@@ -141,7 +144,7 @@ namespace HanafudaPoker.Games
                 case TurnState.WaitForNextRound:
 
                     // 全員がOKボタン押したら次のラウンドへ、とか
-                    if(networkManager.IsEveryoneReady)
+                    if(networkManager.IsEveryoneReady())
                     {
                         networkManager.ResetPlayersReady();
                         round++;

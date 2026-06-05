@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+
+using HanafudaPoker.Games;
 
 namespace HanafudaPoker.Cards
 {
@@ -45,11 +48,45 @@ namespace HanafudaPoker.Cards
         public CardFeature Feature;
         public int CardID;
 
-        public CardData(CardMonth month, CardRank rank, CardFeature feature)
+        public CardData(CardMonth month, CardRank rank, CardFeature feature, int id)
         {
             Month = month;
             Rank = rank;
             Feature = feature;
+            CardID = id;
+        }
+
+        
+    }
+
+    public static class CardDataBase
+    {
+        private static Dictionary<int, CardData> cards;
+        static void CardDatabase()
+        {
+            cards = new();
+
+            foreach(var card in CardMovementManager.CreateDeck())
+            {
+                cards.Add(card.CardID, card);
+            }
+            return;
+        }
+
+        public static CardData GetCardDataByID(int id)
+        {
+            return cards[id];
+        }
+
+        public static List<CardData> GetCardDataListByID(int[] ids)
+        {
+            List<CardData> list = new();
+            foreach(int id in ids)
+            {
+                list.Add(GetCardDataByID(id));
+            }
+
+            return list;
         }
     }
 }

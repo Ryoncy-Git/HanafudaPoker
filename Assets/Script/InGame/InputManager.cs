@@ -44,25 +44,6 @@ namespace HanafudaPoker.Games
                 gameManager.Players[0].WillChangeCards[2] = ! gameManager.Players[0].WillChangeCards[2];
                 uiDebug.ShowWillChange();
             }
-
-            if(Input.GetKeyDown(KeyCode.P))
-            {
-                gameManager.Players[0].HandCards = new List<CardData>()
-                {
-                    new(CardMonth.Matsu,  CardRank.Hikari, CardFeature.Tori),
-                    new(CardMonth.Ume,    CardRank.Tane,   CardFeature.Tori),
-                    new(CardMonth.Fuji,   CardRank.Tane,   CardFeature.Tori)
-                };
-
-                gameManager.FieldCard = new List<CardData>()
-                {
-                    new(CardMonth.Yanagi, CardRank.Tane,   CardFeature.Tori),
-                    new(CardMonth.Kiri  , CardRank.Hikari, CardFeature.Tori),
-                    new(CardMonth.Susuki, CardRank.Tane,   CardFeature.Tori),
-                    new(CardMonth.Sakura, CardRank.Kasu,   CardFeature.None),
-                    new(CardMonth.Sakura, CardRank.Kasu,   CardFeature.None)
-                };
-            }
         }
     }
 }
