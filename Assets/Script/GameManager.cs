@@ -56,6 +56,8 @@ namespace HanafudaPoker.Games
 
             switch(turnState)
             {
+
+                // カード配布前
                 case TurnState.BeforeGame:
                     // なんかカード配るアニメーションとか
                     ResetFields();
@@ -88,6 +90,7 @@ namespace HanafudaPoker.Games
                 break;
                 
                 
+                // 場に3枚開示、最初の交換タイム
                 case TurnState.WaitForFirstChange:
 
                     if(isEveryoneReady())
@@ -108,6 +111,7 @@ namespace HanafudaPoker.Games
                     }
                 break;
 
+                // 追加で1枚開示、最後の交換タイム
                 case TurnState.WaitForSecondChange:
                 
                     if(isEveryoneReady())
@@ -128,6 +132,7 @@ namespace HanafudaPoker.Games
                     }
                 break;
 
+                // 全て開示、役判定
                 case TurnState.ShowResult:
 
                     // debug
@@ -231,6 +236,7 @@ namespace HanafudaPoker.Games
                 player.HandCards.Clear();
             }
         }
+
     }
 
     public enum TurnState
