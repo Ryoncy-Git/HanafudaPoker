@@ -53,6 +53,9 @@ MonoBehaviour:
   - RPC_SetPlayersHandCards
   - RPC_SetPlayerWillChangeCard
   - RPC_SetTurnState
+  - RPC_StartGame
+  - RPC_SendGameData
+  - RPC_SetPlayerNumber
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

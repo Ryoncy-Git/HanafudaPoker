@@ -14,60 +14,59 @@ namespace HanafudaPoker.Games
         // カード関係
         public List<CardData> Deck;
         public List<CardData> FieldCard;
-        private List<CardData> FieldCardForShow;
+        public List<CardData> FieldCardForShow;
         public List<CardData> DiscardPile;
         public PlayerData[] Players;
         // 手札はPlayers内にあるので、呼ぶときはPlayers[0].HandCards
 
         // その他
-        public TurnState currentState; // 現在がどんなターンなのかを管理する
+        public TurnState CurrentState; // 現在がどんなターンなのかを管理する
         private TurnState prevState_Debug;
-        private TurnState previousState;
+        public TurnState PreviousState;
         private int round;
 
 
         // インスタンス
-        private UIManager uiManager;
-        private UIDebug uiDebug;
+        // [SerializeField]private UIManager uiManager;
+        [SerializeField]private UIDebug uiDebug;
         [SerializeField]private NetworkManager networkManager;
+
+        private void Awake()
+        {
+            // これは何が何でもぜったい最初にしておきたい
+            CurrentState = TurnState.WaitForInitialize;
+            PreviousState = TurnState.WaitForInitialize;
+        }
 
         private void Start()
         {
-            
-            // ネット対戦にする前段階のデバッグ用initialize
-            Players = new PlayerData[4];
-            for(int i = 0; i < 4; i++)
-            {
-                Players[i] = new PlayerData(i);
-            }
-
-
-            Initialize(); 
-            SetInstances();
+            Initialize();
         }
 
         private void Update()
         {
-            if(currentState != previousState)
+            if(CurrentState != PreviousState)
             {
-                OnEnterState(currentState);
-                previousState = currentState;
+                PreviousState = CurrentState;
+                OnEnterState(CurrentState);
+                Debug.Log($"change state to {CurrentState}");
+                SendGameDataIfMasterClient();
+
+                // debug
+                uiDebug.ShowState(CurrentState);
+                uiDebug.SetTextFieldCards(FieldCardForShow);
+                uiDebug.SetTextHandCards(Players);
             }
 
-            OnUpdateState(currentState);
+            OnUpdateState(CurrentState);
         }
 
         private void OnEnterState(TurnState turnState)
         {
-            // デバッグ用
-            if(turnState != prevState_Debug)
-            {
-                uiDebug.ShowState(turnState);
-                prevState_Debug = turnState;
-
-                uiDebug.SetTextFieldCards(FieldCardForShow);
-                uiDebug.SetTextHandCards(Players);
-            }
+            if(! networkManager.IsMasterClient())
+                return;
+            
+            // ここから先はmaster clientだけが実行、処理する部分
 
 
             switch(turnState)
@@ -75,62 +74,47 @@ namespace HanafudaPoker.Games
                 case TurnState.BeforeGame:
                     ResetFields();
 
-                    SetTurnIfMasterClient(TurnState.CreateDeck);
+                    CurrentState = TurnState.CreateDeck;
                 break;
-                
+
                 case TurnState.CreateDeck:
-                    if(networkManager.IsMasterClient())
-                    {
-                        Deck = CardMovementManager.CreateDeck();
-                    }
-                
-                    SetTurnIfMasterClient(TurnState.Shuffling);
-                break;
+                    Deck = CardMovementManager.CreateDeck();
+                    CardMovementManager.ShuffleDeck(Deck);
 
-                case TurnState.Shuffling:
-                    if(networkManager.IsMasterClient())
-                    {
-                        CardMovementManager.ShuffleDeck(Deck);
-                        // マスタークライアントはシャッフルしたでーたを送信する必要がある
-                        networkManager.SetDeck(Deck);
-                    }
+                    // Debug.Log("after shuffle");
 
-                    SetTurnIfMasterClient(TurnState.DealCards);
+                    CurrentState = TurnState.DealCards;
                 break;
 
                 case TurnState.DealCards:
-                    networkManager.ResetPlayersReady();
+                    ResetPlayersReady();
+                    CardMovementManager.DealCards(Deck, FieldCard, Players);
 
-                    if(networkManager.IsMasterClient())
-                    {
-                        CardMovementManager.DealCards(Deck, FieldCard, Players);
-                    }
-                    SetTurnIfMasterClient(TurnState.ShowField);
+                    CurrentState = TurnState.ShowField;
                 break;
 
                 case TurnState.ShowField: 
                     FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
-                    SetTurnIfMasterClient(TurnState.WaitForFirstChange);
+                    CurrentState = TurnState.WaitForFirstChange;
                 break;
 
                 case TurnState.ShowResult:
 
-                    List<Yaku>[] yakus = 
+                    List<Yaku>[]playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    
+                    for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
                     {
-                        YakuData.YakuCheck(FieldCard, Players[0].HandCards), 
-                        YakuData.YakuCheck(FieldCard, Players[1].HandCards), 
-                        YakuData.YakuCheck(FieldCard, Players[2].HandCards), 
-                        YakuData.YakuCheck(FieldCard, Players[3].HandCards), 
-                    };
+                        playerYaku[i] = YakuData.YakuCheck(FieldCard, Players[i].HandCards);
+                    }
 
-                    uiDebug.ShowYaku(yakus);
+                    uiDebug.ShowYaku(playerYaku);
 
                     // なんかいい感じに役とか表示して次へ
                     // 今はデバッグで無条件で次のターンへ
 
 
                     // こいこいはこのタイミングで
-                    SetTurnIfMasterClient(TurnState.WaitForNextRound);
+                    CurrentState = TurnState.WaitForNextRound;
                 break;
 
                 case TurnState.Other:
@@ -151,16 +135,15 @@ namespace HanafudaPoker.Games
 
                     if(networkManager.IsMasterClient())
                     {
-                        if(networkManager.IsEveryoneReady())
+                        if(IsEveryoneReady())
                         {
                             CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-                            // 次のターンに進むのであれこれ処理
                             ShowFirstFieldCard();
                             
-                            networkManager.ResetPlayersReady();
+                            ResetPlayersReady();
 
                             uiDebug.ShowWillChange();
-                            SetTurnIfMasterClient(TurnState.ShowResult);
+                            CurrentState = TurnState.WaitForSecondChange;
                         }
                     }
                 break;
@@ -169,16 +152,15 @@ namespace HanafudaPoker.Games
                 
                     if(networkManager.IsMasterClient())
                     {
-                        if(networkManager.IsEveryoneReady())
+                        if(IsEveryoneReady())
                         {
                             CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-
                             ShowSecondFieldCard();
 
-                            networkManager.ResetPlayersReady();
+                            ResetPlayersReady();
 
                             uiDebug.ShowWillChange();
-                            SetTurnIfMasterClient(TurnState.ShowResult);
+                            CurrentState = TurnState.ShowResult;
                         }
                     }
                 break;
@@ -187,19 +169,22 @@ namespace HanafudaPoker.Games
 
                 case TurnState.WaitForNextRound:
 
-                    // 全員がOKボタン押したら次のラウンドへ、とか
-                    if(networkManager.IsEveryoneReady())
+                    if(networkManager.IsMasterClient())
                     {
-                        networkManager.ResetPlayersReady();
-                        round++;
-
-                        if(round <= GameConst.ROUND_NUMBER)
+                        // 全員がOKボタン押したら次のラウンドへ、とか
+                        if(IsEveryoneReady())
                         {
-                            // 親が一周したら終わり
-                            // シーン遷移とか
-                        }
+                            ResetPlayersReady();
+                            round++;
 
-                        SetTurnIfMasterClient(TurnState.BeforeGame);
+                            if(round <= GameConst.ROUND_NUMBER)
+                            {
+                                // 親が一周したら終わり
+                                // シーン遷移とか
+                            }
+
+                            CurrentState = TurnState.BeforeGame;
+                        }
                     }
                 break;
             }
@@ -208,20 +193,27 @@ namespace HanafudaPoker.Games
 
 
         // ーーーーーーーーーーーーこのファイル内のみで使う補助関数たちーーーーーーーーーーーーーーー
-
-        private void SetInstances()
-        {
-            uiManager = this.gameObject.GetComponent<UIManager>();
-            uiDebug = this.gameObject.GetComponent<UIDebug>();
-        }
-
         private void Initialize()
         {
-            currentState = prevState_Debug = TurnState.BeforeGame;
+            networkManager.SetPlayerNumber();
+            Players = new PlayerData[GameConst.PLAYER_NUMBER];
+
+            int[] playerActorNumbers = networkManager.GetPlayerActorNumbers();
+
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+            {
+                // Debug.Log("after access to networl managher");
+                // Debug.Log($"Players Length = {Players.Length}");
+                // Debug.Log($"Player actor number length = {playerActorNumbers.Length}");
+                Players[seatID] = new PlayerData(seatID, playerActorNumbers[seatID]);
+            }
+
             Deck = new List<CardData>();
             FieldCard = new List<CardData>();
             DiscardPile = new List<CardData>();
+            FieldCardForShow = new List<CardData>();
 
+            CurrentState = prevState_Debug = TurnState.BeforeGame;
             return;
         }
 
@@ -246,21 +238,71 @@ namespace HanafudaPoker.Games
                 player.HandCards.Clear();
             }
 
-            List<Yaku>[] emptyList =
+            List<Yaku>[] emptyList = new List<Yaku>[GameConst.PLAYER_NUMBER];
+            for(int i = 0; i < emptyList.Length; i++)
             {
-                new List<Yaku>(),
-                new List<Yaku>(),
-                new List<Yaku>(),
-                new List<Yaku>()
-            };
+                emptyList[i] = new List<Yaku>();
+            }
             uiDebug.ShowYaku(emptyList);
         }
 
-        private void SetTurnIfMasterClient(TurnState state)
+        private bool IsEveryoneReady()
         {
+            foreach(PlayerData player in Players)
+            {
+                if(player.IsReady == false)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private void SendGameDataIfMasterClient()
+        {
+            // まsターくらいあんとだけが呼び出せる関数
+            // ゲームデータ（デックや場札）、各プレイヤーの準備完了状況などが変更されたときに必ず呼び出す
+            // また、適せん、各クライアントから同期要請があったらこれを返す
             if(networkManager.IsMasterClient())
             {
-                networkManager.SetTurnState(state);
+                int[] deckIDs = CardDataBase.GetIDsByList(Deck);
+                int[] fieldIDs = CardDataBase.GetIDsByList(FieldCard);
+                int[] discardIDs = CardDataBase.GetIDsByList(DiscardPile);
+
+
+                int[] hands = new int[GameConst.PLAYER_NUMBER * GameConst.HAND_CARD_NUMBER];
+
+                for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
+                {
+                    if(Players[i].HandCards.Count == 0)
+                        continue;
+
+                    
+                    int[] ids = CardDataBase.GetIDsByList(Players[i].HandCards);
+
+                    for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
+                    {
+                        hands[i * GameConst.HAND_CARD_NUMBER + j] = ids[j];
+                    }
+                }
+
+                networkManager.SendGameData
+                (
+                    CurrentState,
+                    PreviousState,
+                    deckIDs,
+                    fieldIDs,
+                    discardIDs,
+                    hands
+                );
+            }
+        }
+
+        private void ResetPlayersReady()
+        {
+            foreach(PlayerData player in Players)
+            {
+                player.WillChangeCards = new bool[]{false, false, false};
+                player.IsReady = false;
             }
         }
     }
@@ -270,12 +312,12 @@ namespace HanafudaPoker.Games
         Other, // = 0
         BeforeGame,
         CreateDeck,
-        Shuffling,
         DealCards,
         ShowField,
         WaitForFirstChange,
         WaitForSecondChange,
         ShowResult,
-        WaitForNextRound
+        WaitForNextRound,
+        WaitForInitialize
     }
 }

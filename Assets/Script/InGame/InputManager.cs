@@ -9,8 +9,8 @@ namespace HanafudaPoker.Games
 {
     public class InputManager : MonoBehaviour
     {
-        private GameManager gameManager;
-        private UIDebug uiDebug;
+        [SerializeField]private GameManager gameManager;
+        [SerializeField]private UIDebug uiDebug;
         private void Start()
         {
             gameManager = this.gameObject.GetComponent<GameManager>();

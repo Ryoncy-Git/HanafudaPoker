@@ -62,7 +62,7 @@ namespace HanafudaPoker.Cards
     public static class CardDataBase
     {
         private static Dictionary<int, CardData> cards;
-        static void CardDatabase()
+        static CardDataBase()
         {
             cards = new();
 

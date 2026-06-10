@@ -6,15 +6,17 @@ namespace HanafudaPoker.Players
 {
     public class PlayerData
     {
+        public int SeatID;
         public int PlayerID;
         public int Point;
         public List<CardData> HandCards;
         public bool IsReady;
         public bool[] WillChangeCards;
 
-        public PlayerData(int id)
+        public PlayerData(int seatId, int playerId)
         {
-            PlayerID = id;
+            SeatID = seatId;
+            PlayerID = playerId;
             Point = 0;
             HandCards = new();
             IsReady = false;

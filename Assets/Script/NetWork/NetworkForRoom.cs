@@ -47,6 +47,17 @@ namespace HanafudaPoker.Networks
             photonView.RPC(nameof(UpdatePlayerList), RpcTarget.All);
         }
 
+        public void OnPressedStartGame()
+        {
+            photonView.RPC(nameof(RPC_StartGame), RpcTarget.All);
+        }
+
+        [PunRPC]
+        private void RPC_StartGame()
+        {
+            SceneManager.LoadScene("InGame");
+        }
+
         [PunRPC]
         private void RPCSendMessage(string message)
         {

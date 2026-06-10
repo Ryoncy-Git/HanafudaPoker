@@ -10,43 +10,34 @@ namespace HanafudaPoker.Games
 {
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
-        private GameManager gameManager;
-
-        public void Awake()
-        {
-            SetInstance();
-        }
-
-        private void SetInstance()
-        {
-            gameManager = this.gameObject.GetComponent<GameManager>();
-        }
+        [SerializeField]private GameManager gameManager;
 
         public bool IsMasterClient()
         {
             return PhotonNetwork.IsMasterClient;
         }
 
-        public bool IsEveryoneReady()
+        public int[] GetPlayerActorNumbers()
         {
-            foreach(PlayerData player in gameManager.Players)
+            Player[] players = PhotonNetwork.PlayerList;
+            int[] ids = new int[players.Length];
+
+            for(int i = 0; i < players.Length; i++)
             {
-                // 一人でも準備完了してない人を見つけたら
-                if(player.IsReady == false)
-                    return false;
+                ids[i] = players[i].ActorNumber;
             }
 
-            return true;
+            return ids;
         }
 
         // ------------------------ RPC送信側 ------------------------
 
-        public void SetPlayerReady(int playerNum, bool state)
+        public void SetPlayerReady(int seatID, bool state)
         {
             photonView.RPC(
                 nameof(RPC_SetPlayerReady),
                 RpcTarget.All,
-                playerNum,
+                seatID,
                 state
             );
         }
@@ -65,139 +56,105 @@ namespace HanafudaPoker.Games
 
         // --------------------- master側のみが送れるRPC 送信側 --------------
 
-        public void SetTurnState(TurnState state)
+        public void SetPlayerNumber()
         {
-            if (!PhotonNetwork.IsMasterClient)
-                return;
+            if(!PhotonNetwork.IsMasterClient)
+                return; 
+
+            int n = PhotonNetwork.PlayerList.Length;
 
             photonView.RPC(
-                nameof(RPC_SetTurnState),
+                nameof(RPC_SetPlayerNumber),
                 RpcTarget.All,
-                state
+                n
             );
         }
-
-        public void SetDeck(List<CardData> deck)
+        public void SendGameData
+        (
+            TurnState currentState, 
+            TurnState prevState, 
+            int[] DeckIDs, 
+            int[] FieldIDs, 
+            int[] discardIDs,
+            int[] playerHand
+        )
         {
             if (!PhotonNetwork.IsMasterClient)
                 return;
 
-            // CardData to ID
-            int[] idsOfDeck = CardDataBase.GetIDsByList(deck);
-
             photonView.RPC(
-                nameof(RPC_SetDeck),
+                nameof(RPC_SendGameData),
                 RpcTarget.All,
-                idsOfDeck
+                currentState, 
+                prevState, 
+                DeckIDs, 
+                FieldIDs, 
+                discardIDs,
+                playerHand
             );
         }
 
-        public void SetFieldCards(List<CardData> field)
-        {
-            if (!PhotonNetwork.IsMasterClient)
-                return;
-
-            // CardData to ID
-            int[] idsOfField = CardDataBase.GetIDsByList(field);
-
-            photonView.RPC(
-                nameof(RPC_SetFieldCards),
-                RpcTarget.All,
-                idsOfField
-            );
-        }
-
-        public void SetPlayersHandCards(
-            List<CardData> hands0,
-            List<CardData> hands1,
-            List<CardData> hands2,
-            List<CardData> hands3)
-        {
-            if (!PhotonNetwork.IsMasterClient)
-                return;
-
-            int[] handsInt0 = CardDataBase.GetIDsByList(hands0);
-            int[] handsInt1 = CardDataBase.GetIDsByList(hands1);
-            int[] handsInt2 = CardDataBase.GetIDsByList(hands2);
-            int[] handsInt3 = CardDataBase.GetIDsByList(hands3);
-            
-            photonView.RPC(
-                nameof(RPC_SetPlayersHandCards),
-                RpcTarget.All,
-                handsInt0,
-                handsInt1,
-                handsInt2,
-                handsInt3
-            );
-        }
-
-        public void ResetPlayersReady()
-        {
-            if (!PhotonNetwork.IsMasterClient)
-                return;
-
-            photonView.RPC(
-                nameof(RPC_ResetPlayersReady),
-                RpcTarget.All
-            );
-        }
-                
         // ------------------------ PunRPC 受信側 -----------------------
         // こっちはmaster clientじゃなくても呼べる。
         [PunRPC]
-        private void RPC_SetPlayerReady(int playerNum, bool state)
+        private void RPC_SetPlayerReady(int seatID, bool state)
         {
             // 私は準備できました。という情報を開示する
-            gameManager.Players[playerNum].IsReady = state;
-            Debug.Log($"Player{playerNum} , Set state To {state}");
+            gameManager.Players[seatID].IsReady = state;
+            // Debug.Log($"Player{seatID} , Set state To {state}");
             return;
         }
 
         [PunRPC]
-        private void RPC_SetPlayerWillChangeCard(int playerNum, bool state, int num)
+        private void RPC_SetPlayerWillChangeCard(int seatID, bool state, int num)
         {
             // 私はこのカードを変更します。という情報を開示する
-            gameManager.Players[playerNum].WillChangeCards[num] = state;
+            gameManager.Players[seatID].WillChangeCards[num] = state;
         }
 
         // --------------------- masterのみが送れるRPCの受信側 -------------------------
         [PunRPC]
-        private void RPC_SetTurnState(TurnState state)
+        private void RPC_SetPlayerNumber(int n)
         {
-            gameManager.currentState = state;
+            GameConst.PLAYER_NUMBER = n;
         }
 
         [PunRPC]
-        private void RPC_SetDeck(int[] deck)
+        private void RPC_SendGameData
+        (   
+            TurnState currentState, 
+            TurnState prevState, 
+            int[] DeckIDs, 
+            int[] FieldIDs, 
+            int[] discardIDs,
+            int[] playerHand
+        )
         {
-            gameManager.Deck = CardDataBase.GetCardDataListByID(deck);
-        }  
+            gameManager.CurrentState = currentState;
+            gameManager.PreviousState = prevState;
 
-        [PunRPC]
-        private void RPC_SetFieldCards(int[] field)
-        {
-            gameManager.FieldCard = CardDataBase.GetCardDataListByID(field);
-        }
+            // sync deck data 
+            gameManager.Deck = CardDataBase.GetCardDataListByID(DeckIDs);
 
-        [PunRPC]
-        private void RPC_SetPlayersHandCards(int[] hands0, int[] hands1, int[] hands2, int[] hands3)
-        {
-            gameManager.Players[0].HandCards = CardDataBase.GetCardDataListByID(hands0);
-            gameManager.Players[1].HandCards = CardDataBase.GetCardDataListByID(hands1);
-            gameManager.Players[2].HandCards = CardDataBase.GetCardDataListByID(hands2);
-            gameManager.Players[3].HandCards = CardDataBase.GetCardDataListByID(hands3);
-        }
+            // sync field data 
+            gameManager.FieldCard = CardDataBase.GetCardDataListByID(FieldIDs);
+            gameManager.DiscardPile = CardDataBase.GetCardDataListByID(discardIDs);
 
-        [PunRPC]
-        private void RPC_ResetPlayersReady()
-        {
-            foreach(PlayerData player in gameManager.Players)
+            // Sync Player hand data
+            for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
             {
-                player.IsReady = false;
-                for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
+                PlayerData player = gameManager.Players[i];
+                int[] handInt = 
+                new int[]
                 {
-                    player.WillChangeCards[i] = false;
-                }
+                    playerHand[i * GameConst.HAND_CARD_NUMBER + 0], 
+                    playerHand[i * GameConst.HAND_CARD_NUMBER + 1], 
+                    playerHand[i * GameConst.HAND_CARD_NUMBER + 2]
+                };
+
+                List<CardData> hand = CardDataBase.GetCardDataListByID(handInt);
+
+                player.HandCards = hand;
             }
         }
     }
