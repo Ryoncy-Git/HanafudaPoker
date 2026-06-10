@@ -32,12 +32,14 @@ namespace HanafudaPoker.Games
 
         // ------------------------ RPC送信側 ------------------------
 
-        public void SetPlayerReady(int seatID, bool state)
+        public void SetPlayerReady(bool state)
         {
+            int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+
             photonView.RPC(
                 nameof(RPC_SetPlayerReady),
                 RpcTarget.All,
-                seatID,
+                actorNumber,
                 state
             );
         }
@@ -94,12 +96,32 @@ namespace HanafudaPoker.Games
             );
         }
 
+        public void InstructInitialize()
+        {
+            photonView.RPC(
+                nameof(RPC_InstructInitialize),
+                RpcTarget.All
+            );
+        }
+
         // ------------------------ PunRPC 受信側 -----------------------
         // こっちはmaster clientじゃなくても呼べる。
         [PunRPC]
-        private void RPC_SetPlayerReady(int seatID, bool state)
+        private void RPC_SetPlayerReady(int actorNumber, bool state)
         {
             // 私は準備できました。という情報を開示する
+            int seatID = 5;
+            foreach(PlayerData player in gameManager.Players)
+            {
+                if(player.ActorNumber == actorNumber)
+                {
+                    seatID = player.SeatID;
+                }
+            }
+
+            if(seatID > GameConst.PLAYER_NUMBER)
+                return;
+                
             gameManager.Players[seatID].IsReady = state;
             // Debug.Log($"Player{seatID} , Set state To {state}");
             return;
@@ -156,6 +178,35 @@ namespace HanafudaPoker.Games
 
                 player.HandCards = hand;
             }
+        }
+
+        [PunRPC]
+        private void RPC_InstructInitialize()
+        {
+            GameConst.PLAYER_NUMBER = PhotonNetwork.PlayerList.Length;
+            gameManager.Players = new PlayerData[GameConst.PLAYER_NUMBER];
+
+            Player[] players = PhotonNetwork.PlayerList;
+            int[] playerActorNumbers = new int[players.Length];
+            for(int i = 0; i < players.Length; i++)
+            {
+                playerActorNumbers[i] = players[i].ActorNumber;
+            }
+
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+            {
+                // Debug.Log("after access to networl managher");
+                // Debug.Log($"Players Length = {Players.Length}");
+                // Debug.Log($"Player actor number length = {playerActorNumbers.Length}");
+                gameManager.Players[seatID] = new PlayerData(seatID, playerActorNumbers[seatID]);
+            }
+
+            gameManager.Deck = new List<CardData>();
+            gameManager.FieldCard = new List<CardData>();
+            gameManager.DiscardPile = new List<CardData>();
+            gameManager.FieldCardForShow = new List<CardData>();
+
+            gameManager.CurrentState = TurnState.BeforeGame;
         }
     }
 }

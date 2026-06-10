@@ -122,6 +122,16 @@ namespace HanafudaPoker.Games
                     // このクラスできてすぐUpdate内をループするのは少し不安なので緩衝材としてOtherを作りました。
                 break;
 
+                case TurnState.WaitForInitialize:
+                    if(networkManager.IsMasterClient())
+                    {
+                        if(IsEveryoneReady())
+                        {
+                            CurrentState = TurnState.BeforeGame;
+                        }
+                    }
+                break;
+
                 default:
                 break;
             }
@@ -198,8 +208,8 @@ namespace HanafudaPoker.Games
             networkManager.SetPlayerNumber();
             Players = new PlayerData[GameConst.PLAYER_NUMBER];
 
+            
             int[] playerActorNumbers = networkManager.GetPlayerActorNumbers();
-
             for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
                 // Debug.Log("after access to networl managher");
@@ -213,8 +223,7 @@ namespace HanafudaPoker.Games
             DiscardPile = new List<CardData>();
             FieldCardForShow = new List<CardData>();
 
-            CurrentState = prevState_Debug = TurnState.BeforeGame;
-            return;
+            networkManager.SetPlayerReady(true);
         }
 
         private void ShowFirstFieldCard()
@@ -305,6 +314,8 @@ namespace HanafudaPoker.Games
                 player.IsReady = false;
             }
         }
+
+
     }
 
     public enum TurnState
