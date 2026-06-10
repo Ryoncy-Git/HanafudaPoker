@@ -44,15 +44,14 @@ namespace HanafudaPoker.Cards
         public CardRank Rank;
         public CardFeature Feature;
 
-        // アニメーション用
         public int CardId;
 
-        public CardData(CardMonth month, CardRank rank, CardFeature feature)
+        public CardData(CardMonth month, CardRank rank, CardFeature feature, int cardId)
         {
             Month = month;
             Rank = rank;
             Feature = feature;
-            CardId = -1;
+            CardId = cardId;
         }
     }
 }

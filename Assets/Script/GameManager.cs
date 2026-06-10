@@ -24,10 +24,14 @@ namespace HanafudaPoker.Games
         private TurnState prevState_Debug;
         private int round;
 
-
         // インスタンス
         private UIManager uiManager;
         private UIDebug uiDebug;
+
+        // ho6:カード表示
+        [SerializeField]
+        private GameObject cardPrefab;
+        private List<CardView> cardViewField;
 
         private void Start()
         {
@@ -67,6 +71,12 @@ namespace HanafudaPoker.Games
 
                     FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
 
+                    // ho6:カード表示
+                    for (int i = 0; i < FieldCardForShow.Count; i++)
+                    {
+                        ViewCardUI(i, 'F');
+                    }
+
                     List<Yaku>[] emptyList =
                     {
                         new List<Yaku>(),
@@ -98,7 +108,11 @@ namespace HanafudaPoker.Games
                         CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
                         // 次のターンに進むのであれこれ処理
                         ShowFirstFieldCard();
-                        foreach(PlayerData player in Players)
+
+                        // ho6:
+                        ViewCardUI(3, 'S');
+
+                        foreach (PlayerData player in Players)
                         {
                             player.IsReady = false;
                             for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
@@ -119,7 +133,11 @@ namespace HanafudaPoker.Games
                         CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
 
                         ShowSecondFieldCard();
-                        foreach(PlayerData player in Players)
+
+                        // ho6:
+                        ViewCardUI(4, 'T');
+
+                        foreach (PlayerData player in Players)
                         {
                             player.IsReady = false;
                             for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
@@ -198,10 +216,48 @@ namespace HanafudaPoker.Games
             Deck = new List<CardData>();
             FieldCard = new List<CardData>();
             DiscardPile = new List<CardData>();
+
+            // ho6:UI表示したカードを記録するリスト
+            cardViewField = new List<CardView>();
             return;
         }
 
+        // ho6:カードを表示
+        private void ViewCardUI(int num, char times)
+        {
+            GameObject cardObj = Instantiate(cardPrefab);
 
+            // 何回目の開示かによって座標を変更
+            if (times == 'F')
+            {
+                cardObj.transform.position =
+                    new Vector3(num * 80.0f - 80.0f, 20f, 90.0f);
+            }
+            else if (times == 'S')
+            {
+                cardObj.transform.position =
+                    new Vector3(-40.0f, 0f, 90.0f);
+            }
+            else if (times == 'T')
+            {
+                cardObj.transform.position =
+                    new Vector3(40.0f, 0f, 90.0f);
+            }
+
+            CardView view = cardObj.GetComponent<CardView>();
+            view.SetCard(FieldCardForShow[num]);
+
+            // 場のカードを保存
+            cardViewField.Add(view);
+
+            RotateCardView(view);
+        }
+
+        // ho6:カードを回転
+        private void RotateCardView(CardView card)
+        {
+            card.StartCoroutine(card.FlipCard());
+        }
 
         private void ShowFirstFieldCard()
         {
@@ -231,6 +287,15 @@ namespace HanafudaPoker.Games
         {
             Deck.Clear();
             FieldCard.Clear();
+
+            // ho6:生成したカードUIを削除
+            foreach(CardView card in cardViewField)
+            {
+                Destroy(card.gameObject);
+            }
+
+            cardViewField.Clear();
+
             foreach(PlayerData player in Players)
             {
                 player.HandCards.Clear();
