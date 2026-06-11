@@ -38,7 +38,7 @@ namespace HanafudaPoker.Games
 
         // デッキの位置
         [SerializeField]
-        private Transform deckPosition;
+        private Transform deckTransform;
 
         // 場に置かれるカードの位置
         [SerializeField]
@@ -46,7 +46,7 @@ namespace HanafudaPoker.Games
 
         // こいこいで追加される札も同様に
 
-        // 手札の位置も後々
+        // 手札の位置
         [SerializeField]
         private Transform[] playerCardPositions;
 
@@ -252,42 +252,50 @@ namespace HanafudaPoker.Games
         {
             GameObject cardObj = Instantiate(cardPrefab);
 
-            CardView view = cardObj.GetComponent<CardView>();
-            view.SetCard(FieldCardForShow[num]);
+            CardView cardView = cardObj.GetComponent<CardView>();
+            cardView.SetCard(FieldCardForShow[num]);
+
+            // デッキのTransformをCardのオブジェクト初期値にする
+            cardView.transform.position = deckTransform.position;
+            cardView.transform.rotation = deckTransform.rotation;
 
             // 何回目の開示かによって座標を変更
             switch (times)
             {
                 // どの時に呼ばれるか Fは最初に場に出される3枚
                 case 'F':
-                    MoveToTargetPosition(view, deckPosition.position, fieldCardPositions[num].position);
-
+                    MoveToTarget(cardView, fieldCardPositions[num]);
+                    ScaleCardView(cardView, 0.9f);
+                    
                     // 場のカードを保存
-                    cardViewField.Add(view);
+                    cardViewField.Add(cardView);
                     break;
 
                 // Sは一度目の取引が終わったタイミング
                 case 'S':
-                    MoveToTargetPosition(view, deckPosition.position, fieldCardPositions[3].position);
+                    MoveToTarget(cardView, fieldCardPositions[3]);
+                    ScaleCardView(cardView, 0.9f);
 
-                    cardViewField.Add(view);
+                    cardViewField.Add(cardView);
                     break;
 
                 // Tは2度目の取引が終わったタイミング
                 case 'T':
-                    MoveToTargetPosition(view, deckPosition.position, fieldCardPositions[4].position);
+                    MoveToTarget(cardView, fieldCardPositions[4]);
+                    ScaleCardView(cardView, 0.9f);
 
-                    cardViewField.Add(view);
+                    cardViewField.Add(cardView);
                     break;
 
                 // Pは自分が持ってる3枚
                 case 'P':
-                    view.SetCard(Players[0].HandCards[num]);
+                    cardView.SetCard(Players[0].HandCards[num]);
 
-                    MoveToTargetPosition(view, deckPosition.position, playerCardPositions[num].position);
-                    
+                    MoveToTarget(cardView, playerCardPositions[num]);
+                    RotateToTarget(cardView, playerCardPositions[num]);
+
                     // Playerのカードを保存
-                    cardViewPlayer.Add(view);
+                    cardViewPlayer.Add(cardView);
                     break;
 
                 default:
@@ -295,19 +303,31 @@ namespace HanafudaPoker.Games
                     break;
             }
 
-            RotateCardView(view);
+            FlipCardView(cardView);
         }
 
-        // ho6:カードを回転
-        private void RotateCardView(CardView card)
+        // ho6:カード自体を回転
+        private void FlipCardView(CardView card)
         {
             card.StartCoroutine(card.FlipCard());
         }
-
-        // ho6:カードを移動
-        private void MoveToTargetPosition(CardView card, Vector3 deckPos, Vector3 targetPos)
+        
+        // ho6:カード自体のScale操作　これだけ引数はfloat
+        private void ScaleCardView(CardView card, float scale)
         {
-            card.MoveToPosition(deckPos, targetPos);
+            card.StartCoroutine(card.ScaleAnimation(scale));
+        }
+
+        // ho6:カードの基準点を移動
+        private void MoveToTarget(CardView card, Transform target)
+        {
+            card.StartCoroutine(card.MoveAnimation(target));
+        }
+
+        // ho6:カードの基準点を回転
+        private void RotateToTarget(CardView card, Transform target)
+        {
+            card.StartCoroutine(card.RotateAnimation(target));
         }
 
         private void ShowFirstFieldCard()
