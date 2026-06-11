@@ -11,6 +11,10 @@ namespace HanafudaPoker.Games
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
         [SerializeField]private GameManager gameManager;
+        private void Start()
+        {
+            // Debug.Log(photonView.ViewID);
+        }
 
         public bool IsMasterClient()
         {
