@@ -265,7 +265,7 @@ namespace HanafudaPoker.Games
                 // どの時に呼ばれるか Fは最初に場に出される3枚
                 case 'F':
                     MoveToTarget(cardView, fieldCardPositions[num]);
-                    ScaleCardView(cardView, 0.9f);
+                    ScaleCardView(cardView, 1.3f);  // 場の札は大きく
                     
                     // 場のカードを保存
                     cardViewField.Add(cardView);
@@ -274,7 +274,7 @@ namespace HanafudaPoker.Games
                 // Sは一度目の取引が終わったタイミング
                 case 'S':
                     MoveToTarget(cardView, fieldCardPositions[3]);
-                    ScaleCardView(cardView, 0.9f);
+                    ScaleCardView(cardView, 1.3f);
 
                     cardViewField.Add(cardView);
                     break;
@@ -282,7 +282,7 @@ namespace HanafudaPoker.Games
                 // Tは2度目の取引が終わったタイミング
                 case 'T':
                     MoveToTarget(cardView, fieldCardPositions[4]);
-                    ScaleCardView(cardView, 0.9f);
+                    ScaleCardView(cardView, 1.3f);
 
                     cardViewField.Add(cardView);
                     break;
@@ -293,6 +293,7 @@ namespace HanafudaPoker.Games
 
                     MoveToTarget(cardView, playerCardPositions[num]);
                     RotateToTarget(cardView, playerCardPositions[num]);
+                    ScaleCardView(cardView, 0.6f);  // 手持ちは小さめに
 
                     // Playerのカードを保存
                     cardViewPlayer.Add(cardView);

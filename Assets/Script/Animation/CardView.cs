@@ -31,9 +31,7 @@ namespace HanafudaPoker.Animation
         // カードを反転 cardVisualを動かす
         public IEnumerator FlipCard()
         {
-            Debug.Log($"Before:{isFaceUp}");
             isFaceUp = !isFaceUp;
-            Debug.Log($"After:{isFaceUp}");
 
             // ワールド座標 transform.rotationで回すとその親のオブジェクト側でも考慮する必要があるからローカル
             Vector3 euler = cardVisual.localEulerAngles;
@@ -43,8 +41,7 @@ namespace HanafudaPoker.Animation
 
             Quaternion start = cardVisual.localRotation;
             Quaternion end = Quaternion.Euler(euler.x, isFaceUp ? 0f : 180f, euler.z);
-            Debug.Log($"Start:{cardVisual.localEulerAngles.y}");
-            Debug.Log($"End:{end.eulerAngles.y}");
+
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
