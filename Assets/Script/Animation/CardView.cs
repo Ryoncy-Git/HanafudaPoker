@@ -22,6 +22,12 @@ namespace HanafudaPoker.Animation
 
         public void SetCard(CardData card)
         {
+            if (frontRenderer == null)
+            {
+                Debug.Log("このカードは偽札です。正しいですか？");
+                return;
+            }
+
             frontRenderer.material =
                 MaterialManager.Instance.GetMaterial(card);
         }

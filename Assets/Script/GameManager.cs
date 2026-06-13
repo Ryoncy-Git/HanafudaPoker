@@ -30,12 +30,24 @@ namespace HanafudaPoker.Games
         private UIManager uiManager;
         private UIDebug uiDebug;
 
+        [Header("ho6が追加した変数一覧")]
+        [Header("使用する札のモデリング(実際に絵柄が描かれているもの、見かけだけのもの)")]
         // ho6:カード表示
         [SerializeField]
-        private GameObject cardPrefab;
-        private List<CardView> cardViewField;
-        private List<CardView> cardViewPlayer;
+        private GameObject cardPrefab;  
+        [SerializeField]
+        private GameObject cardFakePrefab;
 
+        [SerializeField]
+        private float scaleOfCommunutyCards = 1.0f;
+        [SerializeField]
+        private float scaleOfHoldCards = 1.0f;
+
+        private List<CardView> cardViewField;       // 場に出された札オブジェクトを管理
+        private List<CardView> cardViewPlayer;      // 自分の手札管理
+        private List<CardView> cardViewOtherPlayer;      // 自分の手札管理
+
+        [Header("札の座標を動かす基準点")]
         // デッキの位置
         [SerializeField]
         private Transform deckTransform;
@@ -48,7 +60,9 @@ namespace HanafudaPoker.Games
 
         // 手札の位置
         [SerializeField]
-        private Transform[] playerCardPositions;
+        private Transform[] playerCardPositions;    // 自分の
+        [SerializeField]
+        private Transform[] playerOtherCardPositions;   // 他の人の見かけの札
 
 
         private void Start()
@@ -99,6 +113,17 @@ namespace HanafudaPoker.Games
                     for (int i=0; i < Players[0].HandCards.Count; i++)
                     {
                         PlayCardAnimation(i, 'P');
+                    }
+
+                    // ho6:接続している人数で生成数は変わる 仮に4人でやってるとする
+                    for (int p = 1; p < Players.Length; p++) // 0は自分、1,2,3は他の人
+                    {
+                        for (int card = 0; card < GameConst.HAND_CARD_NUMBER; card++)
+                        {
+                            int positionIndex = (p - 1) * GameConst.HAND_CARD_NUMBER + card;
+
+                            PlayCardAnimation(positionIndex, 'O');
+                        }
                     }
 
                     List<Yaku>[] emptyList =
@@ -244,16 +269,20 @@ namespace HanafudaPoker.Games
             // ho6:UI表示したカードを記録するリスト
             cardViewField = new List<CardView>();
             cardViewPlayer = new List<CardView>();
+            cardViewOtherPlayer = new List<CardView>();
+
             return;
         }
 
         // ho6:カードを表示
         private void PlayCardAnimation(int num, char times)
         {
-            GameObject cardObj = Instantiate(cardPrefab);
+            // 生成するカードは、本物のプレイヤーのとき表アリ、見た目だけのとき表ナシ
+            GameObject prefabToUse = (times == 'O') ? cardFakePrefab : cardPrefab;
+
+            GameObject cardObj = Instantiate(prefabToUse);
 
             CardView cardView = cardObj.GetComponent<CardView>();
-            cardView.SetCard(FieldCardForShow[num]);
 
             // デッキのTransformをCardのオブジェクト初期値にする
             cardView.transform.position = deckTransform.position;
@@ -262,41 +291,34 @@ namespace HanafudaPoker.Games
             // 何回目の開示かによって座標を変更
             switch (times)
             {
+                // 場の札
                 // どの時に呼ばれるか Fは最初に場に出される3枚
                 case 'F':
-                    MoveToTarget(cardView, fieldCardPositions[num]);
-                    ScaleCardView(cardView, 1.3f);  // 場の札は大きく
-                    
-                    // 場のカードを保存
-                    cardViewField.Add(cardView);
+                    CreateFirstFieldCard(num, cardView);
                     break;
 
                 // Sは一度目の取引が終わったタイミング
                 case 'S':
-                    MoveToTarget(cardView, fieldCardPositions[3]);
-                    ScaleCardView(cardView, 1.3f);
-
-                    cardViewField.Add(cardView);
+                    CreateFirstFieldCard(3, cardView);
                     break;
 
                 // Tは2度目の取引が終わったタイミング
                 case 'T':
-                    MoveToTarget(cardView, fieldCardPositions[4]);
-                    ScaleCardView(cardView, 1.3f);
-
-                    cardViewField.Add(cardView);
+                    CreateFirstFieldCard(4, cardView);
                     break;
 
+                // プレイヤーの札
                 // Pは自分が持ってる3枚
                 case 'P':
-                    cardView.SetCard(Players[0].HandCards[num]);
+                    CreatePlayerCard(num, cardView);
 
-                    MoveToTarget(cardView, playerCardPositions[num]);
-                    RotateToTarget(cardView, playerCardPositions[num]);
-                    ScaleCardView(cardView, 0.6f);  // 手持ちは小さめに
+                    break;
 
-                    // Playerのカードを保存
-                    cardViewPlayer.Add(cardView);
+                // 他の人の手札　見かけだけ
+                case 'O':
+                    // 2,3,4人の手札の位置に移動
+                    // 手札が3枚だから HANDS_CARD_NUM = 3 と定義するべきか、
+                    CreateOtherPlayerCard(num, cardView);
                     break;
 
                 default:
@@ -306,6 +328,42 @@ namespace HanafudaPoker.Games
 
             FlipCardView(cardView);
         }
+
+        // ho6:場の札生成
+        private void CreateFirstFieldCard(int index, CardView view)
+        {
+            view.SetCard(FieldCardForShow[index]);
+
+            MoveToTarget(view, fieldCardPositions[index]);
+            ScaleCardView(view, scaleOfCommunutyCards);
+
+            cardViewField.Add(view);
+        }
+
+        // ho6:自分の札生成
+        private void CreatePlayerCard(int index, CardView view)
+        {
+            view.SetCard(Players[0].HandCards[index]);
+
+            MoveToTarget(view, playerCardPositions[index]);
+            RotateToTarget(view, playerCardPositions[index]);
+            ScaleCardView(view, scaleOfHoldCards);  // 手持ちは小さめに
+
+            cardViewPlayer.Add(view);
+        }
+
+        // ho6:見せかけの相手の手札
+        private void CreateOtherPlayerCard(int index, CardView view)
+        {
+            view.SetCard(FieldCardForShow[0]);
+        
+            MoveToTarget(view, playerOtherCardPositions[index]);
+            RotateToTarget(view, playerOtherCardPositions[index]);
+
+            cardViewOtherPlayer.Add(view);
+        }
+
+        /*-- CardViewクラスへの受け渡しを行うだけの関数 --*/
 
         // ho6:カード自体を回転
         private void FlipCardView(CardView card)
@@ -330,6 +388,8 @@ namespace HanafudaPoker.Games
         {
             card.StartCoroutine(card.RotateAnimation(target));
         }
+
+
 
         private void ShowFirstFieldCard()
         {
@@ -360,6 +420,7 @@ namespace HanafudaPoker.Games
             Deck.Clear();
             FieldCard.Clear();
 
+
             // ho6:生成したカードUIを削除
             foreach(CardView card in cardViewField)
             {
@@ -371,10 +432,17 @@ namespace HanafudaPoker.Games
                 Destroy(card.gameObject);
             }
 
+            foreach(CardView card in cardViewOtherPlayer)
+            {
+                Destroy(card.gameObject);
+            }
+
             cardViewField.Clear();
             cardViewPlayer.Clear();
+            cardViewOtherPlayer.Clear();
 
-            foreach(PlayerData player in Players)
+
+            foreach (PlayerData player in Players)
             {
                 player.HandCards.Clear();
             }
