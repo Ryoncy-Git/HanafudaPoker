@@ -332,7 +332,11 @@ namespace HanafudaPoker.Games
         // ho6:場の札生成
         private void CreateFirstFieldCard(int index, CardView view)
         {
+            // 絵札設定
             view.SetCard(FieldCardForShow[index]);
+
+            // 光札を光らせる
+            EffectManager.Instance.CheckCardEffect(FieldCardForShow[index], view);
 
             MoveToTarget(view, fieldCardPositions[index]);
             ScaleCardView(view, scaleOfCommunutyCards);
@@ -344,6 +348,8 @@ namespace HanafudaPoker.Games
         private void CreatePlayerCard(int index, CardView view)
         {
             view.SetCard(Players[0].HandCards[index]);
+
+            EffectManager.Instance.CheckCardEffect(Players[0].HandCards[index], view);
 
             MoveToTarget(view, playerCardPositions[index]);
             RotateToTarget(view, playerCardPositions[index]);

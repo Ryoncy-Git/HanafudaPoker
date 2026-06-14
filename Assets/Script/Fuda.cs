@@ -29,13 +29,13 @@ namespace HanafudaPoker.Cards
     [Flags]
     public enum CardFeature
     {
-        None = 0,
-        Akatan = 1 << 0,
-        Akajitan = 1 << 1,
-        Aotan = 1 << 2,
-        Tori = 1 << 3,
+        None        = 0,
+        Akatan      = 1 << 0,
+        Akajitan    = 1 << 1,
+        Aotan       = 1 << 2,
+        Tori        = 1 << 3,
         Inoshikacho = 1 << 4,
-        Mizu = 1 << 5
+        Mizu        = 1 << 5
     }
 
     public class CardData

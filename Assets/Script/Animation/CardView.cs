@@ -20,6 +20,14 @@ namespace HanafudaPoker.Animation
         [SerializeField]
         private Transform cardVisual;
 
+        [SerializeField]
+        private ParticleSystem hikariParticle;
+
+        private void Awake()
+        {
+            hikariParticle.Stop();
+        }
+
         public void SetCard(CardData card)
         {
             if (frontRenderer == null)
@@ -128,5 +136,10 @@ namespace HanafudaPoker.Animation
             transform.rotation = card.rotation;
         }
 
+        /*-- 札に付与されるエフェクト操作 --*/
+        public void PlayHiakariEffect()
+        {
+            hikariParticle.Play();
+        }
     }
 }
