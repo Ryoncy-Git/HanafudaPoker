@@ -43,6 +43,14 @@ namespace HanafudaPoker.UIs
             { CardRank.Kasu, "カス" }
         };
 
+
+        [Header("ho6:他の手札をデバッグ表示する用")]
+        [SerializeField] private GameObject PlayerSecondPanel;
+        [SerializeField] private GameObject PlayerThirdPanel;
+        [SerializeField] private GameObject PlayerForthPanel;
+        [SerializeField] private GameObject BackTitleScenePanel;
+        [SerializeField] private GameObject FieldCardsPanel;
+
         private void Start()
         {
             gameManager = this.gameObject.GetComponent<GameManager>();
@@ -215,6 +223,55 @@ namespace HanafudaPoker.UIs
         public void SelectCard(int n)
         {
             gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];
+        }
+
+
+        // ho6: ---------------UI制御の関数たち----------------
+        public void ShowSecondPlayerCardUIs()
+        {
+            PlayerSecondPanel.SetActive(true);
+            PlayerThirdPanel.SetActive(false);
+            PlayerForthPanel.SetActive(false);
+        }
+
+        public void ShowThirdPlayerCardUIs()
+        {
+            PlayerSecondPanel.SetActive(false);
+            PlayerThirdPanel.SetActive(true);
+            PlayerForthPanel.SetActive(false);
+        }
+
+        public void ShowForthPlayerCardUIs()
+        {
+            PlayerSecondPanel.SetActive(false);
+            PlayerThirdPanel.SetActive(false);
+            PlayerForthPanel.SetActive(true);
+        }
+
+        public void CloseAllPlayerCardUIs()
+        {
+            PlayerSecondPanel.SetActive(false);
+            PlayerThirdPanel.SetActive(false);
+            PlayerForthPanel.SetActive(false);
+        }
+
+        public void ShowAllPlayerCardUIs()
+        {
+            PlayerSecondPanel.SetActive(true);
+            PlayerThirdPanel.SetActive(true);
+            PlayerForthPanel.SetActive(true);
+        }
+
+        public void SetBackTitleScenePanel()
+        {
+            BackTitleScenePanel.SetActive(
+                !BackTitleScenePanel.activeSelf);
+        }
+
+        public void ShowFieldCardsPanel()
+        {
+            FieldCardsPanel.SetActive(
+                !FieldCardsPanel.activeSelf);
         }
     }
 }

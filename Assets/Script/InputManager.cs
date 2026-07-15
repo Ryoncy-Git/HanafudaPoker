@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Players;
 using HanafudaPoker.Cards;
@@ -11,11 +12,14 @@ namespace HanafudaPoker.Games
     {
         private GameManager gameManager;
         private UIDebug uiDebug;
+
+
         private void Start()
         {
             gameManager = this.gameObject.GetComponent<GameManager>();
             uiDebug = this.gameObject.GetComponent<UIDebug>();
         }
+        
         private void Update()
         {
             if(Input.GetKeyDown(KeyCode.Space))
@@ -63,6 +67,56 @@ namespace HanafudaPoker.Games
                     new(CardMonth.Sakura, CardRank.Kasu,   CardFeature.None, 9)
                 };
             }
+
+
+            // ho6:
+            // 他の手札デバッグ表示
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                uiDebug.ShowSecondPlayerCardUIs();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                uiDebug.ShowThirdPlayerCardUIs();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                uiDebug.ShowForthPlayerCardUIs();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                uiDebug.CloseAllPlayerCardUIs();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                uiDebug.ShowAllPlayerCardUIs();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                uiDebug.SetBackTitleScenePanel();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                uiDebug.ShowFieldCardsPanel();
+            }
+        }
+
+        // ho6: タイトル画面に戻るかどうかのボタン
+        // この画面遷移に関してはInputManagerが持つ責務ではないが、今はここに置きます
+        public void OnClickYes()
+        {
+            SceneManager.LoadScene("Title");
+        }
+
+        public void OnClickNo()
+        {
+            uiDebug.SetBackTitleScenePanel();
         }
     }
 }
