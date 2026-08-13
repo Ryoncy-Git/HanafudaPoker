@@ -2144,6 +2144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerNameListText: {fileID: 1685329479}
   inputedName: {fileID: 771785928}
+  startButton: {fileID: 1366488027}
 --- !u!4 &1962042772
 Transform:
   m_ObjectHideFlags: 0

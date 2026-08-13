@@ -10,12 +10,22 @@ namespace HanafudaPoker.Networks
     {
         [SerializeField] private TextMeshProUGUI playerNameListText;
         [SerializeField] private TMP_InputField inputedName;
+        [SerializeField] private GameObject startButton;
         private Player[] playerList;
         public void Start()
         {
             // debug
             PhotonNetwork.ConnectUsingSettings();
             UpdatePlayerList();
+
+            if(PhotonNetwork.IsMasterClient)
+            {
+                startButton.SetActive(true);
+            }
+            else
+            {
+                startButton.SetActive(false);
+            }
         }
 
         public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -26,6 +36,15 @@ namespace HanafudaPoker.Networks
         public override void OnPlayerLeftRoom(Player newPlayer)
         {
             UpdatePlayerList();
+
+            if(PhotonNetwork.IsMasterClient)
+            {
+                startButton.SetActive(true);
+            }
+            else
+            {
+                startButton.SetActive(false);
+            }
         }
 
         [PunRPC]

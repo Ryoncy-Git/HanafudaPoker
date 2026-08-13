@@ -140,6 +140,5 @@ namespace HanafudaPoker.Games
                 }
             }
         }
-
     }
 }

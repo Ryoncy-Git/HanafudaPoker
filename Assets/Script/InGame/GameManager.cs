@@ -213,8 +213,8 @@ namespace HanafudaPoker.Games
             for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
                 // Debug.Log("after access to networl managher");
-                // Debug.Log($"Players Length = {Players.Length}");
-                // Debug.Log($"Player actor number length = {playerActorNumbers.Length}");
+                Debug.Log($"Players Length = {Players.Length}");
+                Debug.Log($"Player actor number length = {playerActorNumbers.Length}");
                 Players[seatID] = new PlayerData(seatID, playerActorNumbers[seatID]);
             }
 
