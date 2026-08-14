@@ -2,22 +2,41 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using HanafudaPoker.Cards;
+using HanafudaPoker.Players;
 using HanafudaPoker.UIs;
 using HanafudaPoker.Yakus;
 
 namespace HanafudaPoker.Games
 {
-    public class GameManager : MonoBehaviour
+    public class GameManagerPrev : MonoBehaviour
     {
+        // ココで使う変数を置いておく
+        // カード関係
+        public List<CardData> Deck;
+        public List<CardData> FieldCard;
+        public List<CardData> FieldCardForShow;
+        public List<CardData> DiscardPile;
+        public PlayerData[] Players;
+        // 手札はPlayers内にあるので、呼ぶときはPlayers[0].HandCards
 
         // その他
         public TurnState CurrentState; // 現在がどんなターンなのかを管理する
+        private TurnState prevState_Debug;
         public TurnState PreviousState;
+        private int round;
 
 
         // インスタンス
         // [SerializeField]private UIManager uiManager;
         [SerializeField]private UIDebug uiDebug;
+        [SerializeField]private NetworkManager networkManager;
+
+        private void Awake()
+        {
+            // これは何が何でもぜったい最初にしておきたい
+            CurrentState = TurnState.WaitForInitialize;
+            PreviousState = TurnState.WaitForInitialize;
+        }
 
         private void Start()
         {
@@ -186,7 +205,25 @@ namespace HanafudaPoker.Games
         // ーーーーーーーーーーーーこのファイル内のみで使う補助関数たちーーーーーーーーーーーーーーー
         private void Initialize()
         {
-            NetworkManager.SetTurn
+            networkManager.SetPlayerNumber();
+            Players = new PlayerData[GameConst.PLAYER_NUMBER];
+
+            
+            int[] playerActorNumbers = networkManager.GetPlayerActorNumbers();
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+            {
+                // Debug.Log("after access to networl managher");
+                Debug.Log($"Players Length = {Players.Length}");
+                Debug.Log($"Player actor number length = {playerActorNumbers.Length}");
+                Players[seatID] = new PlayerData(seatID, playerActorNumbers[seatID]);
+            }
+
+            Deck = new List<CardData>();
+            FieldCard = new List<CardData>();
+            DiscardPile = new List<CardData>();
+            FieldCardForShow = new List<CardData>();
+
+            networkManager.SetPlayerReady(true);
         }
 
         private void ShowFirstFieldCard()

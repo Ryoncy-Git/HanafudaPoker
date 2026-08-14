@@ -8,7 +8,7 @@ using HanafudaPoker.Cards;
 
 namespace HanafudaPoker.Games
 {
-    public class NetworkManager : MonoBehaviourPunCallbacks
+    public class NetworkManagerPrev : MonoBehaviourPunCallbacks
     {
         [SerializeField]private GameManager gameManager;
         private void Start()
