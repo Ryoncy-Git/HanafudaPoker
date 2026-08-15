@@ -30,8 +30,8 @@ namespace HanafudaPoker.Games
             {
                 PreviousState = CurrentState;
                 OnEnterState(CurrentState);
+
                 Debug.Log($"change state to {CurrentState}");
-                SendGameDataIfMasterClient();
 
                 // debug
                 uiDebug.ShowState(CurrentState);
@@ -48,27 +48,24 @@ namespace HanafudaPoker.Games
                 return;
             
             // ここから先はmaster clientだけが実行、処理する部分
-
-
             switch(turnState)
             {
                 case TurnState.BeforeGame:
-                    ResetFields();
+                    NetworkManager.SetField(null);
 
                     CurrentState = TurnState.CreateDeck;
                 break;
 
                 case TurnState.CreateDeck:
-                    Deck = CardMovementManager.CreateDeck();
-                    CardMovementManager.ShuffleDeck(Deck);
-
-                    // Debug.Log("after shuffle");
+                    var deck = CardMovementManager.CreateDeck();
+                    CardMovementManager.ShuffleDeck(deck);
+                    // SetDeckはCMMの方でやる
 
                     CurrentState = TurnState.DealCards;
                 break;
 
                 case TurnState.DealCards:
-                    ResetPlayersReady();
+                    SetAllPlayersReady(false);
                     CardMovementManager.DealCards(Deck, FieldCard, Players);
 
                     CurrentState = TurnState.ShowField;
@@ -104,12 +101,9 @@ namespace HanafudaPoker.Games
                 break;
 
                 case TurnState.WaitForInitialize:
-                    if(networkManager.IsMasterClient())
+                    if(IsEveryoneReady())
                     {
-                        if(IsEveryoneReady())
-                        {
-                            CurrentState = TurnState.BeforeGame;
-                        }
+                        
                     }
                 break;
 
@@ -186,99 +180,34 @@ namespace HanafudaPoker.Games
         // ーーーーーーーーーーーーこのファイル内のみで使う補助関数たちーーーーーーーーーーーーーーー
         private void Initialize()
         {
-            NetworkManager.SetTurn
+            NetworkManager.SetTurn((int)TurnState.WaitForInitialize);
+            GameConst.PLAYER_NUMBER = 
+            NetworkManager.SetIsReady(false);
+            NetworkManager.SetWillChangeCards(new bool{false, false, false});
+
+
+            // 空データを入れる作業はここでは　要らないかも
+            // var Deck = new List<CardData>();
+            // var FieldCard = new List<CardData>();
+            // NetworkManager.SetDeck(CardDataBase.GetIDsByList(Deck));
+
         }
 
-        private void ShowFirstFieldCard()
+        private void IsEveryoneReady()
         {
-            FieldCardForShow.Add(FieldCard[3]);
-            return;
-        }
-
-        private void ShowSecondFieldCard()
-        {
-            FieldCardForShow.Add(FieldCard[4]);
-            return;
-        }
-
-        private void ResetFields()
-        {
-            Deck.Clear();
-            FieldCard.Clear();
-            foreach(PlayerData player in Players)
+            for(int seatID; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
-                player.HandCards.Clear();
-            }
-
-            List<Yaku>[] emptyList = new List<Yaku>[GameConst.PLAYER_NUMBER];
-            for(int i = 0; i < emptyList.Length; i++)
-            {
-                emptyList[i] = new List<Yaku>();
-            }
-            uiDebug.ShowYaku(emptyList);
-        }
-
-        private bool IsEveryoneReady()
-        {
-            foreach(PlayerData player in Players)
-            {
-                if(player.IsReady == false)
-                    return false;
-            }
-
-            return true;
-        }
-
-        private void SendGameDataIfMasterClient()
-        {
-            // まsターくらいあんとだけが呼び出せる関数
-            // ゲームデータ（デックや場札）、各プレイヤーの準備完了状況などが変更されたときに必ず呼び出す
-            // また、適せん、各クライアントから同期要請があったらこれを返す
-            if(networkManager.IsMasterClient())
-            {
-                int[] deckIDs = CardDataBase.GetIDsByList(Deck);
-                int[] fieldIDs = CardDataBase.GetIDsByList(FieldCard);
-                int[] discardIDs = CardDataBase.GetIDsByList(DiscardPile);
-
-
-                int[] hands = new int[GameConst.PLAYER_NUMBER * GameConst.HAND_CARD_NUMBER];
-
-                for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
-                {
-                    if(Players[i].HandCards.Count == 0)
-                        continue;
-
-                    
-                    int[] ids = CardDataBase.GetIDsByList(Players[i].HandCards);
-
-                    for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
-                    {
-                        hands[i * GameConst.HAND_CARD_NUMBER + j] = ids[j];
-                    }
-                }
-
-                networkManager.SendGameData
-                (
-                    CurrentState,
-                    PreviousState,
-                    deckIDs,
-                    fieldIDs,
-                    discardIDs,
-                    hands
-                );
+                
             }
         }
 
-        private void ResetPlayersReady()
+        private void SetAllPlayersReady(bool state)
         {
-            foreach(PlayerData player in Players)
-            {
-                player.WillChangeCards = new bool[]{false, false, false};
-                player.IsReady = false;
-            }
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
+            NetworkManager.SetAllPlayersReady(state);
         }
-
-
     }
 
     public enum TurnState

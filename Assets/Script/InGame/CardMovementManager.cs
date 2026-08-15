@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using HanafudaPoker.Cards;
-using HanafudaPoker.Players;
+using HanafudaPoker.Network;
 
 
 namespace HanafudaPoker.Games
@@ -74,6 +74,9 @@ namespace HanafudaPoker.Games
             deck.Add(new CardData(CardMonth.Kiri,    CardRank.Kasu,    CardFeature.None,        id++));
             deck.Add(new CardData(CardMonth.Kiri,    CardRank.Kasu,    CardFeature.None,        id++));
 
+
+            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
+
             // デバッグ
             Debug.Log("Create Deck");
             return deck;
@@ -88,13 +91,17 @@ namespace HanafudaPoker.Games
                 (deck[i], deck[rand]) = (deck[rand], deck[i]);
             }
 
+            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
+
             // デバッグ用
-            Debug.Log("Shuffle Deck");
+            Debug.Log("Deck Shuffle Done");
             return deck;
         }
 
-        public static void DealCards(List<CardData> deck, List<CardData> field, PlayerData[] players)
+        public static void DealCards(List<CardData> field, PlayerData[] players)
         {
+            var deck = CardDataBase.GetCardDataListByID(NetworkManager.GetDeck());
+
             CardData dealtCard;
 
             for(int i = 0; i < players.Length; i++)

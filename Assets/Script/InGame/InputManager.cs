@@ -20,28 +20,33 @@ namespace HanafudaPoker.Games
 
             if(Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                NetworkManager.SetWillChangeCards(ChangedStateByIndex(0));
+                int mySeatID = NetworkManager.GetMySeatID();
+                bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
+
+                // change state[0]
+                state[0] != state[0];
+                NetworkManager.SetWillChangeCards(state);
             }
 
             if(Input.GetKeyDown(KeyCode.DownArrow))
             {
-                NetworkManager.SetWillChangeCards(ChangedStateByIndex(1));
+                int mySeatID = NetworkManager.GetMySeatID();
+                bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
+
+                // change state[1]
+                state[1] != state[1];
+                NetworkManager.SetWillChangeCards(state);
             }
 
             if(Input.GetKeyDown(KeyCode.RightArrow))
             {
-                NetworkManager.SetWillChangeCards(ChangedStateByIndex(2));
-            }
-        }
+                int mySeatID = NetworkManager.GetMySeatID();
+                bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
 
-        private int ChangedStateByIndex(int index)
-        {
-            int mySeatID = NetworkManager.GetMySeatID();
-            int state = NetworkManager.GetWillChangeCards(mySeatID);
-            
-            // state = state xor (001 << index)
-            state ^= 1 << index; 
-            return state;
+                // change state[2]
+                state[2] != state[2];
+                NetworkManager.SetWillChangeCards(state);
+            }
         }
     }
 }

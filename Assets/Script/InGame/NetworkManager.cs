@@ -16,13 +16,13 @@ namespace HanafudaPoker.Network
     int SeatID
     int[] Hands
     bool IsReady
-    int WillCardChange (3bit bool, 000 ~ 111)
+    bool[] WillCardChange
     */
 
 
-    public static class NetworkManager
+    public static class NetworkManager : MonoBehaviourPunCallbacks
     {
-        // RP (Room Properties)
+        // RP (Room Properties) (Only MasterClient can change)
         private const string Key_TurnState = "Turn";
         private const string Key_Round = "Round";
         private const string Key_Deck = "Deck";
@@ -61,18 +61,27 @@ namespace HanafudaPoker.Network
         // setter
         public static void SetTurnState(int state)
         {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
             Hashtable props = new Hashtable();
             props[Key_TurnState] = state;
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         }
         public static void SetRound(int round)
         {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
             Hashtable props = new Hashtable();
             props[Key_Round] = round;
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         }
         public static void SetDeck(int[] deck)
         {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
             Hashtable props = new Hashtable();
             props[Key_Deck] = deck;
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
@@ -80,6 +89,9 @@ namespace HanafudaPoker.Network
         }
         public static void SetField(int[] field)
         {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
             Hashtable props = new Hashtable();
             props[Key_Field] = field;
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
@@ -104,7 +116,7 @@ namespace HanafudaPoker.Network
             props[Key_Hands] = hands;
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
-        public static void SetWillChangeCards(int state)
+        public static void SetWillChangeCards(bool[] state)
         {
             Hashtable props = new Hashtable();
             props[Key_WillChangeCards] = state;
@@ -151,14 +163,14 @@ namespace HanafudaPoker.Network
             return (PhotonNetwork.LocalPlayer.CustomProperties[Key_SeatID] is int value) ? value : -1;
         }
         
-        public static int GetWillChangeCards(int seatID)
+        public static bool[] GetWillChangeCards(int seatID)
         {
             Player player = GetPlayerBySeatID(seatID);
 
             if(player == null)
                 return 0;
             
-            return (player.CustomProperties[Key_WillChangeCards] is int value) ? value : 0;
+            return (player.CustomProperties[Key_WillChangeCards] is bool[] value) ? value : null;
         }
         public static int[] GetHands(int seatID)
         {
@@ -169,5 +181,25 @@ namespace HanafudaPoker.Network
 
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;
         }
+
+        // RPCs
+        public static void SetAllPlayersReady(bool state)
+        {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
+            PhotonView.RPC(
+                nameof(RPC_SetAllPlayersReady), 
+                RpcTarget.All,
+                state
+            );
+        }
+
+        [PunRPC]
+        private static void RPC_SetAllPlayersReady(bool state)
+        {
+            // 各個人が受信したのち、自分の変数を変更する
+            SetIsReady(state);
+        } 
     }
 }
