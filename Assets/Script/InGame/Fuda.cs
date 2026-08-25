@@ -62,16 +62,16 @@ namespace HanafudaPoker.Cards
     public static class CardDataBase
     {
         private static Dictionary<int, CardData> cards;
-        // static CardDataBase()
-        // {
-        //     cards = new();
+        static CardDataBase()
+        {
+            cards = new();
 
-        //     foreach(var card in CardMovementManager.CreateAndShuffleDeck())
-        //     {
-        //         cards.Add(card.CardID, card);
-        //     }
-        //     return;
-        // }
+            foreach(var card in CardMovementManager.CreateAndShuffleDeck())
+            {
+                cards.Add(card.CardID, card);
+            }
+            return;
+        }
 
         public static CardData GetCardDataByID(int id)
         {

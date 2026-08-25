@@ -15,7 +15,9 @@ namespace HanafudaPoker.Games
         {
             if(Input.GetKeyDown(KeyCode.Space))
             {
-                NetworkManager.SetIsReady(true);
+                bool state = NetworkManager.GetIsReady();
+                NetworkManager.SetIsReady(! state);
+                Debug.Log("Change Ready To " + !state);
             }
 
             if(Input.GetKeyDown(KeyCode.LeftArrow))

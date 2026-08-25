@@ -31,10 +31,14 @@ namespace HanafudaPoker.Games
 
             if(CurrentState != PreviousState)
             {
-                PreviousState = CurrentState;
-                OnEnterState(CurrentState);
-
                 Debug.Log($"change state to {CurrentState}");
+                PreviousState = CurrentState;
+
+                if(NetworkManager.IsMasterClient())
+                    OnEnterState(CurrentState);
+                    // OnUpdateはマスターのみじっこう
+
+                
 
                 // debug
                 uiDebug.ShowState(CurrentState);
@@ -42,9 +46,8 @@ namespace HanafudaPoker.Games
                 // uiDebug.SetTextHandCards(Players);
             }
 
-            if(NetworkManager.IsMasterClient())
-                OnUpdateState(CurrentState);
-                // OnUpdateはマスターのみじっこう
+            OnUpdateState(CurrentState);
+                
         }
 
         private void OnEnterState(TurnState turnState)
@@ -54,6 +57,7 @@ namespace HanafudaPoker.Games
                 case TurnState.BeforeGame:
                     NetworkManager.SetField(null);
                     // this.ResetGames();
+                    Debug.Log("End Gefore Game");
 
                     NetworkManager.SetTurnState((int)TurnState.CreateDeck);
                 break;
@@ -61,6 +65,7 @@ namespace HanafudaPoker.Games
                 case TurnState.CreateDeck:
                     CardMovementManager.CreateAndShuffleDeck();
                     // SetDeckはCMMの方でやる
+                    Debug.Log("End Create Deck");
 
                     NetworkManager.SetTurnState((int)TurnState.DealCards);
                 break;
@@ -68,6 +73,7 @@ namespace HanafudaPoker.Games
                 case TurnState.DealCards:
                     NetworkManager.SetAllPlayersReady(false);
                     CardMovementManager.DealCards();
+                    Debug.Log("End Deal Cards");
 
                     NetworkManager.SetTurnState((int)TurnState.ShowField);
                 break;
@@ -75,7 +81,9 @@ namespace HanafudaPoker.Games
                 case TurnState.ShowField: 
                 // まだ ↓
                     // FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
-                    // CurrentState = TurnState.WaitForFirstChange;
+                    Debug.Log("End Show Field");
+
+                    NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
                 break;
 
                 case TurnState.ShowResult:
@@ -91,6 +99,7 @@ namespace HanafudaPoker.Games
 
                     // なんかいい感じに役とか表示して次へ
                     // 今はデバッグで無条件で次のターンへ
+                    Debug.Log("End Show Yaku");
 
 
                     // こいこいはこのタイミングで
@@ -102,12 +111,7 @@ namespace HanafudaPoker.Games
                     // このクラスできてすぐUpdate内をループするのは少し不安なので緩衝材としてOtherを作りました。
                 break;
 
-                case TurnState.WaitForInitialize:
-                    // if(IsEveryoneReady())
-                    // {
-                        
-                    // }
-                break;
+                
 
                 default:
                 break;
@@ -174,6 +178,17 @@ namespace HanafudaPoker.Games
                         }
                     }
                 break;
+
+                case TurnState.WaitForInitialize:
+                    if(NetworkManager.IsMasterClient())
+                    {
+                        if(IsEveryoneReady())
+                        {
+                            NetworkManager.SetTurnState((int)TurnState.BeforeGame);
+                            Debug.Log("End Initialize");
+                        }
+                    }
+                break;
             }
         }
 
@@ -183,7 +198,10 @@ namespace HanafudaPoker.Games
         private void Initialize()
         {
             NetworkManager.SetTurnState((int)TurnState.WaitForInitialize);
-            // GameConst.PLAYER_NUMBER = 
+            GameConst.PLAYER_NUMBER = NetworkManager.GetPlayerNumber();
+            Debug.Log("Initialize : player number = " + GameConst.PLAYER_NUMBER);
+            NetworkManager.SetUpSeatID();
+
             NetworkManager.SetIsReady(false);
             NetworkManager.SetWillChangeCards(new bool[] {false, false, false});
 

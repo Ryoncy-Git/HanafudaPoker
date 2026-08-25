@@ -1,6 +1,7 @@
 using Photon.Realtime;
 using Photon.Pun;
 using ExitGames.Client.Photon;
+using UnityEngine;
 
 namespace HanafudaPoker.Network
 {
@@ -59,6 +60,24 @@ namespace HanafudaPoker.Network
         }
 
         // setter
+        public static void SetUpSeatID()
+        {
+            if(! PhotonNetwork.IsMasterClient)
+                return;
+
+            var players = PhotonNetwork.PlayerList;
+            int seatID = 0;
+
+            foreach(Player p in players)
+            {
+                Hashtable props = new Hashtable();
+                props[Key_SeatID] = seatID;
+                p.SetCustomProperties(props);
+
+                Debug.Log("Player name " + p.NickName + " seatID = " + seatID);
+                seatID++;
+            }
+        }
         public static void SetTurnState(int state)
         {
             if(! PhotonNetwork.IsMasterClient)
@@ -154,12 +173,21 @@ namespace HanafudaPoker.Network
         }
 
 
-        public static bool GetIsReady(int seatID)
+        public static bool GetIsReady(int seatID = -1)
         {
-            Player player = GetPlayerBySeatID(seatID);
+            Player player;
 
-            if(player == null)  
-                return false;
+            if(seatID == -1) // 引数ナシなら自分自身の
+            {
+                player = PhotonNetwork.LocalPlayer;
+            }
+            else
+            {
+                player = GetPlayerBySeatID(seatID);
+
+                if(player == null)  
+                    return false;
+            }
 
             // そのIDのPlayerの準備状況を返す
             return (player.CustomProperties[Key_IsReady] is bool value) ? value : false;
@@ -193,6 +221,8 @@ namespace HanafudaPoker.Network
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;
         }
 
+        // public setter and getter
+
         public static void SetAllPlayersReady(bool state)
         {
             RPCManager.Instance.SetAllPlayersReady(state);
@@ -201,6 +231,12 @@ namespace HanafudaPoker.Network
         public static bool IsMasterClient()
         {
             return PhotonNetwork.IsMasterClient;
+        }
+
+        public static int GetPlayerNumber()
+        {
+            var list = PhotonNetwork.PlayerList;
+            return list.Length;
         }
     }
 }

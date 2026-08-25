@@ -9,7 +9,7 @@ namespace HanafudaPoker.Games
 {
     public static class CardMovementManager
     {
-        public static void CreateAndShuffleDeck()
+        public static List<CardData> CreateAndShuffleDeck()
         {
             List<CardData> deck = new();
             int id = 0;
@@ -79,6 +79,7 @@ namespace HanafudaPoker.Games
             // NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
 
             ShuffleDeck(deck);
+            return deck;
         }
 
         private static void ShuffleDeck(List<CardData> deck)
