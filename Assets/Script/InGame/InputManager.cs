@@ -24,7 +24,7 @@ namespace HanafudaPoker.Games
                 bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
 
                 // change state[0]
-                state[0] != state[0];
+                state[0] = !state[0];
                 NetworkManager.SetWillChangeCards(state);
             }
 
@@ -34,7 +34,7 @@ namespace HanafudaPoker.Games
                 bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
 
                 // change state[1]
-                state[1] != state[1];
+                state[1] = ! state[1];
                 NetworkManager.SetWillChangeCards(state);
             }
 
@@ -44,7 +44,7 @@ namespace HanafudaPoker.Games
                 bool[] state = NetworkManager.GetWillChangeCards(mySeatID);
 
                 // change state[2]
-                state[2] != state[2];
+                state[2] = ! state[2];
                 NetworkManager.SetWillChangeCards(state);
             }
         }

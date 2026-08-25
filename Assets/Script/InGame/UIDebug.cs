@@ -6,6 +6,7 @@ using HanafudaPoker.Cards;
 using HanafudaPoker.Players;
 using HanafudaPoker.Games;
 using HanafudaPoker.Yakus;
+using HanafudaPoker.Network;
 
 namespace HanafudaPoker.UIs
 {
@@ -17,7 +18,7 @@ namespace HanafudaPoker.UIs
         [SerializeField]private TextMeshProUGUI stateText;
         [SerializeField]private TextMeshProUGUI[] yakuText;
         [SerializeField]private GameObject[] willChangeMarker;
-        private GameManager gameManager;
+         // private GameManager gameManager;
 
         private static readonly Dictionary<CardMonth, string> dictMonth = new()
         {
@@ -45,7 +46,7 @@ namespace HanafudaPoker.UIs
 
         private void Start()
         {
-            gameManager = this.gameObject.GetComponent<GameManager>();
+            // gameManager = this.gameObject.GetComponent<GameManager>();
         }
 
 
@@ -109,7 +110,7 @@ namespace HanafudaPoker.UIs
 
         public void ShowYaku(List<Yaku>[] yakus)
         {
-            for(int i = 0; i < gameManager.Players.Length; i++) // 4 == players.Length
+            for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
             {
                 if(yakus[i] == null)
                 {
@@ -194,27 +195,27 @@ namespace HanafudaPoker.UIs
 
         public void ShowWillChange()
         {
-            // 実装の時は、ここを自分のPlayer IDで制御?
-            PlayerData player = gameManager.Players[0];
+            // // 実装の時は、ここを自分のPlayer IDで制御?
+            // PlayerData player = gameManager.Players[0];
 
-            for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
-            {
-                if(player.WillChangeCards[i])
-                {
-                    willChangeMarker[i].SetActive(true);
-                }
-                else
-                {
-                    willChangeMarker[i].SetActive(false);
-                }
-            }
+            // for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
+            // {
+            //     if(player.WillChangeCards[i])
+            //     {
+            //         willChangeMarker[i].SetActive(true);
+            //     }
+            //     else
+            //     {
+            //         willChangeMarker[i].SetActive(false);
+            //     }
+            // }
         }
 
 
         // ---------------送り関数たち----------------
         public void SelectCard(int n)
         {
-            gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];
+            // gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];
         }
     }
 }

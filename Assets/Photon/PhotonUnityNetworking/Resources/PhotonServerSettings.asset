@@ -52,6 +52,7 @@ MonoBehaviour:
   - RPC_SendGameData
   - RPC_SetPlayerNumber
   - RPC_InstructInitialize
+  - RPC_SetAllPlayersReady
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

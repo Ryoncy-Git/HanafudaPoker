@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
 using HanafudaPoker.Yakus;
+using HanafudaPoker.Network;
 
 namespace HanafudaPoker.Games
 {
@@ -11,8 +12,8 @@ namespace HanafudaPoker.Games
     {
 
         // その他
-        public TurnState CurrentState; // 現在がどんなターンなのかを管理する
-        public TurnState PreviousState;
+        private TurnState CurrentState; // 現在がどんなターンなのかを管理する
+        private TurnState PreviousState;
 
 
         // インスタンス
@@ -26,6 +27,8 @@ namespace HanafudaPoker.Games
 
         private void Update()
         {
+            CurrentState = (TurnState)NetworkManager.GetTurnState();
+
             if(CurrentState != PreviousState)
             {
                 PreviousState = CurrentState;
@@ -35,64 +38,63 @@ namespace HanafudaPoker.Games
 
                 // debug
                 uiDebug.ShowState(CurrentState);
-                uiDebug.SetTextFieldCards(FieldCardForShow);
-                uiDebug.SetTextHandCards(Players);
+                // uiDebug.SetTextFieldCards(FieldCardForShow);
+                // uiDebug.SetTextHandCards(Players);
             }
 
-            OnUpdateState(CurrentState);
+            if(NetworkManager.IsMasterClient())
+                OnUpdateState(CurrentState);
+                // OnUpdateはマスターのみじっこう
         }
 
         private void OnEnterState(TurnState turnState)
         {
-            if(! networkManager.IsMasterClient())
-                return;
-            
-            // ここから先はmaster clientだけが実行、処理する部分
             switch(turnState)
             {
                 case TurnState.BeforeGame:
                     NetworkManager.SetField(null);
+                    // this.ResetGames();
 
-                    CurrentState = TurnState.CreateDeck;
+                    NetworkManager.SetTurnState((int)TurnState.CreateDeck);
                 break;
 
                 case TurnState.CreateDeck:
-                    var deck = CardMovementManager.CreateDeck();
-                    CardMovementManager.ShuffleDeck(deck);
+                    CardMovementManager.CreateAndShuffleDeck();
                     // SetDeckはCMMの方でやる
 
-                    CurrentState = TurnState.DealCards;
+                    NetworkManager.SetTurnState((int)TurnState.DealCards);
                 break;
 
                 case TurnState.DealCards:
-                    SetAllPlayersReady(false);
-                    CardMovementManager.DealCards(Deck, FieldCard, Players);
+                    NetworkManager.SetAllPlayersReady(false);
+                    CardMovementManager.DealCards();
 
-                    CurrentState = TurnState.ShowField;
+                    NetworkManager.SetTurnState((int)TurnState.ShowField);
                 break;
 
                 case TurnState.ShowField: 
-                    FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
-                    CurrentState = TurnState.WaitForFirstChange;
+                // まだ ↓
+                    // FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
+                    // CurrentState = TurnState.WaitForFirstChange;
                 break;
 
                 case TurnState.ShowResult:
 
-                    List<Yaku>[]playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    // List<Yaku>[]playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                     
-                    for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
-                    {
-                        playerYaku[i] = YakuData.YakuCheck(FieldCard, Players[i].HandCards);
-                    }
+                    // for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
+                    // {
+                    //     playerYaku[i] = YakuData.YakuCheck(FieldCard, Players[i].HandCards);
+                    // }
 
-                    uiDebug.ShowYaku(playerYaku);
+                    // uiDebug.ShowYaku(playerYaku);
 
                     // なんかいい感じに役とか表示して次へ
                     // 今はデバッグで無条件で次のターンへ
 
 
                     // こいこいはこのタイミングで
-                    CurrentState = TurnState.WaitForNextRound;
+                    NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
                 break;
 
                 case TurnState.Other:
@@ -101,10 +103,10 @@ namespace HanafudaPoker.Games
                 break;
 
                 case TurnState.WaitForInitialize:
-                    if(IsEveryoneReady())
-                    {
+                    // if(IsEveryoneReady())
+                    // {
                         
-                    }
+                    // }
                 break;
 
                 default:
@@ -118,34 +120,32 @@ namespace HanafudaPoker.Games
             {
                 case TurnState.WaitForFirstChange:
 
-                    if(networkManager.IsMasterClient())
+                    // wait player input
+
+                    if(NetworkManager.IsMasterClient())
                     {
                         if(IsEveryoneReady())
                         {
-                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-                            ShowFirstFieldCard();
-                            
-                            ResetPlayersReady();
+                            CardMovementManager.ChangeHandCards();
+                            NetworkManager.SetAllPlayersReady(false);
 
                             uiDebug.ShowWillChange();
-                            CurrentState = TurnState.WaitForSecondChange;
+                            NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
                         }
                     }
                 break;
 
                 case TurnState.WaitForSecondChange:
                 
-                    if(networkManager.IsMasterClient())
+                    if(NetworkManager.IsMasterClient())
                     {
                         if(IsEveryoneReady())
                         {
-                            CardMovementManager.ChangeHandCards(Deck, Players, DiscardPile);
-                            ShowSecondFieldCard();
-
-                            ResetPlayersReady();
+                            CardMovementManager.ChangeHandCards();
+                            NetworkManager.SetAllPlayersReady(false);
 
                             uiDebug.ShowWillChange();
-                            CurrentState = TurnState.ShowResult;
+                            NetworkManager.SetTurnState((int)TurnState.ShowResult);
                         }
                     }
                 break;
@@ -154,13 +154,15 @@ namespace HanafudaPoker.Games
 
                 case TurnState.WaitForNextRound:
 
-                    if(networkManager.IsMasterClient())
+                    if(NetworkManager.IsMasterClient())
                     {
                         // 全員がOKボタン押したら次のラウンドへ、とか
                         if(IsEveryoneReady())
                         {
-                            ResetPlayersReady();
+                            NetworkManager.SetAllPlayersReady(false);
+                            int round = NetworkManager.GetRound();
                             round++;
+                            NetworkManager.SetRound(round);
 
                             if(round <= GameConst.ROUND_NUMBER)
                             {
@@ -168,7 +170,7 @@ namespace HanafudaPoker.Games
                                 // シーン遷移とか
                             }
 
-                            CurrentState = TurnState.BeforeGame;
+                            NetworkManager.SetTurnState((int)TurnState.BeforeGame);
                         }
                     }
                 break;
@@ -180,10 +182,10 @@ namespace HanafudaPoker.Games
         // ーーーーーーーーーーーーこのファイル内のみで使う補助関数たちーーーーーーーーーーーーーーー
         private void Initialize()
         {
-            NetworkManager.SetTurn((int)TurnState.WaitForInitialize);
-            GameConst.PLAYER_NUMBER = 
+            NetworkManager.SetTurnState((int)TurnState.WaitForInitialize);
+            // GameConst.PLAYER_NUMBER = 
             NetworkManager.SetIsReady(false);
-            NetworkManager.SetWillChangeCards(new bool{false, false, false});
+            NetworkManager.SetWillChangeCards(new bool[] {false, false, false});
 
 
             // 空データを入れる作業はここでは　要らないかも
@@ -193,20 +195,17 @@ namespace HanafudaPoker.Games
 
         }
 
-        private void IsEveryoneReady()
+        private bool IsEveryoneReady()
         {
-            for(int seatID; seatID < GameConst.PLAYER_NUMBER; seatID++)
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
-                
+                if(NetworkManager.GetIsReady(seatID) == false)
+                {
+                    return false;
+                }
             }
-        }
 
-        private void SetAllPlayersReady(bool state)
-        {
-            if(! PhotonNetwork.IsMasterClient)
-                return;
-
-            NetworkManager.SetAllPlayersReady(state);
+            return true;
         }
     }
 

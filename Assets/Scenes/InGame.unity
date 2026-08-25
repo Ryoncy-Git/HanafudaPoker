@@ -2682,7 +2682,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5354524880db3b4ebd17a72e6492963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 1182538486}
   uiDebug: {fileID: 1182538484}
 --- !u!114 &1182538486
 MonoBehaviour:
@@ -2696,10 +2695,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a23fc634dd2194084e9ba00187f41f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentState: 0
-  PreviousState: 0
   uiDebug: {fileID: 1182538484}
-  networkManager: {fileID: 1656567665}
 --- !u!4 &1182538487
 Transform:
   m_ObjectHideFlags: 0
@@ -3714,8 +3710,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1656567667}
-  - component: {fileID: 1656567665}
   - component: {fileID: 1656567668}
+  - component: {fileID: 1656567669}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -3723,19 +3719,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1656567665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1656567664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83d9dd0df27ea5049b589fe56583135e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameManager: {fileID: 1182538486}
 --- !u!4 &1656567667
 Transform:
   m_ObjectHideFlags: 0
@@ -3773,6 +3756,18 @@ MonoBehaviour:
   sceneViewId: 2
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &1656567669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656567664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a60e72b8b16256649906212cb251785a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1796225017
 GameObject:
   m_ObjectHideFlags: 0

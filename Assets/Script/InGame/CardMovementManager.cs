@@ -9,7 +9,7 @@ namespace HanafudaPoker.Games
 {
     public static class CardMovementManager
     {
-        public static List<CardData> CreateDeck()
+        public static void CreateAndShuffleDeck()
         {
             List<CardData> deck = new();
             int id = 0;
@@ -75,14 +75,13 @@ namespace HanafudaPoker.Games
             deck.Add(new CardData(CardMonth.Kiri,    CardRank.Kasu,    CardFeature.None,        id++));
 
 
-            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
-
-            // デバッグ
             Debug.Log("Create Deck");
-            return deck;
+            // NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
+
+            ShuffleDeck(deck);
         }
 
-        public static List<CardData> ShuffleDeck(List<CardData> deck)
+        private static void ShuffleDeck(List<CardData> deck)
         {
             for(int i = 0; i < deck.Count; i++)
             {
@@ -95,57 +94,82 @@ namespace HanafudaPoker.Games
 
             // デバッグ用
             Debug.Log("Deck Shuffle Done");
-            return deck;
         }
 
-        public static void DealCards(List<CardData> field, PlayerData[] players)
+        public static void DealCards()
         {
             var deck = CardDataBase.GetCardDataListByID(NetworkManager.GetDeck());
+            // var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
             CardData dealtCard;
+            List<CardData> dealtCards = new List<CardData>();
 
-            for(int i = 0; i < players.Length; i++)
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
+                dealtCards = new List<CardData>();
+
                 for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
                 {
-                    // Debug.LogError($"Deck:{deck.Count}");
                     dealtCard = deck[deck.Count - 1];
 
-                    players[i].HandCards.Add(dealtCard);
+                    dealtCards.Add(dealtCard);
                     deck.Remove(dealtCard);
                 }
+
+                NetworkManager.SetHands(CardDataBase.GetIDsByList(dealtCards), seatID);
             }
+
+
+            dealtCards = new List<CardData>();
 
             for(int k = 0; k < GameConst.FIELD_CARD_NUMBER; k++) // 場のカードが5枚なので
             {
                 dealtCard = deck[deck.Count - 1];
-                field.Add(dealtCard);
+                dealtCards.Add(dealtCard);
                 deck.Remove(dealtCard);
             }
+
+            NetworkManager.SetField(CardDataBase.GetIDsByList(dealtCards));
+            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
             
             Debug.Log("Deal Cards");
             return;   
         }
 
-        public static void ChangeHandCards(List<CardData> deck, PlayerData[] players, List<CardData> discardPile)
+        public static void ChangeHandCards()
         {
-            CardData dealtCard;
+            var deck = CardDataBase.GetCardDataListByID(NetworkManager.GetDeck());
 
-            foreach(PlayerData player in players)
+            CardData dealtCard;
+            List<CardData> newHands;
+
+
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
+                newHands = new List<CardData>();
+                bool[] readys = NetworkManager.GetWillChangeCards(seatID);
+                var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+
                 for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
                 {
-                    if(player.WillChangeCards[i])
+                    if(readys[i] == false) // 変えないのなら
                     {
-                        CardData changedCard = player.HandCards[i];
+                        newHands.Add(hands[i]);
+                    }
+                    else
+                    {
                         dealtCard = deck[deck.Count - 1];
-
-                        discardPile.Add(changedCard);
-                        player.HandCards[i] = dealtCard;
+                        newHands.Add(dealtCard);
                         deck.Remove(dealtCard);
                     }
+
+                    NetworkManager.SetHands(CardDataBase.GetIDsByList(newHands), seatID);
                 }
             }
+
+            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
+
+            Debug.Log("Deal done");
         }
     }
 }

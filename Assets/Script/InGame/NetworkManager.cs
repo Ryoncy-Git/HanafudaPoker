@@ -20,7 +20,7 @@ namespace HanafudaPoker.Network
     */
 
 
-    public static class NetworkManager : MonoBehaviourPunCallbacks
+    public static class NetworkManager
     {
         // RP (Room Properties) (Only MasterClient can change)
         private const string Key_TurnState = "Turn";
@@ -110,11 +110,22 @@ namespace HanafudaPoker.Network
             // 自分のPPを変更
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
-        public static void SetHands(int[] hands)
+        public static void SetHands(int[] hands, int seatID = -1)
         {
+            // 第二引数がしていなければ自分のカードを、指定があれば指定した人の手札を変更
             Hashtable props = new Hashtable();
             props[Key_Hands] = hands;
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            if(player == null)
+            {
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+            else
+            {
+                player.SetCustomProperties(props);
+            }
         }
         public static void SetWillChangeCards(bool[] state)
         {
@@ -168,7 +179,7 @@ namespace HanafudaPoker.Network
             Player player = GetPlayerBySeatID(seatID);
 
             if(player == null)
-                return 0;
+                return new bool[] {false, false, false};
             
             return (player.CustomProperties[Key_WillChangeCards] is bool[] value) ? value : null;
         }
@@ -182,24 +193,14 @@ namespace HanafudaPoker.Network
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;
         }
 
-        // RPCs
         public static void SetAllPlayersReady(bool state)
         {
-            if(! PhotonNetwork.IsMasterClient)
-                return;
-
-            PhotonView.RPC(
-                nameof(RPC_SetAllPlayersReady), 
-                RpcTarget.All,
-                state
-            );
+            RPCManager.Instance.SetAllPlayersReady(state);
         }
 
-        [PunRPC]
-        private static void RPC_SetAllPlayersReady(bool state)
+        public static bool IsMasterClient()
         {
-            // 各個人が受信したのち、自分の変数を変更する
-            SetIsReady(state);
-        } 
+            return PhotonNetwork.IsMasterClient;
+        }
     }
 }
