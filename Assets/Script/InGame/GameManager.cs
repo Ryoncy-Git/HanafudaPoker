@@ -43,7 +43,7 @@ namespace HanafudaPoker.Games
                 // debug
                 uiDebug.ShowState(CurrentState);
                 // uiDebug.SetTextFieldCards(FieldCardForShow);
-                // uiDebug.SetTextHandCards(Players);
+                uiDebug.SetTextHandCards();
             }
 
             OnUpdateState(CurrentState);

@@ -3,7 +3,7 @@ using TMPro;
 using System.Collections.Generic;
 
 using HanafudaPoker.Cards;
-using HanafudaPoker.Players;
+// using HanafudaPoker.Players;
 using HanafudaPoker.Games;
 using HanafudaPoker.Yakus;
 using HanafudaPoker.Network;
@@ -63,19 +63,24 @@ namespace HanafudaPoker.UIs
             fieldCardsText.text = str;
         }
 
-        public void SetTextHandCards(PlayerData[] players)
+        public void SetTextHandCards()
         {
+            // var players = PhotonNetwork.PlayerList;
+
             string str = "";
-            for(int i = 0; i < players.Length; i++)
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
                 str = "";
+                var handsID = NetworkManager.GetHands(seatID);
+                Debug.Log(handsID);
+                var hands = CardDataBase.GetCardDataListByID(handsID);  
 
                 for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
                 {
-                    str += dictMonth[players[i].HandCards[j].Month] + " " + dictRank[players[i].HandCards[j].Rank] + "\n";
+                    str += dictMonth[hands[j].Month] + " " + dictRank[hands[j].Rank] + "\n";
                 }
 
-                handCardsText[i].text = str;
+                handCardsText[seatID].text = str;
             }
         }
 
@@ -110,11 +115,11 @@ namespace HanafudaPoker.UIs
 
         public void ShowYaku(List<Yaku>[] yakus)
         {
-            for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
+            for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
-                if(yakus[i] == null)
+                if(yakus[seatID] == null)
                 {
-                    yakuText[i].text = "";
+                    yakuText[seatID].text = "";
                     // Debug.Log($"Num {i} is null List");
                     continue;
                 }
@@ -123,73 +128,73 @@ namespace HanafudaPoker.UIs
                 // Debug.Log($"Yaku Num = {yakus[i].Count}");
 
                 string tex = "";
-                if(yakus[i].Contains(Yaku.Tsui))
+                if(yakus[seatID].Contains(Yaku.Tsui))
                     tex += "対\n";
 
-                if(yakus[i].Contains(Yaku.Nitsui))
+                if(yakus[seatID].Contains(Yaku.Nitsui))
                     tex += "二対\n";
 
-                if(yakus[i].Contains(Yaku.Santsui))
+                if(yakus[seatID].Contains(Yaku.Santsui))
                     tex += "三対\n";
 
-                if(yakus[i].Contains(Yaku.Yontsui))
+                if(yakus[seatID].Contains(Yaku.Yontsui))
                     tex += "四対\n";
 
-                if(yakus[i].Contains(Yaku.Mangetsu))
+                if(yakus[seatID].Contains(Yaku.Mangetsu))
                     tex += "満月\n";
 
-                if(yakus[i].Contains(Yaku.Akatan))
+                if(yakus[seatID].Contains(Yaku.Akatan))
                     tex += "赤タン\n";
 
-                if(yakus[i].Contains(Yaku.Aotan))
+                if(yakus[seatID].Contains(Yaku.Aotan))
                     tex += "青タン\n";
 
-                if(yakus[i].Contains(Yaku.Tan))
+                if(yakus[seatID].Contains(Yaku.Tan))
                     tex += "タン\n";
 
-                if(yakus[i].Contains(Yaku.Gokou))
+                if(yakus[seatID].Contains(Yaku.Gokou))
                     tex += "五光\n";
 
-                if(yakus[i].Contains(Yaku.Yonkou))
+                if(yakus[seatID].Contains(Yaku.Yonkou))
                     tex += "四光\n";
 
-                if(yakus[i].Contains(Yaku.Ameshikou))
+                if(yakus[seatID].Contains(Yaku.Ameshikou))
                     tex += "雨四光\n";
 
-                if(yakus[i].Contains(Yaku.Sankou))
+                if(yakus[seatID].Contains(Yaku.Sankou))
                     tex += "三光\n";
 
-                if(yakus[i].Contains(Yaku.Inoshikacho))
+                if(yakus[seatID].Contains(Yaku.Inoshikacho))
                     tex += "猪鹿蝶\n";
 
-                if(yakus[i].Contains(Yaku.Sakeutage))
+                if(yakus[seatID].Contains(Yaku.Sakeutage))
                     tex += "酒宴\n";
 
-                if(yakus[i].Contains(Yaku.Mizu))
+                if(yakus[seatID].Contains(Yaku.Mizu))
                     tex += "水鏡\n";
 
-                if(yakus[i].Contains(Yaku.Murasaki))
+                if(yakus[seatID].Contains(Yaku.Murasaki))
                     tex += "紫苑花\n";
 
-                if(yakus[i].Contains(Yaku.Hanaikada))
+                if(yakus[seatID].Contains(Yaku.Hanaikada))
                     tex += "花筏\n";
 
-                if(yakus[i].Contains(Yaku.Adabana))
+                if(yakus[seatID].Contains(Yaku.Adabana))
                     tex += "徒花\n";
 
-                if(yakus[i].Contains(Yaku.Chidori))
+                if(yakus[seatID].Contains(Yaku.Chidori))
                     tex += "千鳥\n";
 
-                if(yakus[i].Contains(Yaku.MidareChidori))
+                if(yakus[seatID].Contains(Yaku.MidareChidori))
                     tex += "乱れ千鳥\n";
 
-                if(yakus[i].Contains(Yaku.Houou))
+                if(yakus[seatID].Contains(Yaku.Houou))
                     tex += "鳳凰\n";
 
-                if(yakus[i].Contains(Yaku.Hououraigi))
+                if(yakus[seatID].Contains(Yaku.Hououraigi))
                     tex += "鳳凰来儀\n";
 
-                yakuText[i].text = tex;
+                yakuText[seatID].text = tex;
             }
         }
 
@@ -213,9 +218,9 @@ namespace HanafudaPoker.UIs
 
 
         // ---------------送り関数たち----------------
-        public void SelectCard(int n)
-        {
-            // gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];
-        }
+        // public void SelectCard(int n)
+        // {
+        //     // gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];
+        // }
     }
 }

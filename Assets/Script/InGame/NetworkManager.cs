@@ -184,10 +184,10 @@ namespace HanafudaPoker.Network
             else
             {
                 player = GetPlayerBySeatID(seatID);
-
-                if(player == null)  
-                    return false;
             }
+
+            if(player == null)  
+                return false;
 
             // そのIDのPlayerの準備状況を返す
             return (player.CustomProperties[Key_IsReady] is bool value) ? value : false;
@@ -202,20 +202,39 @@ namespace HanafudaPoker.Network
             return (PhotonNetwork.LocalPlayer.CustomProperties[Key_SeatID] is int value) ? value : -1;
         }
         
-        public static bool[] GetWillChangeCards(int seatID)
+        public static bool[] GetWillChangeCards(int seatID = -1)
         {
-            Player player = GetPlayerBySeatID(seatID);
+            Player player;
 
-            if(player == null)
-                return new bool[] {false, false, false};
+            if(seatID == -1) // 引数ナシなら自分自身の
+            {
+                player = PhotonNetwork.LocalPlayer;
+            }
+            else
+            {
+                player = GetPlayerBySeatID(seatID);
+            }
             
+            if(player == null)  
+                return new bool[] {false, false, false};
+
             return (player.CustomProperties[Key_WillChangeCards] is bool[] value) ? value : null;
         }
-        public static int[] GetHands(int seatID)
+        public static int[] GetHands(int seatID = -1)
         {
-            Player player = GetPlayerBySeatID(seatID);
+            Player player;
 
-            if(player == null)
+            if(seatID == -1) // 引数ナシなら自分自身の
+            {
+                player = PhotonNetwork.LocalPlayer;
+            }
+            else
+            {
+                player = GetPlayerBySeatID(seatID);
+            }
+
+            
+            if(player == null)  
                 return null;
 
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;

@@ -66,7 +66,7 @@ namespace HanafudaPoker.Cards
         {
             cards = new();
 
-            foreach(var card in CardMovementManager.CreateAndShuffleDeck())
+            foreach(var card in CardMovementManager.CreateDeck())
             {
                 cards.Add(card.CardID, card);
             }
