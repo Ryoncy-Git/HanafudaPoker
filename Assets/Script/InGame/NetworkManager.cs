@@ -41,7 +41,7 @@ namespace HanafudaPoker.Network
         private static readonly Hashtable props = new Hashtable();  
         
         // private functions
-        private static Player GetPlayerBySeatID(int seatID)
+        public /*private */static Player GetPlayerBySeatID(int seatID)
         {
             Player player = null;
             var players = PhotonNetwork.PlayerList;
@@ -234,9 +234,11 @@ namespace HanafudaPoker.Network
             }
 
             
-            if(player == null)  
+            if(player == null)
+            {  
+                Debug.Log("Failed to get hand on ID : " + seatID);
                 return null;
-
+            }
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;
         }
 
@@ -245,6 +247,10 @@ namespace HanafudaPoker.Network
         public static void SetAllPlayersReady(bool state)
         {
             RPCManager.Instance.SetAllPlayersReady(state);
+        }
+        public static void SetAllPlayersWillChangeCards(bool state)
+        {
+            RPCManager.Instance.SetAllPlayersWillChangeCards(state);
         }
 
         public static bool IsMasterClient()

@@ -25,6 +25,17 @@ public class RPCManager : MonoBehaviourPunCallbacks
             state
         );
     }
+    public void SetAllPlayersWillChangeCards(bool state)
+    {
+        if(! PhotonNetwork.IsMasterClient)
+            return;
+
+        photonView.RPC(
+            nameof(RPC_SetAllPlayersWillChangeCards),
+            RpcTarget.All,
+            state
+        );
+    }
 
     [PunRPC]
     private void RPC_SetAllPlayersReady(bool state)
@@ -32,4 +43,10 @@ public class RPCManager : MonoBehaviourPunCallbacks
         // 各個人が受信したのち、自分の変数を変更する
         NetworkManager.SetIsReady(state);
     } 
+
+    [PunRPC]
+    private void RPC_SetAllPlayersWillChangeCards(bool state)
+    {
+        NetworkManager.SetIsReady(state);
+    }
 }

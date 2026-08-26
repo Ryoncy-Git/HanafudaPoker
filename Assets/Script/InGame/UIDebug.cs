@@ -71,15 +71,19 @@ namespace HanafudaPoker.UIs
             for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
                 str = "";
-                var handsID = NetworkManager.GetHands(seatID);
-                Debug.Log(handsID);
-                var hands = CardDataBase.GetCardDataListByID(handsID);  
-
-                for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
+                var handsIDs = NetworkManager.GetHands(seatID);
+                var playerName = NetworkManager.GetPlayerBySeatID(seatID).NickName;
+                Debug.Log(playerName);
+                
+                if(handsIDs != null)
                 {
-                    str += dictMonth[hands[j].Month] + " " + dictRank[hands[j].Rank] + "\n";
-                }
+                    var hands = CardDataBase.GetCardDataListByID(handsIDs);  
 
+                    for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
+                    {
+                        str += dictMonth[hands[j].Month] + " " + dictRank[hands[j].Rank] + "\n";
+                    }
+                }
                 handCardsText[seatID].text = str;
             }
         }
