@@ -17,7 +17,10 @@ namespace HanafudaPoker.UIs
         [SerializeField]private TextMeshProUGUI[] handCardsText;
         [SerializeField]private TextMeshProUGUI stateText;
         [SerializeField]private TextMeshProUGUI[] yakuText;
-        [SerializeField]private GameObject[] willChangeMarker;
+        [SerializeField]private GameObject[] willChangeMarker_0; // [SeatID][index]
+        [SerializeField]private GameObject[] willChangeMarker_1; // [SeatID][index]
+        [SerializeField]private GameObject[] willChangeMarker_2; // [SeatID][index]
+        [SerializeField]private GameObject[] willChangeMarker_3; // [SeatID][index]
          // private GameManager gameManager;
 
         private static readonly Dictionary<CardMonth, string> dictMonth = new()
@@ -44,45 +47,56 @@ namespace HanafudaPoker.UIs
             { CardRank.Kasu, "カス" }
         };
 
-        private void Start()
-        {
-            // gameManager = this.gameObject.GetComponent<GameManager>();
-        }
-
 
         // ---------------受け取り関数たち----------------
         
-        public void SetTextFieldCards(List<CardData> field)
+        public void SetTextFieldCards()
         {
+            TurnState currentTurnState = (TurnState)NetworkManager.GetTurnState();
+            var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+
             string str = "";
-            for(int i = 0; i < field.Count; i++)
+
+            if(currentTurnState == TurnState.WaitForFirstChange || currentTurnState == TurnState.ShowField)
             {
-                str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
+                for(int i = 0; i < 3; i++) // 一回目の手札変更の時は三枚だけ見えるように
+                {
+                    str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
+                }
             }
+            else if(currentTurnState == TurnState.WaitForSecondChange)
+            {
+                for(int i = 0; i < 4; i++) // 二回目の手札変更の時は４枚だけ見えるように
+                {
+                    str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
+                }
+            }
+            else if(currentTurnState == TurnState.ShowResult || currentTurnState == TurnState.WaitForNextRound)
+            {
+                for(int i = 0; i < 5; i++)
+                {
+                    str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
+                }
+            }
+            
 
             fieldCardsText.text = str;
         }
 
         public void SetTextHandCards()
         {
-            // var players = PhotonNetwork.PlayerList;
-
             string str = "";
             for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
             {
                 str = "";
-                var handsIDs = NetworkManager.GetHands(seatID);
-                var playerName = NetworkManager.GetPlayerBySeatID(seatID).NickName;
-                Debug.Log(playerName);
+                var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));  
                 
-                if(handsIDs != null)
-                {
-                    var hands = CardDataBase.GetCardDataListByID(handsIDs);  
+                if(hands.Count <= 0)
+                    return;
 
-                    for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
-                    {
-                        str += dictMonth[hands[j].Month] + " " + dictRank[hands[j].Rank] + "\n";
-                    }
+                for(int j = 0; j < GameConst.HAND_CARD_NUMBER; j++)
+                {
+                    str += dictMonth[hands[j].Month] + " " + dictRank[hands[j].Rank] + "\n";
                 }
                 handCardsText[seatID].text = str;
             }
@@ -92,7 +106,14 @@ namespace HanafudaPoker.UIs
         {
             switch(state)
             {
+                case TurnState.WaitForInitialize:
+                    stateText.text = "全員の準備を待っています";
+                break;
+
                 case TurnState.BeforeGame:
+                case TurnState.CreateDeck:
+                case TurnState.DealCards:
+                case TurnState.ShowField:
                     stateText.text = "山札を準備中";
                 break;
 
@@ -204,20 +225,38 @@ namespace HanafudaPoker.UIs
 
         public void ShowWillChange()
         {
-            // // 実装の時は、ここを自分のPlayer IDで制御?
+            // 実装の時は、ここを自分のPlayer IDで制御?
             // PlayerData player = gameManager.Players[0];
 
-            // for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
-            // {
-            //     if(player.WillChangeCards[i])
-            //     {
-            //         willChangeMarker[i].SetActive(true);
-            //     }
-            //     else
-            //     {
-            //         willChangeMarker[i].SetActive(false);
-            //     }
-            // }
+            bool[] willchange = NetworkManager.GetWillChangeCards();
+
+            if(willchange.Length == 0)
+                return;
+            
+            int seatID = NetworkManager.GetMySeatID();
+
+            for(int i = 0; i < GameConst.HAND_CARD_NUMBER; i++)
+            {
+                switch(seatID)
+                {
+                    case 0:
+                        willChangeMarker_0[i].SetActive(willchange[i]);
+                    break;
+
+                    case 1:
+                        willChangeMarker_1[i].SetActive(willchange[i]);
+                    break;
+
+                    case 2:
+                        willChangeMarker_2[i].SetActive(willchange[i]);
+                    break;
+
+                    case 3:
+                        willChangeMarker_3[i].SetActive(willchange[i]);
+                    break;
+                }
+                
+            }
         }
 
 

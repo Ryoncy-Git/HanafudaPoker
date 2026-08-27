@@ -42,12 +42,13 @@ namespace HanafudaPoker.Games
 
                 // debug
                 uiDebug.ShowState(CurrentState);
-                // uiDebug.SetTextFieldCards(FieldCardForShow);
+                uiDebug.SetTextFieldCards();
                 uiDebug.SetTextHandCards();
+                
             }
+            uiDebug.ShowWillChange();
 
             OnUpdateState(CurrentState);
-                
         }
 
         private void OnEnterState(TurnState turnState)
@@ -57,6 +58,9 @@ namespace HanafudaPoker.Games
                 case TurnState.BeforeGame:
                     NetworkManager.SetField(null);
                     // this.ResetGames();
+                    NetworkManager.SetIsReady(false);
+                    NetworkManager.SetWillChangeCards(new bool[] {false, false, false});
+
                     Debug.Log("End Gefore Game");
 
                     NetworkManager.SetTurnState((int)TurnState.CreateDeck);
@@ -79,8 +83,6 @@ namespace HanafudaPoker.Games
                 break;
 
                 case TurnState.ShowField: 
-                // まだ ↓
-                    // FieldCardForShow = new List<CardData> {FieldCard[0], FieldCard[1], FieldCard[2]};
                     Debug.Log("End Show Field");
 
                     NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
@@ -88,14 +90,18 @@ namespace HanafudaPoker.Games
 
                 case TurnState.ShowResult:
 
-                    // List<Yaku>[]playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    List<Yaku>[]playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                     
-                    // for(int i = 0; i < GameConst.PLAYER_NUMBER; i++)
-                    // {
-                    //     playerYaku[i] = YakuData.YakuCheck(FieldCard, Players[i].HandCards);
-                    // }
+                    var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
-                    // uiDebug.ShowYaku(playerYaku);
+                    for(int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+                    {
+                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+
+                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+                    }
+
+                    uiDebug.ShowYaku(playerYaku);
 
                     // なんかいい感じに役とか表示して次へ
                     // 今はデバッグで無条件で次のターンへ
@@ -132,6 +138,7 @@ namespace HanafudaPoker.Games
                         {
                             CardMovementManager.ChangeHandCards();
                             NetworkManager.SetAllPlayersReady(false);
+                            NetworkManager.SetAllPlayersWillChangeCards(false);
 
                             uiDebug.ShowWillChange();
                             NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
@@ -140,13 +147,14 @@ namespace HanafudaPoker.Games
                 break;
 
                 case TurnState.WaitForSecondChange:
-                
+
                     if(NetworkManager.IsMasterClient())
                     {
                         if(IsEveryoneReady())
                         {
                             CardMovementManager.ChangeHandCards();
                             NetworkManager.SetAllPlayersReady(false);
+                            NetworkManager.SetAllPlayersWillChangeCards(false);
 
                             uiDebug.ShowWillChange();
                             NetworkManager.SetTurnState((int)TurnState.ShowResult);
@@ -201,9 +209,6 @@ namespace HanafudaPoker.Games
             GameConst.PLAYER_NUMBER = NetworkManager.GetPlayerNumber();
             Debug.Log("Initialize : player number = " + GameConst.PLAYER_NUMBER);
             NetworkManager.SetUpSeatID();
-
-            NetworkManager.SetIsReady(false);
-            NetworkManager.SetWillChangeCards(new bool[] {false, false, false});
 
 
             // 空データを入れる作業はここでは　要らないかも

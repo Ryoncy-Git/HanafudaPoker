@@ -165,11 +165,11 @@ namespace HanafudaPoker.Network
         }
         public static int[] GetDeck()
         {
-            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_Deck] is int[] value) ? value : null;
+            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_Deck] is int[] value) ? value : new int[] {};
         }
         public static int[] GetField()
         {
-            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_Field] is int[] value) ? value : null;
+            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_Field] is int[] value) ? value : new int[] {};
         }
 
 
@@ -218,7 +218,7 @@ namespace HanafudaPoker.Network
             if(player == null)  
                 return new bool[] {false, false, false};
 
-            return (player.CustomProperties[Key_WillChangeCards] is bool[] value) ? value : null;
+            return (player.CustomProperties[Key_WillChangeCards] is bool[] value) ? value : new bool[] {false, false, false};
         }
         public static int[] GetHands(int seatID = -1)
         {
@@ -237,9 +237,9 @@ namespace HanafudaPoker.Network
             if(player == null)
             {  
                 Debug.Log("Failed to get hand on ID : " + seatID);
-                return null;
+                return new int[] {};
             }
-            return (player.CustomProperties[Key_Hands] is int[] value) ? value : null;
+            return (player.CustomProperties[Key_Hands] is int[] value) ? value : new int[] {};
         }
 
         // public setter and getter
