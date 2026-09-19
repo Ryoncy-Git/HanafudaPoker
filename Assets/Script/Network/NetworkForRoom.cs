@@ -1,0 +1,120 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Photon.Pun;
+using Photon.Realtime;
+using TMPro;
+
+namespace HanafudaPoker.Networks
+{
+    public class NetworkForRoom : MonoBehaviourPunCallbacks
+    {
+        [SerializeField] private TextMeshProUGUI playerNameListText;
+        [SerializeField] private TMP_InputField inputedName;
+        [SerializeField] private GameObject startButton;
+        private Player[] playerList;
+        public void Start()
+        {
+            // debug
+            // PhotonNetwork.ConnectUsingSettings(); Roomに入った時点で接続済みだから不必要？
+            UpdatePlayerList();
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                startButton.SetActive(true);
+            }
+            else
+            {
+                startButton.SetActive(false);
+            }
+        }
+
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
+            UpdatePlayerList();
+        }
+
+        public override void OnPlayerLeftRoom(Player newPlayer)
+        {
+            UpdatePlayerList();
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                startButton.SetActive(true);
+            }
+            else
+            {
+                startButton.SetActive(false);
+            }
+        }
+
+        [PunRPC]
+        public void UpdatePlayerList()
+        {
+            playerList = PhotonNetwork.PlayerList;
+            playerNameListText.text = "";
+
+            foreach (var player in playerList)
+            {
+                playerNameListText.text += player.ActorNumber + "  " + player.NickName + "\n";
+            }
+        }
+
+        public void OnPressedChangeName()
+        {
+            PhotonNetwork.NickName = inputedName.text;
+            UpdatePlayerList();
+            photonView.RPC(nameof(UpdatePlayerList), RpcTarget.All);
+        }
+
+        public void OnPressedStartGame()
+        {
+            photonView.RPC(nameof(RPC_StartGame), RpcTarget.All);
+        }
+
+        [PunRPC]
+        private void RPC_StartGame()
+        {
+            SceneManager.LoadScene("Game");
+        }
+
+        [PunRPC]
+        private void RPCSendMessage(string message)
+        {
+            Debug.Log(message + " via photon");
+        }
+
+        // ho6:
+        // 部屋を抜ける時
+        public void OnPressedBackToTitle()
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+
+        public override void OnLeftRoom()
+        {
+            PhotonNetwork.Disconnect();
+        }
+
+        public override void OnDisconnected(DisconnectCause cause)
+        {
+            SceneManager.LoadScene("OutOfNetwork");
+        }
+
+        // ---------------for debug--------------
+
+        // マスターサーバーへの接続が成功した時に呼ばれるコールバック
+        public override void OnConnectedToMaster()
+        {
+            // "Room"という名前のルームに参加する（ルームが存在しなければ作成して参加する）
+            PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
+            Debug.Log("Joined To Master Server");
+        }
+
+        public override void OnJoinedRoom()
+        {
+            PhotonNetwork.NickName = "Player" + PhotonNetwork.LocalPlayer.ActorNumber;
+            UpdatePlayerList();
+            Debug.Log("Joied To Room");
+        }
+    }
+}

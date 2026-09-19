@@ -23,6 +23,14 @@ namespace HanafudaPoker.Animation
         [SerializeField]
         private ParticleSystem hikariParticle;
 
+        // カード更新後のアニメーションのためにカードIDが必要
+        private int cardID;
+
+        public int CardID => cardID;
+
+        // カード変更がされたか
+        public bool isChanging;
+
         private void Awake()
         {
             hikariParticle.Stop();
@@ -31,10 +39,10 @@ namespace HanafudaPoker.Animation
         public void SetCard(CardData card)
         {
             if (frontRenderer == null)
-            {
-                Debug.Log("このカードは偽札です。正しいですか？");
                 return;
-            }
+
+            cardID = card.CardID;
+            Debug.Log($"SetCard : {card.CardID}");
 
             frontRenderer.material =
                 MaterialManager.Instance.GetMaterial(card);
@@ -136,10 +144,32 @@ namespace HanafudaPoker.Animation
             transform.rotation = card.rotation;
         }
 
+        // 上記の処理を一括で行う
+        public IEnumerator PlayAnimation(Transform target, float scale, bool flip)
+        {
+            StartCoroutine(MoveAnimation(target));
+            StartCoroutine(RotateAnimation(target));
+            StartCoroutine(ScaleAnimation(scale));
+
+            if (flip) yield return FlipCard();
+            
+        }
+
         /*-- 札に付与されるエフェクト操作 --*/
         public void PlayHiakariEffect()
         {
             hikariParticle.Play();
+        }
+
+
+        // 札を交換する
+        public IEnumerator ChangeCardAnimation(CardData newCard)
+        {
+            yield return FlipCard();
+
+            SetCard(newCard);
+
+            yield return FlipCard();
         }
     }
 }

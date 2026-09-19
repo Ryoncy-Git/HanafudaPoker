@@ -18,7 +18,7 @@ namespace HanafudaPoker.Mat
 
         public Material GetMaterial(CardData card)
         {
-            return cardMaterials[card.CardId];
+            return cardMaterials[card.CardID];
         }
     }
 }

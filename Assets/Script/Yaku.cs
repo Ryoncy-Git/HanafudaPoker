@@ -9,7 +9,7 @@ namespace HanafudaPoker.Yakus
     public enum Yaku
     {
         Tsui,
-        Nitsui, 
+        Nitsui,
         Santsui,
         Yontsui,
         Mangetsu, // 同じ月4枚
@@ -22,7 +22,7 @@ namespace HanafudaPoker.Yakus
         Sankou,
         Inoshikacho,
         Sakeutage, // 酒、桜の光、芒の月
-        
+
         Mizu, // 菖蒲の種、柳のカス、柳の光
         Murasaki, // 桐、藤、菖蒲を三種類集める カス限定
         Hanaikada, // 連続する月の札を四枚、カスのみで成立
@@ -40,11 +40,11 @@ namespace HanafudaPoker.Yakus
 
             List<CardData> cards = new();
 
-            foreach(CardData c in field)
+            foreach (CardData c in field)
             {
                 cards.Add(c);
             }
-            foreach(CardData c in hand)
+            foreach (CardData c in hand)
             {
                 cards.Add(c);
             }
@@ -52,84 +52,84 @@ namespace HanafudaPoker.Yakus
             // 役を全部調べてチェックしてリストに足していく
             // 役は何個もある状態、役がかぶっても墓に持ってる役で勝負
             // 役が完全に同じ場合は月がデカい方が勝ち
-            if(hasYontsui(cards))
+            if (hasYontsui(cards))
             {
                 yakus.Add(Yaku.Yontsui);
             }
-            else if(hasSantsui(cards))
+            else if (hasSantsui(cards))
             {
                 yakus.Add(Yaku.Santsui);
             }
-            else if(hasNitsui(cards))
+            else if (hasNitsui(cards))
             {
                 yakus.Add(Yaku.Nitsui);
             }
-            else if(hasTsui(cards))
-            {    
+            else if (hasTsui(cards))
+            {
                 yakus.Add(Yaku.Tsui);
             }
 
-            if(hasMangetsu(cards))
+            if (hasMangetsu(cards))
                 yakus.Add(Yaku.Mangetsu);
 
-            if(hasAkatan(cards))
+            if (hasAkatan(cards))
                 yakus.Add(Yaku.Akatan);
 
-            if(hasAotan(cards))
+            if (hasAotan(cards))
                 yakus.Add(Yaku.Aotan);
 
-            if(hasTan(cards))
+            if (hasTan(cards))
                 yakus.Add(Yaku.Tan);
 
-            if(hasGokou(cards))
+            if (hasGokou(cards))
             {
                 yakus.Add(Yaku.Gokou);
             }
-            else if(hasYonkou(cards))
+            else if (hasYonkou(cards))
             {
                 yakus.Add(Yaku.Yonkou);
             }
-            else if(hasAmeshikou(cards))
+            else if (hasAmeshikou(cards))
             {
                 yakus.Add(Yaku.Ameshikou);
             }
-            else if(hasSankou(cards))
+            else if (hasSankou(cards))
             {
                 yakus.Add(Yaku.Sankou);
             }
 
-            if(hasInoshikacho(cards))
+            if (hasInoshikacho(cards))
                 yakus.Add(Yaku.Inoshikacho);
 
-            if(hasSakeutage(cards))
+            if (hasSakeutage(cards))
                 yakus.Add(Yaku.Sakeutage);
 
-            if(hasMizu(cards))
+            if (hasMizu(cards))
                 yakus.Add(Yaku.Mizu);
 
-            if(hasMurasaki(cards))
+            if (hasMurasaki(cards))
                 yakus.Add(Yaku.Murasaki);
 
-            if(hasHanaikada(cards))
+            if (hasHanaikada(cards))
                 yakus.Add(Yaku.Hanaikada);
 
-            if(hasAdabana(cards))
+            if (hasAdabana(cards))
                 yakus.Add(Yaku.Adabana);
 
             // 鳥役（排他的）
-            if(hasHououraigi(cards))
+            if (hasHououraigi(cards))
             {
                 yakus.Add(Yaku.Hououraigi);
             }
-            else if(hasHouou(cards))
+            else if (hasHouou(cards))
             {
                 yakus.Add(Yaku.Houou);
             }
-            else if(hasMidareChidori(cards))
+            else if (hasMidareChidori(cards))
             {
                 yakus.Add(Yaku.MidareChidori);
             }
-            else if(hasChidori(cards))
+            else if (hasChidori(cards))
             {
                 yakus.Add(Yaku.Chidori);
             }
@@ -141,14 +141,14 @@ namespace HanafudaPoker.Yakus
         {
             int[] monthCount = new int[12];
 
-            foreach(CardData card in cards) // 各月何枚ずつあるか確認
+            foreach (CardData card in cards) // 各月何枚ずつあるか確認
             {
                 monthCount[(int)card.Month - 1]++;
             }
 
-            foreach(int count in monthCount)
+            foreach (int count in monthCount)
             {
-                if(count == 2 || count == 3) // 二枚か三枚なら
+                if (count == 2 || count == 3) // 二枚か三枚なら
                 {
                     return true;
                 }
@@ -162,14 +162,14 @@ namespace HanafudaPoker.Yakus
             int[] monthCount = new int[12];
             int tsuiCount = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
                 monthCount[(int)card.Month - 1]++;
             }
 
-            foreach(int count in monthCount)
+            foreach (int count in monthCount)
             {
-                if(count == 2 || count == 3)
+                if (count == 2 || count == 3)
                 {
                     tsuiCount++;
                 }
@@ -183,14 +183,14 @@ namespace HanafudaPoker.Yakus
             int[] monthCount = new int[12];
             int tsuiCount = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
                 monthCount[(int)card.Month - 1]++;
             }
 
-            foreach(int count in monthCount)
+            foreach (int count in monthCount)
             {
-                if(count == 2 || count == 3)
+                if (count == 2 || count == 3)
                 {
                     tsuiCount++;
                 }
@@ -204,14 +204,14 @@ namespace HanafudaPoker.Yakus
             int[] monthCount = new int[12];
             int tsuiCount = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
                 monthCount[(int)card.Month - 1]++;
             }
 
-            foreach(int count in monthCount)
+            foreach (int count in monthCount)
             {
-                if(count == 2 || count == 3)
+                if (count == 2 || count == 3)
                 {
                     tsuiCount++;
                 }
@@ -224,14 +224,14 @@ namespace HanafudaPoker.Yakus
         {
             int[] monthCount = new int[12];
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
                 monthCount[(int)card.Month - 1]++;
             }
 
-            foreach(int count in monthCount)
+            foreach (int count in monthCount)
             {
-                if(count == 4)
+                if (count == 4)
                 {
                     return true;
                 }
@@ -244,9 +244,9 @@ namespace HanafudaPoker.Yakus
         {
             int count = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Feature.HasFlag(CardFeature.Akajitan))
+                if (card.Feature.HasFlag(CardFeature.Akajitan))
                 {
                     count++;
                 }
@@ -259,9 +259,9 @@ namespace HanafudaPoker.Yakus
         {
             int count = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Feature.HasFlag(CardFeature.Aotan))
+                if (card.Feature.HasFlag(CardFeature.Aotan))
                 {
                     count++;
                 }
@@ -274,9 +274,9 @@ namespace HanafudaPoker.Yakus
         {
             int count = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Tanzaku)
+                if (card.Rank == CardRank.Tanzaku)
                 {
                     count++;
                 }
@@ -288,9 +288,9 @@ namespace HanafudaPoker.Yakus
         {
             int hikariCount = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Hikari)
+                if (card.Rank == CardRank.Hikari)
                 {
                     hikariCount++;
                 }
@@ -304,13 +304,13 @@ namespace HanafudaPoker.Yakus
             int hikariCount = 0;
             bool hasRain = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Hikari)
+                if (card.Rank == CardRank.Hikari)
                 {
                     hikariCount++;
 
-                    if(card.Month == CardMonth.Yanagi)
+                    if (card.Month == CardMonth.Yanagi)
                     {
                         hasRain = true;
                     }
@@ -325,13 +325,13 @@ namespace HanafudaPoker.Yakus
             int hikariCount = 0;
             bool hasRain = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Hikari)
+                if (card.Rank == CardRank.Hikari)
                 {
                     hikariCount++;
 
-                    if(card.Month == CardMonth.Yanagi)
+                    if (card.Month == CardMonth.Yanagi)
                     {
                         hasRain = true;
                     }
@@ -345,9 +345,9 @@ namespace HanafudaPoker.Yakus
         {
             int hikariCount = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Hikari &&
+                if (card.Rank == CardRank.Hikari &&
                 card.Month != CardMonth.Yanagi)
                 {
                     hikariCount++;
@@ -362,21 +362,21 @@ namespace HanafudaPoker.Yakus
             bool hasShika = false;
             bool hasCho = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Hagi &&
+                if (card.Month == CardMonth.Hagi &&
                 card.Rank == CardRank.Tane)
                 {
                     hasIno = true;
                 }
 
-                if(card.Month == CardMonth.Momiji &&
+                if (card.Month == CardMonth.Momiji &&
                 card.Rank == CardRank.Tane)
                 {
                     hasShika = true;
                 }
 
-                if(card.Month == CardMonth.Botan &&
+                if (card.Month == CardMonth.Botan &&
                 card.Rank == CardRank.Tane)
                 {
                     hasCho = true;
@@ -392,21 +392,21 @@ namespace HanafudaPoker.Yakus
             bool hasSakura = false;
             bool hasSake = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Susuki &&
+                if (card.Month == CardMonth.Susuki &&
                 card.Rank == CardRank.Hikari)
                 {
                     hasMoon = true;
                 }
 
-                if(card.Month == CardMonth.Sakura &&
+                if (card.Month == CardMonth.Sakura &&
                 card.Rank == CardRank.Hikari)
                 {
                     hasSakura = true;
                 }
 
-                if(card.Month == CardMonth.Kiku &&
+                if (card.Month == CardMonth.Kiku &&
                 card.Rank == CardRank.Tane)
                 {
                     hasSake = true;
@@ -424,9 +424,9 @@ namespace HanafudaPoker.Yakus
         {
             int count = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Feature.HasFlag(CardFeature.Mizu))
+                if (card.Feature.HasFlag(CardFeature.Mizu))
                 {
                     count++;
                 }
@@ -441,19 +441,19 @@ namespace HanafudaPoker.Yakus
             bool hasAyame = false;
             bool hasKiri = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Fuji && card.Rank == CardRank.Kasu)
+                if (card.Month == CardMonth.Fuji && card.Rank == CardRank.Kasu)
                 {
                     hasFuji = true;
                 }
 
-                if(card.Month == CardMonth.Ayame && card.Rank == CardRank.Kasu)
+                if (card.Month == CardMonth.Ayame && card.Rank == CardRank.Kasu)
                 {
                     hasAyame = true;
                 }
 
-                if(card.Month == CardMonth.Kiri && card.Rank == CardRank.Kasu)
+                if (card.Month == CardMonth.Kiri && card.Rank == CardRank.Kasu)
                 {
                     hasKiri = true;
                 }
@@ -466,17 +466,17 @@ namespace HanafudaPoker.Yakus
         {
             bool[] kasuMonths = new bool[12];
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Rank == CardRank.Kasu)
+                if (card.Rank == CardRank.Kasu)
                 {
                     kasuMonths[(int)card.Month - 1] = true;
                 }
             }
 
-            for(int start = 0; start <= 8; start++)
+            for (int start = 0; start <= 8; start++)
             {
-                if(
+                if (
                     kasuMonths[start] &&
                     kasuMonths[start + 1] &&
                     kasuMonths[start + 2] &&
@@ -497,24 +497,24 @@ namespace HanafudaPoker.Yakus
             bool hasMomiji = false;
             bool hasKiri = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Matsu)
+                if (card.Month == CardMonth.Matsu)
                 {
                     hasMatsu = true;
                 }
 
-                if(card.Month == CardMonth.Susuki)
+                if (card.Month == CardMonth.Susuki)
                 {
                     hasSusuki = true;
                 }
 
-                if(card.Month == CardMonth.Momiji)
+                if (card.Month == CardMonth.Momiji)
                 {
                     hasMomiji = true;
                 }
 
-                if(card.Month == CardMonth.Kiri)
+                if (card.Month == CardMonth.Kiri)
                 {
                     hasKiri = true;
                 }
@@ -532,9 +532,9 @@ namespace HanafudaPoker.Yakus
         {
             bool hasHououBool = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Kiri &&
+                if (card.Month == CardMonth.Kiri &&
                 card.Rank == CardRank.Hikari)
                 {
                     hasHououBool = true;
@@ -549,9 +549,9 @@ namespace HanafudaPoker.Yakus
         {
             bool hasHououBool = false;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Month == CardMonth.Kiri &&
+                if (card.Month == CardMonth.Kiri &&
                 card.Rank == CardRank.Hikari)
                 {
                     hasHououBool = true;
@@ -573,9 +573,9 @@ namespace HanafudaPoker.Yakus
         {
             int count = 0;
 
-            foreach(CardData card in cards)
+            foreach (CardData card in cards)
             {
-                if(card.Feature.HasFlag(CardFeature.Tori))
+                if (card.Feature.HasFlag(CardFeature.Tori))
                 {
                     count++;
                 }
