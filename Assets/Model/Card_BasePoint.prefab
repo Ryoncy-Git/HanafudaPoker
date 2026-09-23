@@ -4923,7 +4923,7 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.0448e-41, y: 0, z: 0, w: 1e-45}
+  m_BoundingSphereOverride: {x: 0, y: 3.67701e-40, z: 9.275538e-39, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -4965,6 +4965,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9022612186919079560}
   - component: {fileID: 1796665200372913464}
+  - component: {fileID: 63938499485460143}
   m_Layer: 0
   m_Name: Card_BasePoint
   m_TagString: Untagged
@@ -5003,6 +5004,28 @@ MonoBehaviour:
   frontRenderer: {fileID: 8077560571746257896}
   cardVisual: {fileID: 1799405826340485282}
   hikariParticle: {fileID: 3791143366367160296}
+  isChanging: 0
+--- !u!65 &63938499485460143
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6290020375255748160}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.5, z: 0.01}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6628604648951949649
 GameObject:
   m_ObjectHideFlags: 0

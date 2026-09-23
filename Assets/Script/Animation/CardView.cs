@@ -31,27 +31,95 @@ namespace HanafudaPoker.Animation
         // カード変更がされたか
         public bool isChanging;
 
+        // この札の所有権は誰か
+        public CardOwner Owner { get; set; }
+        public bool isSelected { get; private set; }
+
+        // 選択された札は、少し上げることで選択を表現する
+        // 元の位置を保持しておく
+        private Vector3 defaultLocalPosition;
+        private Coroutine selectCoroutine;
+        public int HandIndex { get; set; }  // 札選択時に使用
+
         private void Awake()
         {
+            defaultLocalPosition = cardVisual.localPosition;
             hikariParticle.Stop();
         }
 
-        public void SetCard(CardData card)
+        // クリックで、選択/解除
+        public void ToggleSelect()
         {
-            if (frontRenderer == null)
+            isSelected = !isSelected;
+
+            Debug.Log($"Card {CardID} Selected = {isSelected}");
+
+            if (selectCoroutine != null)
+                StopCoroutine(selectCoroutine);
+
+            Vector3 targetPos = isSelected
+                ? defaultLocalPosition + Vector3.up * 0.1f
+                : defaultLocalPosition;
+
+            selectCoroutine = StartCoroutine(SelectedCardAnimation(targetPos));
+        }
+
+        // アニメーション終了後に解除
+        public void DeSelect()
+        {
+            if (!isSelected)
                 return;
 
-            cardID = card.CardID;
-            Debug.Log($"SetCard : {card.CardID}");
+            isSelected = false;
 
-            frontRenderer.material =
-                MaterialManager.Instance.GetMaterial(card);
+            if (selectCoroutine != null)
+                StopCoroutine(selectCoroutine);
+
+            selectCoroutine =
+                StartCoroutine(
+                    SelectedCardAnimation(defaultLocalPosition));
+        }
+
+        // 札を交換する
+        public IEnumerator ChangeCardAnimation(CardData newCard)
+        {
+            yield return FlipCard();
+
+            SetCard(newCard);
+
+            yield return FlipCard();
+
+            DeSelect();
         }
 
         /*-- 札自体のTransform操作 --*/
 
+        // 札が選択されたときの処理
+        private IEnumerator SelectedCardAnimation(Vector3 endPos)
+        {
+            Vector3 startPos = cardVisual.localPosition;
+
+            float elapsed = 0f;
+            float duration = 0.2f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+
+                cardVisual.localPosition =
+                    Vector3.Lerp(
+                        startPos,
+                        endPos,
+                        elapsed / duration);
+
+                yield return null;
+            }
+
+            cardVisual.localPosition = endPos;
+        }
+
         // カードを反転 cardVisualを動かす
-        public IEnumerator FlipCard()
+        private IEnumerator FlipCard()
         {
             isFaceUp = !isFaceUp;
 
@@ -77,7 +145,7 @@ namespace HanafudaPoker.Animation
         }
 
         // スケール
-        public IEnumerator ScaleAnimation(float scale)
+        private IEnumerator ScaleAnimation(float scale)
         {
             Vector3 startScale = cardVisual.localScale;
             Vector3 endScale = Vector3.one * scale;
@@ -101,7 +169,7 @@ namespace HanafudaPoker.Animation
         /*-- 札全体の処理 --*/
 
         // 山札から指定の場所に移動する
-        public IEnumerator MoveAnimation(Transform card)
+        private IEnumerator MoveAnimation(Transform card)
         {
             //Debug.Log($"Target Rot = {card.rotation.eulerAngles}");
 
@@ -124,7 +192,7 @@ namespace HanafudaPoker.Animation
         }
 
         // 回転
-        public IEnumerator RotateAnimation(Transform card)
+        private IEnumerator RotateAnimation(Transform card)
         {
             Quaternion startRotate = transform.rotation;
             Quaternion endRortate = card.rotation;
@@ -152,24 +220,34 @@ namespace HanafudaPoker.Animation
             StartCoroutine(ScaleAnimation(scale));
 
             if (flip) yield return FlipCard();
-            
+
         }
 
         /*-- 札に付与されるエフェクト操作 --*/
         public void PlayHiakariEffect()
         {
+            Debug.Log("光札のエフェクトを再生");
             hikariParticle.Play();
         }
 
-
-        // 札を交換する
-        public IEnumerator ChangeCardAnimation(CardData newCard)
+        public void SetCard(CardData card)
         {
-            yield return FlipCard();
+            if (frontRenderer == null)
+                return;
 
-            SetCard(newCard);
+            cardID = card.CardID;
+            Debug.Log($"SetCard : {card.CardID}");
 
-            yield return FlipCard();
+            frontRenderer.material =
+                MaterialManager.Instance.GetMaterial(card);
         }
+
+    }
+
+    public enum CardOwner
+    {
+        PlayerHand,
+        Field,
+        OtherPlayer
     }
 }

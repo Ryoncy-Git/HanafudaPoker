@@ -5,6 +5,7 @@ using System.Collections.Generic;
 // using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
 using HanafudaPoker.Network;
+using HanafudaPoker.Animation;
 
 namespace HanafudaPoker.Games
 {
@@ -12,6 +13,7 @@ namespace HanafudaPoker.Games
     {
         [SerializeField] private UIDebug uiDebug;
         [SerializeField] private GameObject uiDebugPanel;
+        [SerializeField] private CardSelector cardSelector;
 
         private bool isShowDebugUI = false;
 
@@ -29,6 +31,12 @@ namespace HanafudaPoker.Games
                 Debug.Log("Change Ready To " + !state);
             }
 
+            if (Input.GetMouseButtonDown(0))
+            {
+                cardSelector.SelectCardFromPlayer();
+            }
+
+            /*
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 int mySeatID = NetworkManager.GetMySeatID();
@@ -58,6 +66,7 @@ namespace HanafudaPoker.Games
                 state[2] = !state[2];
                 NetworkManager.SetWillChangeCards(state);
             }
+            */
 
             if (Input.GetKeyDown(KeyCode.F3))
             {

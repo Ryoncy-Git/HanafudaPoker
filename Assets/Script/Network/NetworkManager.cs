@@ -171,8 +171,6 @@ namespace HanafudaPoker.Network
         {
             return (PhotonNetwork.CurrentRoom.CustomProperties[Key_Field] is int[] value) ? value : new int[] { };
         }
-
-
         public static bool GetIsReady(int seatID = -1)
         {
             Player player;

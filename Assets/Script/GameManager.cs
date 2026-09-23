@@ -140,6 +140,8 @@ namespace HanafudaPoker.Games
                             NetworkManager.SetAllPlayersReady(false);
                             NetworkManager.SetAllPlayersWillChangeCards(false);
 
+                            NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+
                             uiDebug.ShowWillChange();
                             NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
                         }
@@ -156,6 +158,8 @@ namespace HanafudaPoker.Games
                             CardMovementManager.ChangeHandCards();
                             NetworkManager.SetAllPlayersReady(false);
                             NetworkManager.SetAllPlayersWillChangeCards(false);
+
+                            NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
                             uiDebug.ShowWillChange();
                             NetworkManager.SetTurnState((int)TurnState.ShowResult);
@@ -175,6 +179,8 @@ namespace HanafudaPoker.Games
                             int round = NetworkManager.GetRound();
                             round++;
                             NetworkManager.SetRound(round);
+
+                            NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
                             if (round <= GameConst.ROUND_NUMBER)
                             {

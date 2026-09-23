@@ -49,6 +49,9 @@ namespace HanafudaPoker.Animation
         // 手札更新を検知
         private int[] previousHandIDs;
 
+        // フィールドに表示する札を出すタイミングを考える
+        private TurnState previousState;
+
         private void Awake()
         {
             Debug.Log("VisualManager 初期化");
@@ -63,7 +66,49 @@ namespace HanafudaPoker.Animation
             if (previousHandIDs == null)
                 return;
 
+            CheckFieldReveal();
             CheckHandChanged();
+        }
+
+        private void CheckFieldReveal()
+        {
+            TurnState currentState =
+                (TurnState)NetworkManager.GetTurnState();
+
+            if (currentState == previousState)
+                return;
+
+            previousState = currentState;
+
+            switch (currentState)
+            {
+                case TurnState.ShowField:
+                    ShowFieldCard(0);
+                    ShowFieldCard(1);
+                    ShowFieldCard(2);
+                    break;
+
+                case TurnState.WaitForSecondChange:
+                    ShowFieldCard(3);
+                    break;
+
+                case TurnState.ShowResult:
+                    ShowFieldCard(4);
+                    break;
+            }
+        }
+
+
+        private void ShowFieldCard(int index)
+        {
+            cardViewField[index].transform.position = deckTransform.position;
+            cardViewField[index].transform.rotation = deckTransform.rotation;
+
+            StartCoroutine(
+                cardViewField[index].PlayAnimation(
+                    fieldCardPositions[index],
+                    scaleOfCommunityCards, true)
+            );
         }
 
         // どの札が入れ替わったか
@@ -76,8 +121,6 @@ namespace HanafudaPoker.Animation
 
             for (int i = 0; i < hands.Count; i++)
             {
-                Debug.Log(
-                    $"i={i} prev={previousHandIDs[i]} now={hands[i].CardID}");
                 if (!cardViewPlayer[i].isChanging && previousHandIDs[i] != hands[i].CardID)
                 {
                     Debug.Log($"Card Changed {i}");
@@ -104,18 +147,13 @@ namespace HanafudaPoker.Animation
         public void CreateFieldCards()
         {
             var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
-
+            
             for (int i = 0; i < field.Count; i++)
             {
                 CardView view = cardFactory.CreateCard(field[i]);
+                view.Owner = CardOwner.Field;
+                // あらかじめ決められた5枚
                 cardViewField.Add(view);
-
-                view.transform.position = deckTransform.position;
-                view.transform.rotation = deckTransform.rotation;
-
-                StartCoroutine(
-                    view.PlayAnimation(fieldCardPositions[i], scaleOfCommunityCards, true)
-                );
             }
         }
 
@@ -134,6 +172,9 @@ namespace HanafudaPoker.Animation
                 view.transform.position = deckTransform.position;
                 view.transform.rotation = deckTransform.rotation;
 
+                view.Owner = CardOwner.PlayerHand;
+                view.HandIndex = i;
+
                 StartCoroutine(
                     view.PlayAnimation(playerCardPositions[i], scaleOfHoldCards, true));
             }
@@ -144,6 +185,11 @@ namespace HanafudaPoker.Animation
             Debug.Log("CreateOtherPlayerCards");
 
             int otherPlayerCount = GameConst.PLAYER_NUMBER - 1;
+
+            // Debug 仮に全員そろっている場合
+            otherPlayerCount = 3;
+
+
             // 他の人の札は例外が無ければ3枚、こいこいで2枚になる場合もある
             for (int i = 0; i < otherPlayerCount * GameConst.HAND_CARD_NUMBER; i++)
             {
@@ -154,6 +200,8 @@ namespace HanafudaPoker.Animation
 
                 view.transform.position = deckTransform.position;
                 view.transform.rotation = deckTransform.rotation;
+
+                view.Owner = CardOwner.OtherPlayer;
 
                 StartCoroutine(
                     view.PlayAnimation(playerOtherCardPositions[i], scaleOfHoldCards, true));
@@ -166,16 +214,19 @@ namespace HanafudaPoker.Animation
 
             foreach (var card in cardViewField)
             {
+                card.StopAllCoroutines();
                 Destroy(card.gameObject);
             }
             
             foreach (var card in cardViewPlayer)
             {
+                card.StopAllCoroutines();
                 Destroy(card.gameObject);
             }
 
             foreach (var card in cardViewOtherPlayer)
             {
+                card.StopAllCoroutines();
                 Destroy(card.gameObject);
             }
 

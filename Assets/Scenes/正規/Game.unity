@@ -719,7 +719,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e4a0f4bc9877d37428d081f119387b42, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1290,7 +1290,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &322765244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5118,6 +5118,7 @@ GameObject:
   - component: {fileID: 1182538491}
   - component: {fileID: 1182538494}
   - component: {fileID: 1182538495}
+  - component: {fileID: 1182538496}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -5194,8 +5195,8 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 56d6f0f8fd9c5a349a62b0a4f0bf2e0d, type: 2}
   - {fileID: 2100000, guid: cfab43eeef2cb3b429e14e35c27ff217, type: 2}
   - {fileID: 2100000, guid: 6ce3b9a09b5de5d49890082c801e626b, type: 2}
-  - {fileID: 2100000, guid: 48056146d736e9942ba842f505963dc4, type: 2}
   - {fileID: 2100000, guid: 2bc4858c82a40874aa2f2b3e4864434e, type: 2}
+  - {fileID: 2100000, guid: 48056146d736e9942ba842f505963dc4, type: 2}
   - {fileID: 2100000, guid: fafe138430fcbb94ebfb8ee68148780d, type: 2}
   - {fileID: 2100000, guid: 14d5dce0f30c2e34eae92a5308803957, type: 2}
   - {fileID: 2100000, guid: a99843a02a20da846aac3d72d6c9a548, type: 2}
@@ -5281,6 +5282,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiDebug: {fileID: 1182538491}
   uiDebugPanel: {fileID: 1179438394}
+  cardSelector: {fileID: 1182538496}
 --- !u!114 &1182538493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5348,6 +5350,18 @@ MonoBehaviour:
   - {fileID: 1107632084}
   - {fileID: 989010487}
   cardFactory: {fileID: 1182538494}
+--- !u!114 &1182538496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1182538483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e99e36b8806ebda45ab5e1ce65486a26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1237279395
 GameObject:
   m_ObjectHideFlags: 0
@@ -5562,7 +5576,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86ce9f41338572f40b4b7c8b7f6bd942, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -8049,7 +8063,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 76f7eae3704340542ab42d842bc92fe8, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2461786139055236258, guid: 76f7eae3704340542ab42d842bc92fe8, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
