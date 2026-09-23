@@ -4,7 +4,7 @@ using HanafudaPoker.Network;
 
 namespace HanafudaPoker.Animation
 {
-    // ŽD‚ð‘I‚Ô
+    // ï¿½Dï¿½ï¿½Iï¿½ï¿½
     public class CardSelector : MonoBehaviour
     {
         public void SelectCardFromPlayer()

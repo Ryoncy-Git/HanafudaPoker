@@ -22,33 +22,38 @@ namespace HanafudaPoker.UIs
         [SerializeField] private GameObject[] willChangeMarker_2; // [SeatID][index]
         [SerializeField] private GameObject[] willChangeMarker_3; // [SeatID][index]
                                                                   // private GameManager gameManager;
+                                                                  
+        [SerializeField] private GameObject KoikoiUI;
+        [SerializeField] private GameObject KoikoiUI_selectCard;
+        [SerializeField] private GameObject KoikoiUI_Button;
+
 
         private static readonly Dictionary<CardMonth, string> dictMonth = new()
         {
-            { CardMonth.Matsu, "¼" },
-            { CardMonth.Ume, "”~" },
-            { CardMonth.Sakura, "÷" },
-            { CardMonth.Fuji, "“¡" },
-            { CardMonth.Ayame, "ÒŠ—" },
-            { CardMonth.Botan, "‰²’O" },
-            { CardMonth.Hagi, "”‹" },
-            { CardMonth.Susuki, "äŠ" },
-            { CardMonth.Kiku, "‹e" },
-            { CardMonth.Momiji, "g—t" },
-            { CardMonth.Yanagi, "–ö" },
-            { CardMonth.Kiri, "‹Ë" }
+            { CardMonth.Matsu, "ï¿½ï¿½" },
+            { CardMonth.Ume, "ï¿½~" },
+            { CardMonth.Sakura, "ï¿½ï¿½" },
+            { CardMonth.Fuji, "ï¿½ï¿½" },
+            { CardMonth.Ayame, "ï¿½ÒŠï¿½" },
+            { CardMonth.Botan, "ï¿½ï¿½ï¿½O" },
+            { CardMonth.Hagi, "ï¿½ï¿½" },
+            { CardMonth.Susuki, "ï¿½" },
+            { CardMonth.Kiku, "ï¿½e" },
+            { CardMonth.Momiji, "ï¿½gï¿½t" },
+            { CardMonth.Yanagi, "ï¿½ï¿½" },
+            { CardMonth.Kiri, "ï¿½ï¿½" }
         };
 
         private static readonly Dictionary<CardRank, string> dictRank = new()
         {
-            { CardRank.Hikari, "Œõ" },
-            { CardRank.Tane, "í" },
-            { CardRank.Tanzaku, "’Zû" },
-            { CardRank.Kasu, "ƒJƒX" }
+            { CardRank.Hikari, "ï¿½ï¿½" },
+            { CardRank.Tane, "ï¿½ï¿½" },
+            { CardRank.Tanzaku, "ï¿½Zï¿½ï¿½" },
+            { CardRank.Kasu, "ï¿½Jï¿½X" }
         };
 
 
-        // ---------------ó‚¯æ‚èŠÖ”‚½‚¿----------------
+        // ---------------ï¿½ó‚¯ï¿½ï¿½Öï¿½ï¿½ï¿½ï¿½ï¿½----------------
 
         public void SetTextFieldCards()
         {
@@ -59,14 +64,14 @@ namespace HanafudaPoker.UIs
 
             if (currentTurnState == TurnState.WaitForFirstChange || currentTurnState == TurnState.ShowField)
             {
-                for (int i = 0; i < 3; i++) // ˆê‰ñ–Ú‚ÌèD•ÏX‚Ì‚ÍO–‡‚¾‚¯Œ©‚¦‚é‚æ‚¤‚É
+                for (int i = 0; i < 3; i++) // ï¿½ï¿½ï¿½Ú‚Ìï¿½Dï¿½ÏXï¿½Ìï¿½ï¿½ÍOï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½ï¿½
                 {
                     str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
                 }
             }
             else if (currentTurnState == TurnState.WaitForSecondChange)
             {
-                for (int i = 0; i < 4; i++) // “ñ‰ñ–Ú‚ÌèD•ÏX‚Ì‚Í‚S–‡‚¾‚¯Œ©‚¦‚é‚æ‚¤‚É
+                for (int i = 0; i < 4; i++) // ï¿½ï¿½ï¿½Ú‚Ìï¿½Dï¿½ÏXï¿½Ìï¿½ï¿½Í‚Sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½ï¿½
                 {
                     str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
                 }
@@ -107,30 +112,30 @@ namespace HanafudaPoker.UIs
             switch (state)
             {
                 case TurnState.WaitForInitialize:
-                    stateText.text = "‘Sˆõ‚Ì€”õ‚ğ‘Ò‚Á‚Ä‚¢‚Ü‚·";
+                    stateText.text = "ï¿½Sï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½Ò‚ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½";
                     break;
 
                 case TurnState.BeforeGame:
                 case TurnState.CreateDeck:
                 case TurnState.DealCards:
                 case TurnState.ShowField:
-                    stateText.text = "RD‚ğ€”õ’†";
+                    stateText.text = "ï¿½Rï¿½Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
                     break;
 
                 case TurnState.WaitForFirstChange:
-                    stateText.text = "•Ï‚¦‚éƒJ[ƒh‚ğ‘I‚ñ‚Å‚­‚¾‚³‚¢i1‰ñ–Új";
+                    stateText.text = "ï¿½Ï‚ï¿½ï¿½ï¿½Jï¿½[ï¿½hï¿½ï¿½Iï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½i1ï¿½ï¿½Új";
                     break;
 
                 case TurnState.WaitForSecondChange:
-                    stateText.text = "•Ï‚¦‚éƒJ[ƒh‚ğ‘I‚ñ‚Å‚­‚¾‚³‚¢i2‰ñ–Új";
+                    stateText.text = "ï¿½Ï‚ï¿½ï¿½ï¿½Jï¿½[ï¿½hï¿½ï¿½Iï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½i2ï¿½ï¿½Új";
                     break;
 
                 case TurnState.ShowResult:
-                    stateText.text = "Œ‹‰Ê";
+                    stateText.text = "ï¿½ï¿½ï¿½ï¿½";
                     break;
 
                 case TurnState.WaitForNextRound:
-                    stateText.text = "Ÿ‚Ìƒ‰ƒEƒ“ƒh‚Öi€”õŠ®—¹‚µ‚½‚çi‚İ‚Ü‚·j";
+                    stateText.text = "ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Eï¿½ï¿½ï¿½hï¿½Öiï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½İ‚Ü‚ï¿½ï¿½j";
                     break;
 
                 default:
@@ -154,70 +159,70 @@ namespace HanafudaPoker.UIs
 
                 string tex = "";
                 if (yakus[seatID].Contains(Yaku.Tsui))
-                    tex += "‘Î\n";
+                    tex += "ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Nitsui))
-                    tex += "“ñ‘Î\n";
+                    tex += "ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Santsui))
-                    tex += "O‘Î\n";
+                    tex += "ï¿½Oï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Yontsui))
-                    tex += "l‘Î\n";
+                    tex += "ï¿½lï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Mangetsu))
-                    tex += "–Œ\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Akatan))
-                    tex += "Ôƒ^ƒ“\n";
+                    tex += "ï¿½Ôƒ^ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Aotan))
-                    tex += "Âƒ^ƒ“\n";
+                    tex += "ï¿½Âƒ^ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Tan))
-                    tex += "ƒ^ƒ“\n";
+                    tex += "ï¿½^ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Gokou))
-                    tex += "ŒÜŒõ\n";
+                    tex += "ï¿½ÜŒï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Yonkou))
-                    tex += "lŒõ\n";
+                    tex += "ï¿½lï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Ameshikou))
-                    tex += "‰JlŒõ\n";
+                    tex += "ï¿½Jï¿½lï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Sankou))
-                    tex += "OŒõ\n";
+                    tex += "ï¿½Oï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Inoshikacho))
-                    tex += "’–­’±\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Sakeutage))
-                    tex += "ğ‰ƒ\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Mizu))
-                    tex += "…‹¾\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Murasaki))
-                    tex += "‡‰‘‰Ô\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Hanaikada))
-                    tex += "‰Ô”³\n";
+                    tex += "ï¿½Ô”ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Adabana))
-                    tex += "“k‰Ô\n";
+                    tex += "ï¿½kï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Chidori))
-                    tex += "ç’¹\n";
+                    tex += "ï¿½ç’¹\n";
 
                 if (yakus[seatID].Contains(Yaku.MidareChidori))
-                    tex += "—‚êç’¹\n";
+                    tex += "ï¿½ï¿½ï¿½ï¿½ç’¹\n";
 
                 if (yakus[seatID].Contains(Yaku.Houou))
-                    tex += "–P™€\n";
+                    tex += "ï¿½Pï¿½ï¿½\n";
 
                 if (yakus[seatID].Contains(Yaku.Hououraigi))
-                    tex += "–P™€—ˆ‹V\n";
+                    tex += "ï¿½Pï¿½ï¿½ï¿½ï¿½ï¿½V\n";
 
                 yakuText[seatID].text = tex;
             }
@@ -225,7 +230,7 @@ namespace HanafudaPoker.UIs
 
         public void ShowWillChange()
         {
-            // À‘•‚Ì‚ÍA‚±‚±‚ğ©•ª‚ÌPlayer ID‚Å§Œä?
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ÍAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Player IDï¿½Åï¿½ï¿½ï¿½?
             // PlayerData player = gameManager.Players[0];
             bool[] willchange = NetworkManager.GetWillChangeCards();
 
@@ -258,8 +263,30 @@ namespace HanafudaPoker.UIs
             }
         }
 
+        public void SetActiveKoikoiUI(bool state)
+        {
+            if(state == true)
+            {
+                KoikoiUI.SetActive(true);
+            }
+            else
+            {
+                KoikoiUI_Button.SetActive(true);
+                KoikoiUI_selectCard.SetActive(false);
+                KoikoiUI.SetActive(false);
+                
+            }
+        }
 
-        // ---------------‘—‚èŠÖ”‚½‚¿----------------
+        public void ShowKoikoiSelectCard()
+        {
+            KoikoiUI.SetActive(true);
+            KoikoiUI_Button.SetActive(false);
+            KoikoiUI_selectCard.SetActive(true);
+        }
+
+
+        // ---------------ï¿½ï¿½ï¿½ï¿½Öï¿½ï¿½ï¿½ï¿½ï¿½----------------
         // public void SelectCard(int n)
         // {
         //     // gameManager.Players[0].WillChangeCards[n] = ! gameManager.Players[0].WillChangeCards[n];

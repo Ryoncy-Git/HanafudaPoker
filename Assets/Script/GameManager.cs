@@ -16,6 +16,8 @@ namespace HanafudaPoker.Games
         // その他
         private TurnState CurrentState; // 現在がどんなターンなのかを管理する
         private TurnState PreviousState;
+        private int MySeatID = -1;
+        public int koikoiIndex = -1;
 
         // インスタンス
         // [SerializeField]private UIManager uiManager;
@@ -60,6 +62,7 @@ namespace HanafudaPoker.Games
                     // this.ResetGames();
                     NetworkManager.SetIsReady(false);
                     NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+                    NetworkManager.SetIsKoikoi(-1);
 
                     Debug.Log("End Before Game");
 
@@ -111,7 +114,40 @@ namespace HanafudaPoker.Games
                     // 今はデバッグで無条件で次のターンへ
                     Debug.Log("End Show Yaku");
 
+                    // 勝者を判定する
+                    int winnerID = 0; // デバッグ用にいったん0で
+                    //
+
+                    NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
+
+
                     // こいこいはこのタイミングで
+                    // NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
+                    NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
+
+                    break;
+                
+                case TurnState.ShowFinalResult:
+                    // 処理自体はShowResultとほぼ同じ
+                    playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+
+                    for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+                    {
+                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+                    }
+
+                    uiDebug.ShowYaku(playerYaku);
+
+                    Debug.Log("End Show Final Yaku");
+
+                    // もういちど勝者を判定する
+                    winnerID = 0;
+                    //
+
+                    NetworkManager.SetWinnerIDAfterKoikoi(winnerID);
+
                     NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
 
                     break;
@@ -204,6 +240,39 @@ namespace HanafudaPoker.Games
                         }
                     }
                     break;
+
+                case TurnState.WaitForKoikoi:
+                    int winnerID = NetworkManager.GetWinnerIDBeforeKoikoi();
+
+                    // 自分が勝者ならこいこいの選択権がある
+                    if(/*NetworkManager.GetMySeatID() == winnerID*/ true)
+                    {
+                        uiDebug.SetActiveKoikoiUI(true);
+
+                        //プレーヤーの入力町
+
+                        if(NetworkManager.GetIsKoikoi() == -1) // 未選択
+                            return;
+
+                        
+                        if(NetworkManager.GetIsKoikoi() == 1 && koikoiIndex != -1 /*何かカードを選択しているなら*/)
+                        {
+                            // こいこいするなら
+                            Debug.Log("こいこいを選択");
+
+                            CardMovementManager.AddToFieldAsKoikoi(koikoiIndex);
+                            NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                            uiDebug.SetActiveKoikoiUI(false);
+                        }
+                        else //(NetworkManager.GetIskoikoi() == 0)
+                        {
+                            Debug.Log("こいこいしないを選択");
+                            NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
+                            uiDebug.SetActiveKoikoiUI(false);
+                        }
+                    }
+                    break;
+                    
             }
         }
 
@@ -214,6 +283,13 @@ namespace HanafudaPoker.Games
             GameConst.PLAYER_NUMBER = NetworkManager.GetPlayerNumber();
             Debug.Log("Initialize : player number = " + GameConst.PLAYER_NUMBER);
             NetworkManager.SetUpSeatID();
+
+
+            // 自分のseatIDを各クライアントが保存しておく
+            // do
+            // {
+            //     MySeatID = NetworkManager.GetMySeatID();
+            // }while(MySeatID == -1);
 
             // 空データを入れる作業はここでは　要らないかも
             // var Deck = new List<CardData>();
@@ -247,6 +323,8 @@ namespace HanafudaPoker.Games
         WaitForFirstChange,
         WaitForSecondChange,
         ShowResult,
+        WaitForKoikoi,
+        ShowFinalResult,
         WaitForNextRound,
         WaitForInitialize
     }

@@ -40,7 +40,7 @@ public class RPCManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_SetAllPlayersReady(bool state)
     {
-        // ŠeŒÂl‚ªóM‚µ‚½‚Ì‚¿A©•ª‚Ì•Ï”‚ğ•ÏX‚·‚é
+        // ï¿½eï¿½Âlï¿½ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ì•Ïï¿½ï¿½ï¿½ÏXï¿½ï¿½ï¿½ï¿½
         NetworkManager.SetIsReady(state);
     }
 

@@ -82,5 +82,24 @@ namespace HanafudaPoker.Games
                 }
             }
         }
+
+        public void PressedButtonKoikoi(bool state)
+        {
+            if(state == true)
+            {
+                NetworkManager.SetIsKoikoi(1);
+                uiDebug.ShowKoikoiSelectCard();
+            }
+            else
+            {
+                NetworkManager.SetIsKoikoi(0);
+                uiDebug.SetActiveKoikoiUI(false);
+            }
+        }
+
+        public void PressedButtonCardSelectNumber(int num)
+        {
+            this.gameObject.GetComponent<GameManager>().koikoiIndex = num;
+        }
     }
 }

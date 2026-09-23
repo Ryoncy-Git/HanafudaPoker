@@ -239,5 +239,44 @@ namespace HanafudaPoker.Games
 
             Debug.Log("Deal done");
         }
+
+
+        public static void AddToFieldAsKoikoi(int cardIndex)
+        {
+            // この関数はこいこいしたプレイやーだけが呼び出す
+            var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+            var deck = CardDataBase.GetCardDataListByID(NetworkManager.GetDeck());
+            var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands());
+            
+            if(cardIndex == -1 || field == null || deck == null || hands == null)
+            {
+                Debug.LogWarning("こいこい用に場にカードを追加する処理に失敗");
+                return;
+            }
+            if(hands.Count != GameConst.HAND_CARD_NUMBER)
+                return;
+
+
+            // デックから二枚を場に追加
+            for(int i = 0; i < 2; i++)
+            {
+                var dealtCard = deck[deck.Count - 1];
+                field.Add(dealtCard);
+                deck.Remove(dealtCard);
+            }
+
+            // NetworkManager.SetField(CardDataBase.GetIDsByList(field));
+
+
+            // こいこいした本人の手札更新
+            var card = hands[cardIndex];
+            hands.Remove(card);
+            NetworkManager.SetHands(CardDataBase.GetIDsByList(hands));
+
+            // 捨てたカードを場に追加
+            field.Add(card);
+
+            NetworkManager.SetField(CardDataBase.GetIDsByList(field));
+        }
     }
 }

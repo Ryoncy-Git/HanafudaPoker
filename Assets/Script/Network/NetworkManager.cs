@@ -10,7 +10,7 @@ namespace HanafudaPoker.Network
     int Round
     int[] Deck
     int[] Field
-    (int[] DiscardPile) // ‘½•ª—v‚ç‚È‚¢
+    (int[] DiscardPile) // ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ï¿½È‚ï¿½
     */
 
     /* Player Properties
@@ -29,6 +29,9 @@ namespace HanafudaPoker.Network
         private const string Key_Deck = "Deck";
         private const string Key_Field = "Field";
         private const string Key_DiscardPile = "Pile";
+        private const string Key_WinnerIDBeforeKoikoi = "Winner1";
+        private const string Key_WinnerIDAfterKoikoi = "Winner2";
+        private const string Key_IsKoikoi = "Iskoikoi";
 
 
         // PP (Player Properties)
@@ -115,23 +118,42 @@ namespace HanafudaPoker.Network
             props[Key_Field] = field;
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         }
-        // ‘½•ªg‚í‚È‚¢
+        // ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½È‚ï¿½
         // public static void AddDiscardPile(int DiscardPile)
         // {
         //     props[Key_Round] = state;
         //     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         // }
 
+        public static void SetWinnerIDBeforeKoikoi(int seatID)
+        {
+            if (!PhotonNetwork.IsMasterClient)
+                return;
+
+            Hashtable props = new Hashtable();
+            props[Key_WinnerIDBeforeKoikoi] = seatID;
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        }
+        public static void SetWinnerIDAfterKoikoi(int seatID)
+        {
+            if (!PhotonNetwork.IsMasterClient)
+                return;
+
+            Hashtable props = new Hashtable();
+            props[Key_WinnerIDAfterKoikoi] = seatID;
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        }
+
         public static void SetIsReady(bool state)
         {
             Hashtable props = new Hashtable();
             props[Key_IsReady] = state;
-            // ©•ª‚ÌPP‚ğ•ÏX
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PPï¿½ï¿½ÏX
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
         public static void SetHands(int[] hands, int seatID = -1)
         {
-            // ‘æ“ñˆø”‚ª‚µ‚Ä‚¢‚È‚¯‚ê‚Î©•ª‚ÌƒJ[ƒh‚ğAw’è‚ª‚ ‚ê‚Îw’è‚µ‚½l‚ÌèD‚ğ•ÏX
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½Îï¿½ï¿½ï¿½ï¿½ÌƒJï¿½[ï¿½hï¿½ï¿½ï¿½Aï¿½wï¿½è‚ªï¿½ï¿½ï¿½ï¿½Îwï¿½è‚µï¿½ï¿½ï¿½lï¿½Ìï¿½Dï¿½ï¿½ÏX
             Hashtable props = new Hashtable();
             props[Key_Hands] = hands;
 
@@ -153,10 +175,17 @@ namespace HanafudaPoker.Network
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
+        public static void SetIsKoikoi(int state)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_IsKoikoi] = state;
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        } 
+
         // getter
         public static int GetTurnState()
         {
-            // Room Properties‚É–Ú“–‚Ä‚Ì‚à‚Ì‚ª‚ ‚ê‚Î‚»‚ê‚ğA‚È‚¯‚ê‚Î0‚ğ•Ô‚·
+            // Room Propertiesï¿½É–Ú“ï¿½ï¿½Ä‚Ì‚ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½Î‚ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½È‚ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ô‚ï¿½
             return (PhotonNetwork.CurrentRoom.CustomProperties[Key_TurnState] is int value) ? value : 0;
         }
         public static int GetRound()
@@ -175,7 +204,7 @@ namespace HanafudaPoker.Network
         {
             Player player;
 
-            if (seatID == -1) // ˆø”ƒiƒV‚È‚ç©•ª©g‚Ì
+            if (seatID == -1) // ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Vï¿½È‚ç©ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½
             {
                 player = PhotonNetwork.LocalPlayer;
             }
@@ -187,7 +216,7 @@ namespace HanafudaPoker.Network
             if (player == null)
                 return false;
 
-            // ‚»‚ÌID‚ÌPlayer‚Ì€”õó‹µ‚ğ•Ô‚·
+            // ï¿½ï¿½ï¿½ï¿½IDï¿½ï¿½Playerï¿½Ìï¿½ï¿½ï¿½ï¿½ó‹µ‚ï¿½Ô‚ï¿½
             return (player.CustomProperties[Key_IsReady] is bool value) ? value : false;
         }
 
@@ -204,7 +233,7 @@ namespace HanafudaPoker.Network
         {
             Player player;
 
-            if (seatID == -1) // ˆø”ƒiƒV‚È‚ç©•ª©g‚Ì
+            if (seatID == -1) // ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Vï¿½È‚ç©ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½
             {
                 player = PhotonNetwork.LocalPlayer;
             }
@@ -222,7 +251,7 @@ namespace HanafudaPoker.Network
         {
             Player player;
 
-            if (seatID == -1) // ˆø”ƒiƒV‚È‚ç©•ª©g‚Ì
+            if (seatID == -1) // ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Vï¿½È‚ç©ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½
             {
                 player = PhotonNetwork.LocalPlayer;
             }
@@ -238,6 +267,21 @@ namespace HanafudaPoker.Network
                 return new int[] { };
             }
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : new int[] { };
+        }
+
+        public static int GetWinnerIDBeforeKoikoi()
+        {
+            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_WinnerIDBeforeKoikoi] is int value) ? value : -1;
+        }
+
+        public static int GetWinnerIDAfterKoikoi()
+        {
+            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_WinnerIDAfterKoikoi] is int value) ? value : -1;
+        }
+
+        public static int GetIsKoikoi()
+        {
+            return (PhotonNetwork.CurrentRoom.CustomProperties[Key_IsKoikoi] is int value) ? value : -1;
         }
 
         // public setter and getter
