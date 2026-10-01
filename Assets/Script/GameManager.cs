@@ -49,6 +49,7 @@ namespace HanafudaPoker.Games
 
             }
             uiDebug.ShowWillChange();
+            uiDebug.SetTextFieldCards();
 
             OnUpdateState(CurrentState);
         }
@@ -58,11 +59,13 @@ namespace HanafudaPoker.Games
             switch (turnState)
             {
                 case TurnState.BeforeGame:
+                    // ほとんどが初期化社業
                     NetworkManager.SetField(null);
                     // this.ResetGames();
                     NetworkManager.SetIsReady(false);
                     NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
                     NetworkManager.SetIsKoikoi(-1);
+                    koikoiIndex = -1;
 
                     Debug.Log("End Before Game");
 
@@ -222,6 +225,7 @@ namespace HanafudaPoker.Games
                             {
                                 // 親が一周したら終わり
                                 // シーン遷移とか
+                                // SceneManager.LoadScene("ResultScene"); みたいな
                             }
 
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
@@ -255,14 +259,14 @@ namespace HanafudaPoker.Games
                             return;
 
                         
-                        if(NetworkManager.GetIsKoikoi() == 1 && koikoiIndex != -1 /*何かカードを選択しているなら*/)
+                        if(NetworkManager.GetIsKoikoi() == 1) // こいこいをするなら
                         {
-                            // こいこいするなら
-                            Debug.Log("こいこいを選択");
-
-                            CardMovementManager.AddToFieldAsKoikoi(koikoiIndex);
-                            NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
-                            uiDebug.SetActiveKoikoiUI(false);
+                            if(koikoiIndex != -1 /*何かカードを選択しているなら*/)
+                            {
+                                CardMovementManager.AddToFieldAsKoikoi(koikoiIndex);
+                                NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                                uiDebug.SetActiveKoikoiUI(false);
+                            }
                         }
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {
@@ -283,6 +287,8 @@ namespace HanafudaPoker.Games
             GameConst.PLAYER_NUMBER = NetworkManager.GetPlayerNumber();
             Debug.Log("Initialize : player number = " + GameConst.PLAYER_NUMBER);
             NetworkManager.SetUpSeatID();
+            uiDebug.SetActiveKoikoiUI(false);
+            koikoiIndex = -1;
 
 
             // 自分のseatIDを各クライアントが保存しておく

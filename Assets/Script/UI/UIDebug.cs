@@ -30,26 +30,26 @@ namespace HanafudaPoker.UIs
 
         private static readonly Dictionary<CardMonth, string> dictMonth = new()
         {
-            { CardMonth.Matsu, "��" },
-            { CardMonth.Ume, "�~" },
-            { CardMonth.Sakura, "��" },
-            { CardMonth.Fuji, "��" },
-            { CardMonth.Ayame, "�Ҋ�" },
-            { CardMonth.Botan, "���O" },
-            { CardMonth.Hagi, "��" },
-            { CardMonth.Susuki, "�" },
-            { CardMonth.Kiku, "�e" },
-            { CardMonth.Momiji, "�g�t" },
-            { CardMonth.Yanagi, "��" },
-            { CardMonth.Kiri, "��" }
+            { CardMonth.Matsu, "松" },
+            { CardMonth.Ume, "梅" },
+            { CardMonth.Sakura, "桜" },
+            { CardMonth.Fuji, "藤" },
+            { CardMonth.Ayame, "菖蒲" },
+            { CardMonth.Botan, "牡丹" },
+            { CardMonth.Hagi, "萩" },
+            { CardMonth.Susuki, "芒" },
+            { CardMonth.Kiku, "菊" },
+            { CardMonth.Momiji, "紅葉" },
+            { CardMonth.Yanagi, "柳" },
+            { CardMonth.Kiri, "桐" }
         };
 
         private static readonly Dictionary<CardRank, string> dictRank = new()
         {
-            { CardRank.Hikari, "��" },
-            { CardRank.Tane, "��" },
-            { CardRank.Tanzaku, "�Z��" },
-            { CardRank.Kasu, "�J�X" }
+            { CardRank.Hikari, "光" },
+            { CardRank.Tane, "種" },
+            { CardRank.Tanzaku, "短冊" },
+            { CardRank.Kasu, "カス" }
         };
 
 
@@ -82,6 +82,16 @@ namespace HanafudaPoker.UIs
                 {
                     str += dictMonth[field[i].Month] + " " + dictRank[field[i].Rank] + "\n";
                 }
+
+                if(NetworkManager.GetIsKoikoi() == 1)
+                {
+                    if(field.Count == 8)
+                    {
+                        str += dictMonth[field[5].Month] + " " + dictRank[field[5].Rank] + "\n";
+                        str += dictMonth[field[6].Month] + " " + dictRank[field[6].Rank] + "\n";
+                        str += dictMonth[field[7].Month] + " " + dictRank[field[7].Rank] + "\n";
+                    }
+                }
             }
 
 
@@ -112,30 +122,30 @@ namespace HanafudaPoker.UIs
             switch (state)
             {
                 case TurnState.WaitForInitialize:
-                    stateText.text = "�S���̏�����҂��Ă��܂�";
+                    stateText.text = "初期化待ち";
                     break;
 
                 case TurnState.BeforeGame:
                 case TurnState.CreateDeck:
                 case TurnState.DealCards:
                 case TurnState.ShowField:
-                    stateText.text = "�R�D��������";
+                    stateText.text = "カードを準備しています";
                     break;
 
                 case TurnState.WaitForFirstChange:
-                    stateText.text = "�ς���J�[�h��I��ł��������i1��ځj";
+                    stateText.text = "変える手札を選択してください（一回目）";
                     break;
 
                 case TurnState.WaitForSecondChange:
-                    stateText.text = "�ς���J�[�h��I��ł��������i2��ځj";
+                    stateText.text = "変える手札を選択してください（二回目）";
                     break;
 
                 case TurnState.ShowResult:
-                    stateText.text = "����";
+                    stateText.text = "結果";
                     break;
 
                 case TurnState.WaitForNextRound:
-                    stateText.text = "���̃��E���h�ցi��������������i�݂܂��j";
+                    stateText.text = "全員の準備を待っています";
                     break;
 
                 default:
@@ -159,70 +169,70 @@ namespace HanafudaPoker.UIs
 
                 string tex = "";
                 if (yakus[seatID].Contains(Yaku.Tsui))
-                    tex += "��\n";
+                    tex += "対\n";
 
                 if (yakus[seatID].Contains(Yaku.Nitsui))
-                    tex += "���\n";
+                    tex += "二対\n";
 
                 if (yakus[seatID].Contains(Yaku.Santsui))
-                    tex += "�O��\n";
+                    tex += "三対\n";
 
                 if (yakus[seatID].Contains(Yaku.Yontsui))
-                    tex += "�l��\n";
+                    tex += "四対\n";
 
                 if (yakus[seatID].Contains(Yaku.Mangetsu))
-                    tex += "����\n";
+                    tex += "満月\n";
 
                 if (yakus[seatID].Contains(Yaku.Akatan))
-                    tex += "�ԃ^��\n";
+                    tex += "赤タン\n";
 
                 if (yakus[seatID].Contains(Yaku.Aotan))
-                    tex += "�^��\n";
+                    tex += "青タン\n";
 
                 if (yakus[seatID].Contains(Yaku.Tan))
-                    tex += "�^��\n";
+                    tex += "タン\n";
 
                 if (yakus[seatID].Contains(Yaku.Gokou))
-                    tex += "�܌�\n";
+                    tex += "五光\n";
 
                 if (yakus[seatID].Contains(Yaku.Yonkou))
-                    tex += "�l��\n";
+                    tex += "四光\n";
 
                 if (yakus[seatID].Contains(Yaku.Ameshikou))
-                    tex += "�J�l��\n";
+                    tex += "雨四光\n";
 
                 if (yakus[seatID].Contains(Yaku.Sankou))
-                    tex += "�O��\n";
+                    tex += "三光\n";
 
                 if (yakus[seatID].Contains(Yaku.Inoshikacho))
-                    tex += "������\n";
+                    tex += "猪鹿蝶\n";
 
                 if (yakus[seatID].Contains(Yaku.Sakeutage))
-                    tex += "����\n";
+                    tex += "酒宴\n";
 
                 if (yakus[seatID].Contains(Yaku.Mizu))
-                    tex += "����\n";
+                    tex += "水\n";
 
                 if (yakus[seatID].Contains(Yaku.Murasaki))
-                    tex += "������\n";
+                    tex += "紫苑花\n";
 
                 if (yakus[seatID].Contains(Yaku.Hanaikada))
-                    tex += "�Ԕ�\n";
+                    tex += "花筏\n";
 
                 if (yakus[seatID].Contains(Yaku.Adabana))
-                    tex += "�k��\n";
+                    tex += "徒花\n";
 
                 if (yakus[seatID].Contains(Yaku.Chidori))
-                    tex += "�璹\n";
+                    tex += "千鳥\n";
 
                 if (yakus[seatID].Contains(Yaku.MidareChidori))
-                    tex += "����璹\n";
+                    tex += "乱れ千鳥\n";
 
                 if (yakus[seatID].Contains(Yaku.Houou))
-                    tex += "�P��\n";
+                    tex += "鳳凰\n";
 
                 if (yakus[seatID].Contains(Yaku.Hououraigi))
-                    tex += "�P�����V\n";
+                    tex += "鳳凰来儀\n";
 
                 yakuText[seatID].text = tex;
             }
