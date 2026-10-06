@@ -9,5 +9,10 @@ namespace HanafudaPoker.Games
         public const int FIELD_CARD_NUMBER = 5;
         public const int ROUND_NUMBER = 4;
         public const int MAX_PLAYER_NUMBER = 4;
+
+        // ho6:
+        public const int BET_VALUE_MINCOIN = 5;
+        public const int BET_VALUE_MIDCOIN = 10;
+        public const int BET_VALUE_MAXCOIN = 50;
     }
 }

@@ -7,6 +7,7 @@ using HanafudaPoker.Yakus;
 using HanafudaPoker.Network;
 
 using HanafudaPoker.Animation;
+using HanafudaPoker.Bet;
 
 namespace HanafudaPoker.Games
 {
@@ -20,7 +21,9 @@ namespace HanafudaPoker.Games
         // インスタンス
         // [SerializeField]private UIManager uiManager;
         [SerializeField] private UIDebug uiDebug;
+        [SerializeField] private UIYaku uiYaku;
         [SerializeField] private VisualManager visualManager;
+        [SerializeField] private BetFactory betFactory;
 
         private void Start()
         {
@@ -65,7 +68,10 @@ namespace HanafudaPoker.Games
 
                     // ho6:
                     visualManager.ResetCardObjects();
-                    
+                    betFactory.ResetBetObjects();
+                    uiYaku.InitShowYaku();
+
+
                     NetworkManager.SetTurnState((int)TurnState.CreateDeck);
                     break;
 
@@ -105,7 +111,8 @@ namespace HanafudaPoker.Games
                         playerYaku[seatID] = YakuData.YakuCheck(field, hands);
                     }
 
-                    uiDebug.ShowYaku(playerYaku);
+                    uiYaku.ShowYaku(playerYaku[NetworkManager.GetMySeatID()]);
+                    //uiDebug.ShowYaku(playerYaku);
 
                     // なんかいい感じに役とか表示して次へ
                     // 今はデバッグで無条件で次のターンへ
