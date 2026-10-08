@@ -137,13 +137,8 @@ namespace HanafudaPoker.Games
                     Debug.Log("beforekoikoi score [0] = " + score[0]);
                     int winnerID = YakuData.JudgeWinner(score);
 
-
-
                     NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
 
-
-                    // こいこいはこのタイミングで
-                    // NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
                     NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
 
                     break;
