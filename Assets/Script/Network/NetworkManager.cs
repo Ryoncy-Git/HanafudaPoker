@@ -23,22 +23,23 @@ namespace HanafudaPoker.Network
 
     public static class NetworkManager
     {
-        // RP (Room Properties) (Only MasterClient can change)
-        private const string Key_TurnState = "Turn";
-        private const string Key_Round = "Round";
-        private const string Key_Deck = "Deck";
-        private const string Key_Field = "Field";
-        private const string Key_DiscardPile = "Pile";
-        private const string Key_WinnerIDBeforeKoikoi = "Winner1";
-        private const string Key_WinnerIDAfterKoikoi = "Winner2";
-        private const string Key_IsKoikoi = "Iskoikoi";
+        // RP (Room Properties) (Only MasterClient can change) // CAPITAL LETTER
+        private const string Key_TurnState = "T";
+        private const string Key_Round = "R";
+        private const string Key_Deck = "D";
+        private const string Key_Field = "F";
+        private const string Key_DiscardPile = "P";
+        private const string Key_WinnerIDBeforeKoikoi = "W1";
+        private const string Key_WinnerIDAfterKoikoi = "W2";
+        private const string Key_IsKoikoi = "K"; // -1 = not define, 0 = false, 1 = true
 
 
-        // PP (Player Properties)
-        private const string Key_SeatID = "SeatID";
-        private const string Key_Hands = "Hands";
-        private const string Key_IsReady = "Ready";
-        private const string Key_WillChangeCards = "Changes";
+        // PP (Player Properties) // small letter
+        private const string Key_SeatID = "s";
+        private const string Key_Hands = "h";
+        private const string Key_IsReady = "r";
+        private const string Key_WillChangeCards = "w";
+        private const string Key_yaku = "y";
 
         // valuable 
         private static readonly Hashtable props = new Hashtable();
@@ -182,6 +183,23 @@ namespace HanafudaPoker.Network
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         } 
 
+        public static void SetYaku(bool[] yakus, int seatID = -1)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_yaku] = yakus;
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            if (player == null)
+            {
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+            else
+            {
+                player.SetCustomProperties(props);
+            }
+        }
+
         // getter
         public static int GetTurnState()
         {
@@ -282,6 +300,28 @@ namespace HanafudaPoker.Network
         public static int GetIsKoikoi()
         {
             return (PhotonNetwork.CurrentRoom.CustomProperties[Key_IsKoikoi] is int value) ? value : -1;
+        }
+
+        public static bool[] GetYaku(int seatID = -1)
+        {
+            Player player;
+
+            if (seatID == -1)
+            {
+                player = PhotonNetwork.LocalPlayer;
+            }
+            else
+            {
+                player = GetPlayerBySeatID(seatID);
+            }
+
+
+            if (player == null)
+            {
+                return new bool[] { };
+            }
+
+            return (player.CustomProperties[Key_yaku] is bool[] value) ? value : new bool[] { };
         }
 
         // public setter and getter

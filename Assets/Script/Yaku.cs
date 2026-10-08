@@ -32,11 +32,44 @@ namespace HanafudaPoker.Yakus
         Houou, // 鳳凰込みの５枚
         Hououraigi // 6まい
     }
+    public static class YakuDataBase
+    {
+        public static bool[] GetIDsByYakuList(List<Yaku> yakus)
+        {
+            bool[] ids = new bool[Enum.GetValues(typeof(Yaku)).Length]; // all false
+
+            foreach (Yaku yaku in yakus)
+            {
+                ids[(int)yaku] = true;
+            }
+
+            return ids;
+        }
+
+        public static List<Yaku> GetYakuListByIDs(bool[] ids)
+        {
+            List<Yaku> yakus = new List<Yaku>();
+            for(int i = 0; i < ids.Length; i++)
+            {
+                if(ids[i] == true)
+                {
+                    yakus.Add((Yaku)i);
+                }
+            }
+
+            return yakus;
+        }
+    }
     public static class YakuData
     {
+        private Dictionary<Yaku, int> YakuStrength =
+        public static int JudgeWinner(List<Yaku>[] playerYaku)
+        {
+            
+        }
         public static List<Yaku> YakuCheck(List<CardData> field, List<CardData> hand)
         {
-            List<Yaku> yakus = new();
+            List<Yaku> yakuList = new();
 
             List<CardData> cards = new();
 
@@ -54,87 +87,87 @@ namespace HanafudaPoker.Yakus
             // 役が完全に同じ場合は月がデカい方が勝ち
             if (hasYontsui(cards))
             {
-                yakus.Add(Yaku.Yontsui);
+                yakuList.Add(Yaku.Yontsui);
             }
             else if (hasSantsui(cards))
             {
-                yakus.Add(Yaku.Santsui);
+                yakuList.Add(Yaku.Santsui);
             }
             else if (hasNitsui(cards))
             {
-                yakus.Add(Yaku.Nitsui);
+                yakuList.Add(Yaku.Nitsui);
             }
             else if (hasTsui(cards))
             {
-                yakus.Add(Yaku.Tsui);
+                yakuList.Add(Yaku.Tsui);
             }
 
             if (hasMangetsu(cards))
-                yakus.Add(Yaku.Mangetsu);
+                yakuList.Add(Yaku.Mangetsu);
 
             if (hasAkatan(cards))
-                yakus.Add(Yaku.Akatan);
+                yakuList.Add(Yaku.Akatan);
 
             if (hasAotan(cards))
-                yakus.Add(Yaku.Aotan);
+                yakuList.Add(Yaku.Aotan);
 
             if (hasTan(cards))
-                yakus.Add(Yaku.Tan);
+                yakuList.Add(Yaku.Tan);
 
             if (hasGokou(cards))
             {
-                yakus.Add(Yaku.Gokou);
+                yakuList.Add(Yaku.Gokou);
             }
             else if (hasYonkou(cards))
             {
-                yakus.Add(Yaku.Yonkou);
+                yakuList.Add(Yaku.Yonkou);
             }
             else if (hasAmeshikou(cards))
             {
-                yakus.Add(Yaku.Ameshikou);
+                yakuList.Add(Yaku.Ameshikou);
             }
             else if (hasSankou(cards))
             {
-                yakus.Add(Yaku.Sankou);
+                yakuList.Add(Yaku.Sankou);
             }
 
             if (hasInoshikacho(cards))
-                yakus.Add(Yaku.Inoshikacho);
+                yakuList.Add(Yaku.Inoshikacho);
 
             if (hasSakeutage(cards))
-                yakus.Add(Yaku.Sakeutage);
+                yakuList.Add(Yaku.Sakeutage);
 
             if (hasMizu(cards))
-                yakus.Add(Yaku.Mizu);
+                yakuList.Add(Yaku.Mizu);
 
             if (hasMurasaki(cards))
-                yakus.Add(Yaku.Murasaki);
+                yakuList.Add(Yaku.Murasaki);
 
             if (hasHanaikada(cards))
-                yakus.Add(Yaku.Hanaikada);
+                yakuList.Add(Yaku.Hanaikada);
 
             if (hasAdabana(cards))
-                yakus.Add(Yaku.Adabana);
+                yakuList.Add(Yaku.Adabana);
 
             // 鳥役（排他的）
             if (hasHououraigi(cards))
             {
-                yakus.Add(Yaku.Hououraigi);
+                yakuList.Add(Yaku.Hououraigi);
             }
             else if (hasHouou(cards))
             {
-                yakus.Add(Yaku.Houou);
+                yakuList.Add(Yaku.Houou);
             }
             else if (hasMidareChidori(cards))
             {
-                yakus.Add(Yaku.MidareChidori);
+                yakuList.Add(Yaku.MidareChidori);
             }
             else if (hasChidori(cards))
             {
-                yakus.Add(Yaku.Chidori);
+                yakuList.Add(Yaku.Chidori);
             }
 
-            return yakus;
+            return yakuList;
         }
 
         public static bool hasTsui(List<CardData> cards)

@@ -40,7 +40,7 @@ namespace HanafudaPoker.Games
 
                 if (NetworkManager.IsMasterClient())
                     OnEnterState(CurrentState);
-                // OnUpdateはマスターのみじっこう
+                // OnEnterはマスターのみじっこう
 
                 // debug
                 uiDebug.ShowState(CurrentState);
@@ -101,7 +101,10 @@ namespace HanafudaPoker.Games
                     break;
 
                 case TurnState.ShowResult:
-
+                    // マスターが全員の約を判定
+                    if(! NetworkManager.IsMasterClient())
+                        return;
+                    
                     List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                     var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
@@ -109,17 +112,23 @@ namespace HanafudaPoker.Games
                     {
                         var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
                         playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+
+                        // send yaku data to network
+                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
+                        NetworkManager.SetYaku(yakuIDs, seatID);
                     }
+
 
                     uiDebug.ShowYaku(playerYaku);
 
-                    // なんかいい感じに役とか表示して次へ
-                    // 今はデバッグで無条件で次のターンへ
+
                     Debug.Log("End Show Yaku");
 
                     // 勝者を判定する
-                    int winnerID = 0; // デバッグ用にいったん0で
-                    //
+                    // int winnerID = 0; // デバッグ用にいったん0で
+                    // 役のデータを渡して商社を判定してもらう
+                    int winner = YakuData.JudgeWinner(playerYaku);
+
 
                     NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
 
@@ -132,16 +141,22 @@ namespace HanafudaPoker.Games
                 
                 case TurnState.ShowFinalResult:
                     // 処理自体はShowResultとほぼ同じ
-                    playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
-                    field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+                    // マスターが全員の約を判定
+                    if(! NetworkManager.IsMasterClient())
+                        return;
+                    
+                    List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
                     for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
                     {
                         var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
                         playerYaku[seatID] = YakuData.YakuCheck(field, hands);
-                    }
 
-                    uiDebug.ShowYaku(playerYaku);
+                        // send yaku data to network
+                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
+                        NetworkManager.SetYaku(yakuIDs, seatID);
+                    }
 
                     Debug.Log("End Show Final Yaku");
 
@@ -276,6 +291,8 @@ namespace HanafudaPoker.Games
                         }
                     }
                     break;
+
+                    // case 
                     
             }
         }
@@ -332,7 +349,8 @@ namespace HanafudaPoker.Games
         WaitForKoikoi,
         ShowFinalResult,
         WaitForNextRound,
-        WaitForInitialize
+        WaitForInitialize, 
+        WaitSomeSecondForResult
     }
 
 }
