@@ -25,7 +25,6 @@ namespace HanafudaPoker.Animation
 
         // カード更新後のアニメーションのためにカードIDが必要
         private int cardID;
-
         public int CardID => cardID;
 
         // カード変更がされたか
@@ -45,6 +44,17 @@ namespace HanafudaPoker.Animation
         {
             defaultLocalPosition = cardVisual.localPosition;
             hikariParticle.Stop();
+        }
+
+        public void SetCard(CardData card)
+        {
+            if (frontRenderer == null)
+                return;
+
+            cardID = card.CardID;
+
+            frontRenderer.material =
+                MaterialManager.Instance.GetMaterial(card);
         }
 
         // クリックで、選択/解除
@@ -86,14 +96,15 @@ namespace HanafudaPoker.Animation
             yield return FlipCard();
 
             SetCard(newCard);
+            EffectManager.Instance.OnCardUpdated(newCard, this);
 
             yield return FlipCard();
 
             DeSelect();
         }
 
-        /*-- 札自体のTransform操作 --*/
 
+        /*-- 札自体のTransform操作 --*/
         // 札が選択されたときの処理
         private IEnumerator SelectedCardAnimation(Vector3 endPos)
         {
@@ -166,8 +177,6 @@ namespace HanafudaPoker.Animation
             cardVisual.localScale = endScale;
         }
 
-        /*-- 札全体の処理 --*/
-
         // 山札から指定の場所に移動する
         private IEnumerator MoveAnimation(Transform card)
         {
@@ -222,25 +231,20 @@ namespace HanafudaPoker.Animation
             if (flip) yield return FlipCard();
 
         }
+        /*-- 札自体のTransform操作 --*/
+
 
         /*-- 札に付与されるエフェクト操作 --*/
-        public void PlayHiakariEffect()
+        public void PlayHikariEffect()
         {
-            Debug.Log("光札のエフェクトを再生");
             hikariParticle.Play();
         }
-
-        public void SetCard(CardData card)
+        
+        public void StopHikariEffect()
         {
-            if (frontRenderer == null)
-                return;
-
-            cardID = card.CardID;
-            Debug.Log($"SetCard : {card.CardID}");
-
-            frontRenderer.material =
-                MaterialManager.Instance.GetMaterial(card);
+            hikariParticle.Stop();
         }
+        /*-- 札に付与されるエフェクト操作 --*/
 
     }
 

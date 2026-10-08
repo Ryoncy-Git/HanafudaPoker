@@ -6,16 +6,10 @@ using HanafudaPoker.Network;
 using HanafudaPoker.Cards;
 using HanafudaPoker.Games;
 
-/*
-    ネットワークの更新とアニメーションの更新タイミングが合ってないため
-    札の更新があってない
-*/
-
 namespace HanafudaPoker.Animation
 {
     public class VisualManager : MonoBehaviour
     {
-
         [Header("クライアントのみで完結")]
         // CardViewに移動させるべきの変数かもしれない
         [SerializeField] private float scaleOfCommunityCards = 1.0f;    // 場の札の大きさ
@@ -152,6 +146,7 @@ namespace HanafudaPoker.Animation
             {
                 CardView view = cardFactory.CreateCard(field[i]);
                 view.Owner = CardOwner.Field;
+
                 // あらかじめ決められた5枚
                 cardViewField.Add(view);
             }
@@ -234,6 +229,11 @@ namespace HanafudaPoker.Animation
             cardViewPlayer.Clear();
             cardViewOtherPlayer.Clear();
             previousHandIDs = null;
+        }
+
+        public CardView GetPlayerCard(int index)
+        {
+            return cardViewPlayer[index];
         }
     }
 }

@@ -22,6 +22,7 @@ namespace HanafudaPoker.Animation
             CardView view = obj.GetComponent<CardView>();
 
             view.SetCard(card);
+            EffectManager.Instance.OnCardUpdated(card, view);
 
             return view;
         }
