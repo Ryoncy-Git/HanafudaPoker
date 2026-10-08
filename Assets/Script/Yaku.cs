@@ -62,10 +62,62 @@ namespace HanafudaPoker.Yakus
     }
     public static class YakuData
     {
-        private Dictionary<Yaku, int> YakuStrength =
-        public static int JudgeWinner(List<Yaku>[] playerYaku)
+        private static readonly Dictionary<Yaku, int> YakuStrength = new()
         {
-            
+            { Yaku.Tsui, 1 },
+            { Yaku.Nitsui, 2 },
+            { Yaku.Santsui, 5 },
+            { Yaku.Adabana, 7 },
+            { Yaku.Hanaikada, 10 },
+            { Yaku.Murasaki, 10 },
+            { Yaku.Chidori, 12 },
+            { Yaku.Akatan, 20 },
+            { Yaku.Sankou, 25 },
+            { Yaku.Tan, 35 },
+            { Yaku.Mangetsu, 50 },
+            { Yaku.Aotan, 60 },
+            { Yaku.Inoshikacho, 60 },
+            { Yaku.Sakeutage, 60 },
+            { Yaku.Mizu, 60 },
+            { Yaku.Yontsui, 100 },
+            { Yaku.Houou, 100 },
+            { Yaku.MidareChidori, 125 },
+            { Yaku.Ameshikou, 150 },
+            { Yaku.Yonkou, 300 },
+            { Yaku.Hououraigi, 500 },
+            { Yaku.Gokou, 1000 }
+        };
+
+        public static int[] CalculateScore(List<Yaku>[] playerYaku)
+        {
+            // 各人のスコアを計算
+            int[] score = new int[playerYaku.Length];
+            for(int i = 0; i < score.Length; i++)
+            {
+                foreach(Yaku yaku in playerYaku[i])
+                {
+                    score[i] += YakuStrength[yaku];
+                }
+            }
+
+            return score;
+        }
+
+        public static int JudgeWinner(int[] score)
+        {
+            // ただ最大値をのインデックスを返すだけ
+            int maxScore = -1;
+            int maxIndex = 0;
+            for(int i = 0; i < score.Length; i++)
+            {
+                if(maxScore < score[i])
+                {
+                    maxIndex = i;
+                    maxScore = score[i];
+                }
+            }
+
+            return maxIndex;
         }
         public static List<Yaku> YakuCheck(List<CardData> field, List<CardData> hand)
         {

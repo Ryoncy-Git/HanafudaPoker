@@ -126,8 +126,11 @@ namespace HanafudaPoker.Games
 
                     // 勝者を判定する
                     // int winnerID = 0; // デバッグ用にいったん0で
-                    // 役のデータを渡して商社を判定してもらう
-                    int winner = YakuData.JudgeWinner(playerYaku);
+                    // 役のデータを渡してスコアの計算
+                    int[] score = YakuData.CalculateScore(playerYaku);
+                    Debug.Log("beforekoikoi score [0] = " + score[0]);
+                    int winnerID = YakuData.JudgeWinner(score);
+
 
 
                     NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
@@ -145,8 +148,8 @@ namespace HanafudaPoker.Games
                     if(! NetworkManager.IsMasterClient())
                         return;
                     
-                    List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
-                    var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+                    playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
                     for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
                     {
@@ -158,11 +161,15 @@ namespace HanafudaPoker.Games
                         NetworkManager.SetYaku(yakuIDs, seatID);
                     }
 
-                    Debug.Log("End Show Final Yaku");
 
-                    // もういちど勝者を判定する
-                    winnerID = 0;
-                    //
+                    uiDebug.ShowYaku(playerYaku);
+
+                    // 勝者を判定する
+                    // int winnerID = 0; // デバッグ用にいったん0で
+                    // 役のデータを渡してスコアの計算
+                    score = YakuData.CalculateScore(playerYaku);
+                    Debug.Log("afterkoikoi score [0] = " + score[0]);
+                    winnerID = YakuData.JudgeWinner(score);
 
                     NetworkManager.SetWinnerIDAfterKoikoi(winnerID);
 
@@ -333,7 +340,6 @@ namespace HanafudaPoker.Games
 
             return true;
         }
-
     }
 
     public enum TurnState
