@@ -113,6 +113,9 @@ namespace HanafudaPoker.Animation
             float elapsed = 0f;
             float duration = 0.2f;
 
+            if (cardVisual == null)
+                yield return null;
+
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
@@ -147,6 +150,9 @@ namespace HanafudaPoker.Animation
             {
                 elapsed += Time.deltaTime;
 
+                if (cardVisual == null)
+                    yield break;
+
                 cardVisual.localRotation =
                     Quaternion.Lerp(start, end, elapsed / duration);
 
@@ -168,6 +174,9 @@ namespace HanafudaPoker.Animation
             {
                 elapsed += Time.deltaTime;
 
+                if (cardVisual.localScale == null)
+                    yield return null;
+
                 cardVisual.localScale =
                     Vector3.Lerp(startScale, endScale, elapsed / duration);
 
@@ -177,7 +186,7 @@ namespace HanafudaPoker.Animation
             cardVisual.localScale = endScale;
         }
 
-        // 山札から指定の場所に移動する
+        // 指定の場所に移動する
         private IEnumerator MoveAnimation(Transform card)
         {
             //Debug.Log($"Target Rot = {card.rotation.eulerAngles}");
@@ -245,6 +254,17 @@ namespace HanafudaPoker.Animation
             hikariParticle.Stop();
         }
         /*-- 札に付与されるエフェクト操作 --*/
+
+        // こいこいアニメーション
+        public void StartKoikoiSelectAnimation(Transform target, float scale)
+        {
+            if (target == null)
+                return;
+
+            StartCoroutine(MoveAnimation(target));
+            StartCoroutine(RotateAnimation(target));
+            StartCoroutine(ScaleAnimation(scale));
+        }
 
     }
 
