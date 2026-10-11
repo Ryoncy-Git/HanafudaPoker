@@ -2,24 +2,82 @@ using UnityEngine;
 
 using HanafudaPoker.Network;
 
+using HanafudaPoker.Games;
+
 namespace HanafudaPoker.Animation
 {
-    // ï¿½Dï¿½ï¿½Iï¿½ï¿½
+    // E½DE½E½IE½E½ Debug.Log($"{}");
     public class CardSelector : MonoBehaviour
     {
         [SerializeField]
         private VisualManager visualManager;
+        private int cardID = -1;    // ƒQ[ƒ€ƒ}ƒl[ƒWƒƒ[‚Ö“n‚·‚à‚Ì‚ğ•Û
 
+        // GameManager‚Ö‘I‘ğ‚³‚ê‚½D‚ğ“`‚¦‚é
+        public int SelectedKoikoiCardID => cardID;
+
+        [SerializeField]
+        private CardSelectMode selectMode = CardSelectMode.None;
+
+        TurnState previousState;
+
+        private void Update()
+        {
+            FieldTurn();
+        }
+
+        private void FieldTurn()
+        {
+            TurnState currentState =
+                (TurnState)NetworkManager.GetTurnState();
+
+            if (currentState == previousState)
+                return;
+
+            previousState = currentState;
+
+            switch (currentState)
+            {
+                case TurnState.BeforeGame:
+                case TurnState.WaitForFirstChange:
+                case TurnState.WaitForSecondChange:
+                    SetSelectMode(CardSelectMode.Exchange);
+                    break;
+
+                case TurnState.WaitForKoikoi:
+                    if (NetworkManager.GetIsKoikoi() == -1)
+                        SetSelectMode(CardSelectMode.Koikoi);
+                    else
+                        SetSelectMode(CardSelectMode.None);
+                    break;
+
+                case TurnState.ShowFinalResult:
+                case TurnState.WaitForNextRound:
+                case TurnState.WaitForInitialize:
+                case TurnState.ShowResult:
+                    SetSelectMode(CardSelectMode.None);
+                    break;
+            }
+        }
+
+        public void SetSelectMode(CardSelectMode mode)
+        {
+            selectMode = mode;
+
+            Debug.Log($"Œ»İ‚ÌCardSelector‚Ìó‘Ô:{selectMode}");
+
+            // ‘O‰ñ‚ÌID‚Íˆø‚«Œp‚ª‚È‚¢
+            cardID = -1;
+        }
+
+        /*-- DŒğŠ·‚Ì‘I‘ğˆ— --*/
         // ƒ}ƒEƒX‘€ì‚©‚çó‚¯æ‚é
         public void SelectCardFromPlayer()
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (!Physics.Raycast(ray, out RaycastHit hit))
+            if (selectMode == CardSelectMode.None)
                 return;
 
-            CardView card =
-                hit.collider.GetComponent<CardView>();
+            CardView card = GetCardFromMouse();
 
             if (card == null)
                 return;
@@ -27,12 +85,19 @@ namespace HanafudaPoker.Animation
             if (card.Owner != CardOwner.PlayerHand)
                 return;
 
-            card.ToggleSelect();
+            switch (selectMode)
+            {
+                case CardSelectMode.Exchange:
+                    SelectCardForExchange(card);
+                    break;
 
-            UpdateNetworkState(card);
+                case CardSelectMode.Koikoi:
+                    SelectCardForKoikoi(card);
+                    break;
+            }
         }
 
-        // ƒL[‘€ì‚©‚çó‚¯æ‚é
+        // ƒL[‘€ì‚©‚çó‚¯æ‚é ŒÄ‚Ño‚µŒ³‚ÍInputManager
         public void ToggleCardByIndex(int handIndex)
         {
             if (handIndex < 0 || handIndex >= 3)
@@ -41,14 +106,26 @@ namespace HanafudaPoker.Animation
                 return;
             }
 
-            CardView card =
-                visualManager.GetPlayerCard(handIndex);
+            CardView card = visualManager.GetPlayerCard(handIndex);
 
             card.ToggleSelect();
 
             UpdateNetworkState(card);
         }
+        /*-- DŒğŠ·‚Ì‘I‘ğˆ— --*/
 
+        // ƒ}ƒEƒXˆÊ’u‚©‚çD‚ğæ“¾‚·‚é‹¤’Êˆ—
+        private CardView GetCardFromMouse()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (!Physics.Raycast(ray, out RaycastHit hit))
+                return null;
+
+            return hit.collider.GetComponent<CardView>();
+        }
+
+        // DŒğŠ·—p‚Ìƒlƒbƒgƒ[ƒNXV
         private void UpdateNetworkState(CardView card)
         {
             int mySeatID = NetworkManager.GetMySeatID();
@@ -58,5 +135,30 @@ namespace HanafudaPoker.Animation
 
             NetworkManager.SetWillChangeCards(state);
         }
+
+        private void SelectCardForExchange(CardView card)
+        {
+            card.ToggleSelect();
+            UpdateNetworkState(card);
+        }
+
+        // ‚±‚¢‚±‚¢‚·‚éD‚ğ‘I‚Ô@D¶¬‚Ís‚í‚È‚¢
+        private void SelectCardForKoikoi(CardView card)
+        {
+            if (cardID != -1)
+                return;
+
+            // card.ToggleSelect();
+            cardID = card.CardID;
+
+            // visualManager.SetSelectKoikoiCardInAnimation(card);
+        }
+    }
+
+    public enum CardSelectMode
+    {
+        None,       // “ü—Í‚ğó‚¯•t‚¯‚È‚¢
+        Exchange,   // DŒğŠ·
+        Koikoi      // ‚±‚¢‚±‚¢—p
     }
 }

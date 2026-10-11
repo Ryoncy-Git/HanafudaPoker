@@ -240,8 +240,8 @@ namespace HanafudaPoker.Games
             Debug.Log("Deal done");
         }
 
-
-        public static void AddToFieldAsKoikoi(int cardIndex)
+        /*
+        public static void AddToFieldAsKoikoiButton(int cardIndex)
         {
             // この関数はこいこいしたプレイやーだけが呼び出す
             var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
@@ -277,6 +277,63 @@ namespace HanafudaPoker.Games
             field.Add(card);
 
             NetworkManager.SetField(CardDataBase.GetIDsByList(field));
+        }
+        */
+
+        // ho6の修正案 CardIDを参照する
+        // この関数はこいこいした者のみが呼び出す
+        public static void AddToFieldAsKoikoi(int cardID)
+        {
+            var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+            var deck = CardDataBase.GetCardDataListByID(NetworkManager.GetDeck());
+            var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands());
+
+            if (cardID == -1 || field == null || deck == null || hands == null)
+            {
+                Debug.LogWarning("こいこい用に場に札を追加する処理失敗");
+                return;
+            }
+
+            if (hands.Count != GameConst.HAND_CARD_NUMBER)
+                return;
+
+            if (deck.Count < 2)
+            {
+                Debug.LogWarning("山札の枚数が不足しています");
+                return;
+            }
+
+            // CardIDから対象カードを検索
+            var card = hands.Find(c => c.CardID == cardID);
+
+            if (card == null)
+            {
+                Debug.LogWarning($"手札に対象カードがありません: {cardID}");
+                return;
+            }
+
+            Debug.Log($"fieldの枚数={field.Count}");
+
+            // デックから二枚を場に追加
+            for (int i = 0; i < 2; i++)
+            {
+                var dealtCard = deck[deck.Count - 1];
+                field.Add(dealtCard);
+                deck.Remove(dealtCard);
+            }
+
+            // 手札から選択した札を場に移動
+            hands.Remove(card);
+            field.Add(card);
+
+            Debug.Log($"fieldの枚数={field.Count}");
+
+            // ネットワーク上の状態を更新
+            NetworkManager.SetDeck(CardDataBase.GetIDsByList(deck));
+            NetworkManager.SetHands(CardDataBase.GetIDsByList(hands));
+            NetworkManager.SetField(CardDataBase.GetIDsByList(field));
+
+            Debug.Log("CardMovementManager:更新済み");
         }
     }
 }

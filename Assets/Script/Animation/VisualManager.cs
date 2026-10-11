@@ -16,9 +16,10 @@ namespace HanafudaPoker.Animation
         [SerializeField] private float scaleOfHoldCards = 1.0f; // 手持ちの大きさ
 
         // 生成されたオブジェクトを管理する
-        private List<CardView> cardViewField;
-        private List<CardView> cardViewPlayer;
-        private List<CardView> cardViewOtherPlayer;
+        private List<CardView> cardViewField;   // 場の札　こいこいは含まれない
+        private List<CardView> cardViewPlayer;  // 手札
+        private List<CardView> cardViewOtherPlayer; // 見せかけ　ゲームとしての意味はない
+        private List<CardView> cardViewKoikoiField; // こいこい用の札
 
         [Header("札の座標を動かす基準点")]
         // デッキの位置
@@ -27,9 +28,12 @@ namespace HanafudaPoker.Animation
 
         // 場に置かれるカードの位置
         [SerializeField]
-        private Transform[] fieldCardPositions;
+        [Header("場の札-こいこい抜き")]
+        private Transform[] fieldDefaultCardPositions;
 
-        // こいこいで追加される札も同様に
+        [SerializeField]
+        [Header("場の札-こいこいのみ")]
+        private Transform[] fieldKoikoiCardPositions;
 
         // 手札の位置
         [SerializeField]
@@ -43,8 +47,12 @@ namespace HanafudaPoker.Animation
         // 手札更新を検知
         private int[] previousHandIDs;
 
-        // フィールドに表示する札を出すタイミングを考える
+        // フィールドに表示する札を出すタイミング
         private TurnState previousState;
+        private TurnState currentState;
+
+        [SerializeField]
+        private MoveObject moveObject;  // 札ではなく、札に割り当てられた空オブジェクトを操作するとか
 
         private void Awake()
         {
@@ -53,6 +61,8 @@ namespace HanafudaPoker.Animation
             cardViewField = new List<CardView>();
             cardViewPlayer = new List<CardView>();
             cardViewOtherPlayer = new List<CardView>();
+            cardViewKoikoiField = new List<CardView>();
+
         }
 
         private void Update()
@@ -60,22 +70,26 @@ namespace HanafudaPoker.Animation
             if (previousHandIDs == null)
                 return;
 
-            CheckFieldReveal();
+            OnStateChanged();
             CheckHandChanged();
         }
 
-        private void CheckFieldReveal()
+        private void OnStateChanged()
         {
-            TurnState currentState =
-                (TurnState)NetworkManager.GetTurnState();
+            currentState = (TurnState)NetworkManager.GetTurnState();
 
             if (currentState == previousState)
                 return;
+
+            Debug.Log($"State: {previousState} -> {currentState}");
 
             previousState = currentState;
 
             switch (currentState)
             {
+                case TurnState.BeforeGame:
+                    break;
+
                 case TurnState.ShowField:
                     ShowFieldCard(0);
                     ShowFieldCard(1);
@@ -89,9 +103,16 @@ namespace HanafudaPoker.Animation
                 case TurnState.ShowResult:
                     ShowFieldCard(4);
                     break;
+
+                case TurnState.ShowFinalResult:
+                    ShowFieldKoikoiCard(1);
+                    ShowFieldKoikoiCard(2);
+                    break;
+
+                case TurnState.WaitForNextRound:
+                    break;
             }
         }
-
 
         private void ShowFieldCard(int index)
         {
@@ -100,7 +121,19 @@ namespace HanafudaPoker.Animation
 
             StartCoroutine(
                 cardViewField[index].PlayAnimation(
-                    fieldCardPositions[index],
+                    fieldDefaultCardPositions[index],
+                    scaleOfCommunityCards, true)
+            );
+        }
+
+        private void ShowFieldKoikoiCard(int index)
+        {
+            cardViewKoikoiField[index].transform.position = deckTransform.position;
+            cardViewKoikoiField[index].transform.rotation = deckTransform.rotation;
+
+            StartCoroutine(
+                cardViewKoikoiField[index].PlayAnimation(
+                    fieldKoikoiCardPositions[index],
                     scaleOfCommunityCards, true)
             );
         }
@@ -110,24 +143,59 @@ namespace HanafudaPoker.Animation
         {
             var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands());
 
-            if (previousHandIDs == null)
+            if (hands == null || previousHandIDs == null)
                 return;
 
-            for (int i = 0; i < hands.Count; i++)
+            // こいこい中は別の表示更新処理で管理する
+            // こいこい以降は札交換アニメーションは行われない
+            if (currentState == TurnState.WaitForKoikoi ||
+                currentState == TurnState.ShowFinalResult)
             {
-                if (!cardViewPlayer[i].isChanging && previousHandIDs[i] != hands[i].CardID)
+                PlayKoikoiCardAnimation();
+                return;
+            }
+
+            // こいこい選択がされなく、そのまま状態が終わりに向かう時
+            if (currentState == TurnState.WaitForNextRound)
+                return;
+
+            int count = Mathf.Min(
+                            cardViewPlayer.Count,
+                            hands.Count
+                        );
+
+            for (int i = 0; i < count; i++)
+            {
+                if (cardViewPlayer[i] == null)
+                    continue;
+
+                if (!cardViewPlayer[i].isChanging &&
+                    previousHandIDs[i] != hands[i].CardID)
                 {
                     Debug.Log($"Card Changed {i}");
 
                     previousHandIDs[i] = hands[i].CardID;
 
                     StartCoroutine(
-                        cardViewPlayer[i]
-                        .ChangeCardAnimation(hands[i]));
+                        cardViewPlayer[i].ChangeCardAnimation(hands[i])
+                    );
                 }
             }
         }
 
+        // こいこい用の札交換 - 正確には出す札を選ぶ だが
+        private void PlayKoikoiCardAnimation()
+        {
+            if (cardViewKoikoiField.Count == 0)
+                return;
+
+            cardViewKoikoiField[0].StartKoikoiSelectAnimation
+            (
+                fieldKoikoiCardPositions[0],
+                scaleOfCommunityCards
+            );
+
+        }
 
         // カード生成と配るアニメーションも付いてる
         public void CreateAllCardObjects()
@@ -138,10 +206,90 @@ namespace HanafudaPoker.Animation
             CreateFieldCards();
         }
 
+        public void ResetCardObjects()
+        {
+            Debug.Log("オブジェクトをリセット");
+
+            foreach (var card in cardViewField)
+            {
+                card.StopAllCoroutines();
+                Destroy(card.gameObject);
+            }
+            
+            foreach (var card in cardViewPlayer)
+            {
+                card.StopAllCoroutines();
+                Destroy(card.gameObject);
+            }
+
+            foreach (var card in cardViewOtherPlayer)
+            {
+                card.StopAllCoroutines();
+                Destroy(card.gameObject);
+            }
+
+            foreach (var card in cardViewKoikoiField)
+            {
+                card.StopAllCoroutines();
+                Destroy(card.gameObject);
+            }
+
+            cardViewField.Clear();
+            cardViewPlayer.Clear();
+            cardViewOtherPlayer.Clear();
+            cardViewKoikoiField.Clear();
+            previousHandIDs = null;
+        }
+
+        public void SetSelectKoikoiCardInAnimation(CardView card, int[] field)
+        {
+            // 選択された札を手札からこいこい用の場所へ
+            if (card == null)
+                return;
+
+            cardViewKoikoiField.Add(card);
+
+            // 山札の2枚を場へ移動したのを反映
+            // var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+
+            Debug.Log($"fieldの枚数={field.Length}");
+
+            // fieldの後ろから2枚、field[5],[6]をデッキから移動させる
+            int firstDrawIndex = field.Length - 3;
+
+            for (int i = firstDrawIndex; i < firstDrawIndex + 2; i++)
+            {
+                CardView view = cardFactory.CreateCard(CardDataBase.GetCardDataByID(field[i]));
+                view.Owner = CardOwner.Field;
+
+                // こいこい用の
+                cardViewKoikoiField.Add(view);
+            }
+
+            // 移動された手札を削除
+            cardViewPlayer.Remove(card);
+        }
+
+        // getter
+        // CardViewPlayterリストの引数と一致する札を返す
+        public CardView GetPlayerCard(int index)
+        {
+            return cardViewPlayer[index];
+        }
+
+        // CardIDから一致する札を返す
+        public CardView GetPlayerCardByID(int id)
+        {
+            // 見つからなければnullを返す
+            return cardViewPlayer.Find(card => card.CardID == id);
+        }
+
+        // VisualManager内の補助関数
+
         public void CreateFieldCards()
         {
             var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
-            
+
             for (int i = 0; i < field.Count; i++)
             {
                 CardView view = cardFactory.CreateCard(field[i]);
@@ -203,37 +351,5 @@ namespace HanafudaPoker.Animation
             }
         }
 
-        public void ResetCardObjects()
-        {
-            Debug.Log("オブジェクトをリセット");
-
-            foreach (var card in cardViewField)
-            {
-                card.StopAllCoroutines();
-                Destroy(card.gameObject);
-            }
-            
-            foreach (var card in cardViewPlayer)
-            {
-                card.StopAllCoroutines();
-                Destroy(card.gameObject);
-            }
-
-            foreach (var card in cardViewOtherPlayer)
-            {
-                card.StopAllCoroutines();
-                Destroy(card.gameObject);
-            }
-
-            cardViewField.Clear();
-            cardViewPlayer.Clear();
-            cardViewOtherPlayer.Clear();
-            previousHandIDs = null;
-        }
-
-        public CardView GetPlayerCard(int index)
-        {
-            return cardViewPlayer[index];
-        }
     }
 }
