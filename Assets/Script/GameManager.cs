@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 using HanafudaPoker.Cards;
@@ -19,13 +20,17 @@ namespace HanafudaPoker.Games
         private TurnState PreviousState;
         private int MySeatID = -1;
         public int koikoiIndex = -1;
+        public int selectedKoikoiCardID = -1;
 
         // インスタンス
         // [SerializeField]private UIManager uiManager;
         [SerializeField] private UIDebug uiDebug;
-        [SerializeField] private UIYaku uiYaku;
+
         [SerializeField] private VisualManager visualManager;
         [SerializeField] private BetFactory betFactory;
+        [SerializeField] private CardSelector cardSelector;
+
+        private CardView selectedKoikoiCard;
 
         private void Start()
         {
@@ -68,15 +73,15 @@ namespace HanafudaPoker.Games
                     NetworkManager.SetIsReady(false);
                     NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
                     NetworkManager.SetIsKoikoi(-1);
+
                     koikoiIndex = -1;
+                    selectedKoikoiCardID = -1;
 
                     Debug.Log("End Before Game");
 
                     // ho6:
                     visualManager.ResetCardObjects();
                     betFactory.ResetBetObjects();
-                    uiYaku.InitShowYaku();
-
 
                     NetworkManager.SetTurnState((int)TurnState.CreateDeck);
                     break;
@@ -124,7 +129,6 @@ namespace HanafudaPoker.Games
                         NetworkManager.SetYaku(yakuIDs, seatID);
                     }
 
-                    uiYaku.ShowYaku(playerYaku[NetworkManager.GetMySeatID()]);
                     //uiDebug.ShowYaku(playerYaku);
 
 
@@ -166,7 +170,6 @@ namespace HanafudaPoker.Games
                         bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
                         NetworkManager.SetYaku(yakuIDs, seatID);
                     }
-
 
                     uiDebug.ShowYaku(playerYaku);
 
@@ -276,25 +279,54 @@ namespace HanafudaPoker.Games
                 case TurnState.WaitForKoikoi:
                     int winnerID = NetworkManager.GetWinnerIDBeforeKoikoi();
 
+                    // 勝者以外は札を選べない
                     // 自分が勝者ならこいこいの選択権がある
-                    if(/*NetworkManager.GetMySeatID() == winnerID*/ true)
+                    if (/*NetworkManager.GetMySeatID() == winnerID*/ true)
                     {
                         uiDebug.SetActiveKoikoiUI(true);
 
                         //プレーヤーの入力町
-
-                        if(NetworkManager.GetIsKoikoi() == -1) // 未選択
+                        if (NetworkManager.GetIsKoikoi() == -1) // 未選択
                             return;
 
-                        
                         if(NetworkManager.GetIsKoikoi() == 1) // こいこいをするなら
                         {
-                            if(koikoiIndex != -1 /*何かカードを選択しているなら*/)
+                            // ロジック用
+                            selectedKoikoiCardID = cardSelector.SelectedKoikoiCardID;
+                            
+                            Debug.Log($"こいこいの札:{selectedKoikoiCardID}");
+
+                            if (selectedKoikoiCardID != -1)
                             {
-                                CardMovementManager.AddToFieldAsKoikoi(koikoiIndex);
+                                // アニメーション用
+                                CardView selectedCard = visualManager.GetPlayerCardByID(selectedKoikoiCardID);
+
+                                if (selectedCard == null)
+                                {
+                                    Debug.LogWarning(
+                                        $"手札に該当するCardViewがありません: {selectedKoikoiCardID}"
+                                    );
+                                    return;
+                                }
+
+                                // アニメーション的に札の更新
+                                selectedKoikoiCard = selectedCard;
+
+                                // ロジック的に札の更新
+                                CardMovementManager.AddToFieldAsKoikoi(selectedKoikoiCardID);
+
                                 NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
                                 uiDebug.SetActiveKoikoiUI(false);
                             }
+                            
+                            // ボタン制御
+                            //if (koikoiIndex != -1 /*何かカードを選択しているなら */)
+                            //{
+                            //    CardMovementManager.AddToFieldAsKoikoiButton(koikoiIndex);
+                            //    NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                            //    uiDebug.SetActiveKoikoiUI(false);
+                            //}
+
                         }
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {
@@ -310,6 +342,38 @@ namespace HanafudaPoker.Games
             }
         }
 
+        // ho6:ネットワークから場札がこいこいも含めて更新されたことを受け取る
+        private void OnEnable()
+        {
+            NetworkManager.OnFieldUpdated += HandleFieldUpdated;
+        }
+
+        private void OnDisable()
+        {
+            NetworkManager.OnFieldUpdated -= HandleFieldUpdated;
+        }
+
+        // ネットワーク上で場札がこいこいも含めて更新されたことを受け取る
+        // ゲームオブジェクトを保持するようのリストに伝える
+        private void HandleFieldUpdated(int[] field)
+        {
+            Debug.Log($"GameManagerが場札更新を受信: {field.Length}枚");
+
+            if (selectedKoikoiCard == null)
+            {
+                Debug.LogWarning("こいこい用の選択カードが設定されていません");
+                return;
+            }
+
+            visualManager.SetSelectKoikoiCardInAnimation(
+                selectedKoikoiCard,
+                field
+            );
+
+            selectedKoikoiCard = null;
+        }
+
+
         // ーーーーーーーーーーーーこのファイル内のみで使う補助関数たちーーーーーーーーーーーーーーー
         private void Initialize()
         {
@@ -319,7 +383,7 @@ namespace HanafudaPoker.Games
             NetworkManager.SetUpSeatID();
             uiDebug.SetActiveKoikoiUI(false);
             koikoiIndex = -1;
-
+            selectedKoikoiCardID = -1;
 
             // 自分のseatIDを各クライアントが保存しておく
             // do
@@ -346,6 +410,7 @@ namespace HanafudaPoker.Games
 
             return true;
         }
+
     }
 
     public enum TurnState

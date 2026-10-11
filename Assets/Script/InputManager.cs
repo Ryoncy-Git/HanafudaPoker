@@ -24,6 +24,7 @@ namespace HanafudaPoker.Games
 
         private void Update()
         {
+            // 準備OKはSpaceか、ButtonUIで受け取る
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 bool state = NetworkManager.GetIsReady();
@@ -34,6 +35,20 @@ namespace HanafudaPoker.Games
             if (Input.GetMouseButtonDown(0))
             {
                 cardSelector.SelectCardFromPlayer();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                if (!isShowDebugUI)
+                {
+                    uiDebugPanel.SetActive(true);
+                    isShowDebugUI = true;
+                }
+                else
+                {
+                    uiDebugPanel.SetActive(false);
+                    isShowDebugUI = false;
+                }
             }
 
 
@@ -53,19 +68,6 @@ namespace HanafudaPoker.Games
             }
 
 
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                if (!isShowDebugUI)
-                {
-                    uiDebugPanel.SetActive(true);
-                    isShowDebugUI = true;
-                }
-                else
-                {
-                    uiDebugPanel.SetActive(false);
-                    isShowDebugUI = false;
-                }
-            }
         }
 
         public void PressedButtonKoikoi(bool state)
@@ -85,6 +87,16 @@ namespace HanafudaPoker.Games
         public void PressedButtonCardSelectNumber(int num)
         {
             this.gameObject.GetComponent<GameManager>().koikoiIndex = num;
+        }
+
+        // ho6:
+        // ボタンを使って準備OKを行う
+        public void OnReadyButtonClicked()
+        {
+            bool state = NetworkManager.GetIsReady();
+            NetworkManager.SetIsReady(!state);
+
+            Debug.Log("Change Ready To"+!state);
         }
     }
 }

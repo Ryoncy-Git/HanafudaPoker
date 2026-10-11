@@ -1,15 +1,18 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 
 using HanafudaPoker.Yakus;
 using HanafudaPoker.Network;
 
+// ho6:
 namespace HanafudaPoker.UIs
 {
     public class UIYaku : MonoBehaviour
     {
         [SerializeField] private TMP_Text yakuText;
+        [SerializeField] private GameObject yakuPanel;
 
         private readonly Dictionary<Yaku, string> yakuNames = new()
         {
@@ -42,13 +45,15 @@ namespace HanafudaPoker.UIs
             return yakuNames.TryGetValue(yaku, out string name) ? name : yaku.ToString();
         }
 
-        public void InitShowYaku()
+        public void Init()
         {
-            yakuText.text = "–ð";
+            yakuText.text = "";
+            yakuPanel.SetActive(false);
         }
 
         public void ShowYaku(List<Yaku> yakus)
         {
+            yakuPanel.SetActive(true);
             yakuText.text = "";
 
             if (yakus == null)
@@ -61,5 +66,9 @@ namespace HanafudaPoker.UIs
             }
         }
 
+        public void CloseYaku()
+        {
+            yakuPanel.SetActive(false);
+        }
     }
 }

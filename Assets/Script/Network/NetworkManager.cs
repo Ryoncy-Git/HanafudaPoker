@@ -3,6 +3,9 @@ using Photon.Pun;
 using ExitGames.Client.Photon;
 using UnityEngine;
 
+// ho6:
+using System;
+
 namespace HanafudaPoker.Network
 {
     /* Room Properties
@@ -27,7 +30,7 @@ namespace HanafudaPoker.Network
         private const string Key_TurnState = "T";
         private const string Key_Round = "R";
         private const string Key_Deck = "D";
-        private const string Key_Field = "F";
+        public const string Key_Field = "F";        // ho6「ほんまごめんpublicにしちゃう」
         private const string Key_DiscardPile = "P";
         private const string Key_WinnerIDBeforeKoikoi = "W1";
         private const string Key_WinnerIDAfterKoikoi = "W2";
@@ -344,6 +347,19 @@ namespace HanafudaPoker.Network
         {
             var list = PhotonNetwork.PlayerList;
             return list.Length;
+        }
+
+        // ho6:が勝手に追加
+        public static event Action<int[]> OnFieldUpdated;
+
+        public static bool IsFieldUpdated(Hashtable properties)
+        {
+            return properties.ContainsKey(Key_Field);
+        }
+
+        public static void NotifyFieldUpdated(int[] field)
+        {
+            OnFieldUpdated?.Invoke(field);
         }
     }
 }
