@@ -276,7 +276,7 @@ namespace HanafudaPoker.Games
 
                     // 勝者以外は札を選べない
                     // 自分が勝者ならこいこいの選択権がある
-                    if (/*NetworkManager.GetMySeatID() == winnerID*/ true)
+                    if (NetworkManager.GetMySeatID() == winnerID)
                     {
                         uiDebug.SetActiveKoikoiUI(true);
 
@@ -286,7 +286,9 @@ namespace HanafudaPoker.Games
 
                         if(NetworkManager.GetIsKoikoi() == 1) // こいこいをするなら
                         {
-                            // ロジック用
+                            if(NetworkManager.GetIsReady())
+                            {
+                                // ロジック用
                             selectedKoikoiCardID = cardSelector.SelectedKoikoiCardID;
                             
                             Debug.Log($"こいこいの札:{selectedKoikoiCardID}");
@@ -321,7 +323,7 @@ namespace HanafudaPoker.Games
                             //    NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
                             //    uiDebug.SetActiveKoikoiUI(false);
                             //}
-
+                            }
                         }
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {

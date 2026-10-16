@@ -43,6 +43,7 @@ namespace HanafudaPoker.Network
         private const string Key_IsReady = "r";
         private const string Key_WillChangeCards = "w";
         private const string Key_yaku = "y";
+        private const string Key_Money = "m";
 
         // valuable 
         private static readonly Hashtable props = new Hashtable();
@@ -190,6 +191,23 @@ namespace HanafudaPoker.Network
         {
             Hashtable props = new Hashtable();
             props[Key_yaku] = yakus;
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            if (player == null)
+            {
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+            else
+            {
+                player.SetCustomProperties(props);
+            }
+        }
+
+        public static void SetMoney(int moneyDelta, int seatID = -1)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_Money] = moneyDelta;
 
             Player player = GetPlayerBySeatID(seatID);
 
