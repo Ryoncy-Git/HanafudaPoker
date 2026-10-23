@@ -1,24 +1,26 @@
 using UnityEngine;
+using HanafudaPoker.Network;
 
 namespace HanafudaPoker.UIs
 {
     public class UIButton : MonoBehaviour
     {
-        [SerializeField] private GameObject stateButtonPanel;
+        [Header("èÛë‘ëJà⁄ÇçsÇ§É{É^Éì")]
+        [SerializeField] private GameObject buttonPanel;
 
         public void Init()
         {
-            stateButtonPanel.SetActive(false);
+            buttonPanel.SetActive(false);
         }
 
-        public void ShowStateButtonUI()
+        public void Show()
         {
-            stateButtonPanel.SetActive(true);
+            buttonPanel.SetActive(true);
         }
 
-        public void HideStateButtonUI()
+        public void Hide()
         {
-            stateButtonPanel.SetActive(false);
+            buttonPanel.SetActive(false);
         }
     }
 }

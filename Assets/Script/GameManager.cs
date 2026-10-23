@@ -77,7 +77,7 @@ namespace HanafudaPoker.Games
                     koikoiIndex = -1;
                     selectedKoikoiCardID = -1;
 
-                    Debug.Log("End Before Game");
+                    Debug.Log("[GameManager] Before Game");
 
                     // ho6:
                     visualManager.ResetCardObjects();
@@ -89,7 +89,7 @@ namespace HanafudaPoker.Games
                 case TurnState.CreateDeck:
                     CardMovementManager.CreateAndShuffleDeck();
                     // SetDeckはCMMの方でやる
-                    Debug.Log("End Create Deck");
+                    Debug.Log("[GameManager] Create Deck");
 
                     NetworkManager.SetTurnState((int)TurnState.DealCards);
                     break;
@@ -97,7 +97,7 @@ namespace HanafudaPoker.Games
                 case TurnState.DealCards:
                     NetworkManager.SetAllPlayersReady(false);
                     CardMovementManager.DealCards();
-                    Debug.Log("End Deal Cards");
+                    Debug.Log("[GameManager] Deal Cards");
 
                     NetworkManager.SetTurnState((int)TurnState.ShowField);
                     break;
@@ -106,58 +106,76 @@ namespace HanafudaPoker.Games
                     // ho6:
                     visualManager.CreateAllCardObjects();
 
-                    Debug.Log("End Show Field");
+                    Debug.Log("[GameManager] Show Field");
 
                     NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
                     break;
 
-                case TurnState.ShowResult:
-                    // マスターが全員の約を判定
-                    if(! NetworkManager.IsMasterClient())
-                        return;
-                    
-                    List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
-                    var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+                case TurnState.WaitForFirstChange:
 
-                    for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
-                    {
-                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
-                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
-
-                        // send yaku data to network
-                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
-                        NetworkManager.SetYaku(yakuIDs, seatID);
-                    }
-
-                    //uiDebug.ShowYaku(playerYaku);
-
-
-                    Debug.Log("End Show Yaku");
-
-                    // 勝者を判定する
-                    // int winnerID = 0; // デバッグ用にいったん0で
-                    // 役のデータを渡してスコアの計算
-                    int[] score = YakuData.CalculateScore(playerYaku);
-                    Debug.Log("beforekoikoi score [0] = " + score[0]);
-                    int winnerID = YakuData.JudgeWinner(score);
-
-
-
-                    NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
-
-
-                    // こいこいはこのタイミングで
-                    // NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
-                    NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
+                    Debug.Log("[GameManager] WaitForFirstChange");
 
                     break;
-                
+
+                case TurnState.WaitForSecondChange:
+
+                    Debug.Log("[GameManager] WaitForSecondChange");
+
+                    break;
+
+                case TurnState.ShowResult:
+                        // マスターが全員の約を判定
+                        if (!NetworkManager.IsMasterClient())
+                            return;
+
+                        List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                        var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+
+                        for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+                        {
+                            var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+                            playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+
+                            // send yaku data to network
+                            bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
+                            NetworkManager.SetYaku(yakuIDs, seatID);
+                        }
+
+                        //uiDebug.ShowYaku(playerYaku);
+
+
+                        Debug.Log("[GameManager] Show Yaku");
+
+                        // 勝者を判定する
+                        // int winnerID = 0; // デバッグ用にいったん0で
+                        // 役のデータを渡してスコアの計算
+                        int[] score = YakuData.CalculateScore(playerYaku);
+                        Debug.Log("beforekoikoi score [0] = " + score[0]);
+                        int winnerID = YakuData.JudgeWinner(score);
+
+
+
+                        NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
+
+
+                        // こいこいはこのタイミングで
+                        // NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
+                        NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
+
+                        break;
+
+                case TurnState.WaitForKoikoi:
+
+                    Debug.Log("[GameManager] WaitForKoikoi");
+
+                    break;
+
                 case TurnState.ShowFinalResult:
                     // 処理自体はShowResultとほぼ同じ
                     // マスターが全員の約を判定
-                    if(! NetworkManager.IsMasterClient())
+                    if (!NetworkManager.IsMasterClient())
                         return;
-                    
+
                     playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                     field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
@@ -184,11 +202,33 @@ namespace HanafudaPoker.Games
 
                     NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
 
+                    Debug.Log("[GameManager] ShowFinalResult");
+
+                    break;
+
+                case TurnState.WaitForNextRound:
+
+                    Debug.Log("[GameManager] WaitForNextRound");
+
+                    break;
+
+                case TurnState.WaitForInitialize:
+
+                    Debug.Log("[GameManager] WaitForInitialize");
+
+                    break;
+
+                case TurnState.WaitSomeSecondForResult:
+
+                    Debug.Log("[GameManager] WaitSomeSecondForResult");
+
                     break;
 
                 case TurnState.Other:
                     // ボタン押したらスタート的な
                     // このクラスできてすぐUpdate内をループするのは少し不安なので緩衝材としてOtherを作りました。
+                    Debug.Log("[GameManager] Other");
+
                     break;
 
                 default:
@@ -271,7 +311,6 @@ namespace HanafudaPoker.Games
                         if (IsEveryoneReady())
                         {
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
-                            Debug.Log("End Initialize");
                         }
                     }
                     break;

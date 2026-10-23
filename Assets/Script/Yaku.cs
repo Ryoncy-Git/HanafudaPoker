@@ -103,6 +103,12 @@ namespace HanafudaPoker.Yakus
             return score;
         }
 
+        // ho6:役の点数を表示するためにGetする関数が必要でした
+        public static int GetYakuScore(Yaku yaku)
+        {
+            return YakuStrength[yaku];
+        }
+
         public static int JudgeWinner(int[] score)
         {
             // ただ最大値をのインデックスを返すだけ

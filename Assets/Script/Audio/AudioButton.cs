@@ -10,7 +10,6 @@ namespace HanafudaPoker.Audio
 
         public void PlayButtonSE()
         {
-            Debug.Log("Button SE");
             audioSource.PlayOneShot(buttonSE);
         }
     }

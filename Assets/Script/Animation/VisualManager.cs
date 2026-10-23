@@ -51,8 +51,8 @@ namespace HanafudaPoker.Animation
         private TurnState previousState;
         private TurnState currentState;
 
-        [SerializeField]
-        private MoveObject moveObject;  // 札ではなく、札に割り当てられた空オブジェクトを操作するとか
+        [Header("Cameraの移動")]
+        [SerializeField] private CameraMove cameraMove;
 
         private void Awake()
         {
@@ -87,10 +87,16 @@ namespace HanafudaPoker.Animation
 
             switch (currentState)
             {
+                case TurnState.WaitForInitialize:
+                    cameraMove.ResetCamera();
+                    break;
+
                 case TurnState.BeforeGame:
+                    cameraMove.ResetCamera();
                     break;
 
                 case TurnState.ShowField:
+                    cameraMove.ResetCamera();
                     ShowFieldCard(0);
                     ShowFieldCard(1);
                     ShowFieldCard(2);
@@ -107,6 +113,7 @@ namespace HanafudaPoker.Animation
                 case TurnState.ShowFinalResult:
                     ShowFieldKoikoiCard(1);
                     ShowFieldKoikoiCard(2);
+                    cameraMove.MoveCamera();
                     break;
 
                 case TurnState.WaitForNextRound:
@@ -159,10 +166,7 @@ namespace HanafudaPoker.Animation
             if (currentState == TurnState.WaitForNextRound)
                 return;
 
-            int count = Mathf.Min(
-                            cardViewPlayer.Count,
-                            hands.Count
-                        );
+            int count = Mathf.Min(cardViewPlayer.Count, hands.Count);
 
             for (int i = 0; i < count; i++)
             {
@@ -176,9 +180,7 @@ namespace HanafudaPoker.Animation
 
                     previousHandIDs[i] = hands[i].CardID;
 
-                    StartCoroutine(
-                        cardViewPlayer[i].ChangeCardAnimation(hands[i])
-                    );
+                    StartCoroutine(cardViewPlayer[i].ChangeCardAnimation(hands[i]));
                 }
             }
         }

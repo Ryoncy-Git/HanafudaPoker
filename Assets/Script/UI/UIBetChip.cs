@@ -3,7 +3,7 @@ using UnityEngine;
 namespace HanafudaPoker.Bet
 {
     // UIÉ{É^ÉìÇ©ÇÁê∂ê¨
-    public class BetChipUI : MonoBehaviour
+    public class UIBetChip : MonoBehaviour
     {
         [SerializeField] private BetFactory betFactory;
 

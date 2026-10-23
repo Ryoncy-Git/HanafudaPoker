@@ -11,7 +11,13 @@ namespace HanafudaPoker.UIs
 {
     public class UIYaku : MonoBehaviour
     {
-        [SerializeField] private TMP_Text yakuText;
+        [Header("役を表示するText")]
+        [SerializeField] private TMP_Text yakuText; // 役の名前
+        [Header("役の点数を表示するText")]
+        [SerializeField] private TMP_Text scoreText; // 役の点数
+        [Header("その人の合計点を表示するText")]
+        [SerializeField] private TMP_Text totalScoreText; // その人の合計点
+
         [SerializeField] private GameObject yakuPanel;
 
         private readonly Dictionary<Yaku, string> yakuNames = new()
@@ -48,13 +54,18 @@ namespace HanafudaPoker.UIs
         public void Init()
         {
             yakuText.text = "";
+            scoreText.text = "";
+            totalScoreText.text = "0";
             yakuPanel.SetActive(false);
         }
 
-        public void ShowYaku(List<Yaku> yakus)
+        public void Show(List<Yaku> yakus)
         {
             yakuPanel.SetActive(true);
             yakuText.text = "";
+            scoreText.text = "";
+
+            int totalScore = 0;
 
             if (yakus == null)
                 return;
@@ -63,10 +74,17 @@ namespace HanafudaPoker.UIs
             {
                 string yakuName = GetYakuName(yaku);
                 yakuText.text += yakuName + "\n";
+
+                int score = YakuData.GetYakuScore(yaku);
+                scoreText.text += $"+{score}点\n";
+
+                totalScore += score;
             }
+
+            totalScoreText.text = $"合計:{totalScore}点";
         }
 
-        public void CloseYaku()
+        public void Hide()
         {
             yakuPanel.SetActive(false);
         }

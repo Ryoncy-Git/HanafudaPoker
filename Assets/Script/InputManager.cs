@@ -25,12 +25,15 @@ namespace HanafudaPoker.Games
         private void Update()
         {
             // 準備OKはSpaceか、ButtonUIで受け取る
+
+            /*
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 bool state = NetworkManager.GetIsReady();
                 NetworkManager.SetIsReady(!state);
                 Debug.Log("Change Ready To " + !state);
             }
+            */
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -91,11 +94,10 @@ namespace HanafudaPoker.Games
 
         // ho6:
         // ボタンを使って準備OKを行う
-        public void OnReadyButtonClicked()
+        public void OnPressedNextStateButton()
         {
             bool state = NetworkManager.GetIsReady();
             NetworkManager.SetIsReady(!state);
-
             Debug.Log("Change Ready To"+!state);
         }
     }

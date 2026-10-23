@@ -6,15 +6,38 @@ using HanafudaPoker.Network;
 using HanafudaPoker.Games;
 using HanafudaPoker.Yakus;
 
+/*
+
+    WaitForInitialize
+    BeforeGame
+    CreateDeck
+    DealCards
+    ShowField
+    WaitForFirstChange
+    WaitForSecondChange
+    ShowYaku
+    WaitForKoikoi
+    ShowFinalResult
+    WaitForNextRound
+    
+    ゲームは上記の状態遷移を行っていく
+    
+    uiYaku：Showyaku, ShowFinalResultの時
+    uiKoikoi:WaitForKoikoiの時
+    uiButton:BeforeGame~WaitForSecondChange, WaitForNextRoundのt機
+    
+    に表示する。
+*/
+
 // ho6:
 namespace HanafudaPoker.UIs
 {
     public class UIManager : MonoBehaviour
     {
         [Header("UIパネル管理")]
-        [SerializeField] private UIYaku uiYaku;
-        [SerializeField] private UIKoikoi uiKoikoi;
-        [SerializeField] private UIButton uiButton;
+        [SerializeField] private UIYaku     uiYaku;
+        [SerializeField] private UIKoikoi   uiKoikoi;
+        [SerializeField] private UIButton   uiButton;
 
         // UIManagerは現在の状態で制御される
         private TurnState previousState = TurnState.Other;
@@ -37,8 +60,7 @@ namespace HanafudaPoker.UIs
 
         private void Update()
         {
-            TurnState currentState =
-                (TurnState)NetworkManager.GetTurnState();
+            TurnState currentState = (TurnState)NetworkManager.GetTurnState();
 
             // ゲーム全体の状態変化
             if (currentState != previousState)
@@ -60,6 +82,10 @@ namespace HanafudaPoker.UIs
 
             switch (state)
             {
+                case TurnState.WaitForInitialize:
+                    uiButton.Show();
+                    break;
+
                 case TurnState.BeforeGame:
 
                     if (yakuCoroutineAfterKoikoi != null)
@@ -75,13 +101,14 @@ namespace HanafudaPoker.UIs
                     }
 
                     canUpdateKoikoiUI = false;
+
+                    uiYaku.Hide();
                     uiKoikoi.Hide();
-                    uiYaku.CloseYaku();
-                    //uiButton.HideStateButtonUI();
+                    uiButton.Show();
+
                     break;
 
                 case TurnState.ShowField:
-                    //uiButton.ShowStateButtonUI();
                     break;
 
                 case TurnState.ShowResult:
@@ -92,15 +119,15 @@ namespace HanafudaPoker.UIs
 
                     // こいこいするか表示
                     yakuCoroutineBeforeKoikoi = StartCoroutine(ShowYakuThenKoikoiUI(seatID));
+
                     break;
 
                 case TurnState.WaitForKoikoi:
-                    //uiButton.HideStateButtonUI();
+                    uiButton.Hide();
                     break;
 
                 case TurnState.ShowFinalResult:
                     uiKoikoi.Hide();
-                    //uiButton.ShowStateButtonUI();
                     break;
 
                 case TurnState.WaitForNextRound:
@@ -131,7 +158,7 @@ namespace HanafudaPoker.UIs
         {
             canUpdateKoikoiUI = false;
 
-            yield return ShowYakuAfterDelayBeforeKoikoi(seatID, 3f);
+            yield return ShowYakuBeforeKoikoi(seatID, 3f);
 
             canUpdateKoikoiUI = true;
             UpdateKoikoiUI();
@@ -142,36 +169,39 @@ namespace HanafudaPoker.UIs
         // こいこいして、役を出す
         private IEnumerator ShowFinalYaku(int seatID)
         {
-            yield return ShowYakuAfterDelayAfterKoikoi(seatID, 100f);
+            yield return new WaitForSeconds(3f);
+
+            // 役を表示する
+            uiYaku.Show(GetPlayerYaku(seatID));
+
+            // 2秒後に「次へ」ボタンを表示
+            yield return new WaitForSeconds(2f);
+            uiButton.Show();
+
+            // 表示開始から合計10秒になるまで待機
+            yield return new WaitForSeconds(8f);
+
+            // 役を閉じて　まだボタンが押されてなければ自動的に次へ
+            uiYaku.Hide();
 
             yakuCoroutineAfterKoikoi = null;
-            // 次のラウンドへの進行処理
+
+            // TODO: 次のラウンドへの進行処理
         }
 
 
 
         /*-- 補助関数 --*/
 
-        private IEnumerator ShowYakuAfterDelayBeforeKoikoi(int seatID, float displaySeconds)
+        private IEnumerator ShowYakuBeforeKoikoi(int seatID, float displaySeconds)
         {
             yield return new WaitForSeconds(3f);
 
-            uiYaku.ShowYaku(GetPlayerYaku(seatID));
+            uiYaku.Show(GetPlayerYaku(seatID));
 
             yield return new WaitForSeconds(displaySeconds);
 
-            uiYaku.CloseYaku();
-        }
-
-        private IEnumerator ShowYakuAfterDelayAfterKoikoi(int seatID, float displaySeconds)
-        {
-            yield return new WaitForSeconds(3f);
-
-            uiYaku.ShowYaku(GetPlayerYaku(seatID));
-
-            yield return new WaitForSeconds(displaySeconds);
-
-            uiYaku.CloseYaku();
+            uiYaku.Hide();
         }
 
         private void UpdateKoikoiUI()

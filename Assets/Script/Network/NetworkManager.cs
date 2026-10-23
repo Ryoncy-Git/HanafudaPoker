@@ -350,6 +350,10 @@ namespace HanafudaPoker.Network
         }
 
         // ho6:が勝手に追加
+        /*
+         * 場の札に、こいこいした時の札が追加されたことを確認するまでは
+         * 札を生成してアニメーションを実行することがないようにするために通知を送る 
+         */
         public static event Action<int[]> OnFieldUpdated;
 
         public static bool IsFieldUpdated(Hashtable properties)
