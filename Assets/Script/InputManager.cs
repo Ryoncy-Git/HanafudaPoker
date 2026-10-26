@@ -94,7 +94,7 @@ namespace HanafudaPoker.Games
 
         // ho6:
         // ボタンを使って準備OKを行う
-        public void OnPressedNextStateButton()
+        public void OnReadyButtonClicked()
         {
             bool state = NetworkManager.GetIsReady();
             NetworkManager.SetIsReady(!state);
