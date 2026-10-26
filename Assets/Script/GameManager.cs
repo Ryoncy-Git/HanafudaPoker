@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
@@ -114,6 +115,31 @@ namespace HanafudaPoker.Games
                 case TurnState.WaitForFirstChange:
 
                     Debug.Log("[GameManager] WaitForFirstChange");
+                    for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+                    {
+                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+
+                        // send yaku data to network
+                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
+                        NetworkManager.SetYaku(yakuIDs, seatID);
+                    }
+
+                    //uiDebug.ShowYaku(playerYaku);
+
+
+                    Debug.Log("End Show Yaku");
+
+                    // 勝者を判定する
+                    // int winnerID = 0; // デバッグ用にいったん0で
+                    // 役のデータを渡してスコアの計算
+                    int[] score = YakuData.CalculateScore(playerYaku);
+                    Debug.Log("beforekoikoi score [0] = " + score[0]);
+                    int winnerID = YakuData.JudgeWinner(score);
+
+                    NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
+
+                    NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
 
                     break;
 
@@ -292,11 +318,13 @@ namespace HanafudaPoker.Games
 
                             NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
-                            if (round <= GameConst.ROUND_NUMBER)
+                            if (round >= GameConst.ROUND_NUMBER)
                             {
                                 // 親が一周したら終わり
                                 // シーン遷移とか
-                                // SceneManager.LoadScene("ResultScene"); みたいな
+                                Debug.Log("round finished");
+                                SceneManager.LoadScene("ResultScene");
+
                             }
 
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
@@ -320,7 +348,7 @@ namespace HanafudaPoker.Games
 
                     // 勝者以外は札を選べない
                     // 自分が勝者ならこいこいの選択権がある
-                    if (/*NetworkManager.GetMySeatID() == winnerID*/ true)
+                    if (NetworkManager.GetMySeatID() == winnerID)
                     {
                         uiDebug.SetActiveKoikoiUI(true);
 
@@ -330,7 +358,9 @@ namespace HanafudaPoker.Games
 
                         if(NetworkManager.GetIsKoikoi() == 1) // こいこいをするなら
                         {
-                            // ロジック用
+                            if(NetworkManager.GetIsReady())
+                            {
+                                // ロジック用
                             selectedKoikoiCardID = cardSelector.SelectedKoikoiCardID;
                             
                             Debug.Log($"こいこいの札:{selectedKoikoiCardID}");
@@ -365,7 +395,7 @@ namespace HanafudaPoker.Games
                             //    NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
                             //    uiDebug.SetActiveKoikoiUI(false);
                             //}
-
+                            }
                         }
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {
