@@ -12,6 +12,7 @@ namespace HanafudaPoker.Yakus
         Nitsui,
         Santsui,
         Yontsui,
+        Gotsui, // 追加
         Mangetsu, // 同じ月4枚
         Akatan,
         Aotan,
@@ -83,6 +84,7 @@ namespace HanafudaPoker.Yakus
             { Yaku.Houou, 100 },
             { Yaku.MidareChidori, 125 },
             { Yaku.Ameshikou, 150 },
+            { Yaku.Gotsui, 200},
             { Yaku.Yonkou, 300 },
             { Yaku.Hououraigi, 500 },
             { Yaku.Gokou, 1000 }
@@ -143,7 +145,11 @@ namespace HanafudaPoker.Yakus
             // 役を全部調べてチェックしてリストに足していく
             // 役は何個もある状態、役がかぶっても墓に持ってる役で勝負
             // 役が完全に同じ場合は月がデカい方が勝ち
-            if (hasYontsui(cards))
+            if (hasGotsui(cards))
+            {
+                yakuList.Add(Yaku.Gotsui);
+            }
+            else if (hasYontsui(cards))
             {
                 yakuList.Add(Yaku.Yontsui);
             }
@@ -309,6 +315,27 @@ namespace HanafudaPoker.Yakus
             }
 
             return tsuiCount >= 4;
+        }
+
+        public static bool hasGotsui(List<CardData> cards)
+        {
+            int[] monthCount = new int[12];
+            int tsuiCount = 0;
+
+            foreach (CardData card in cards)
+            {
+                monthCount[(int)card.Month - 1]++;
+            }
+
+            foreach (int count in monthCount)
+            {
+                if (count == 2 || count == 3)
+                {
+                    tsuiCount++;
+                }
+            }
+
+            return tsuiCount >= 5;
         }
 
         public static bool hasMangetsu(List<CardData> cards)
