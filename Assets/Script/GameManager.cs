@@ -115,31 +115,6 @@ namespace HanafudaPoker.Games
                 case TurnState.WaitForFirstChange:
 
                     Debug.Log("[GameManager] WaitForFirstChange");
-                    for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
-                    {
-                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
-                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
-
-                        // send yaku data to network
-                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
-                        NetworkManager.SetYaku(yakuIDs, seatID);
-                    }
-
-                    //uiDebug.ShowYaku(playerYaku);
-
-
-                    Debug.Log("End Show Yaku");
-
-                    // 勝者を判定する
-                    // int winnerID = 0; // デバッグ用にいったん0で
-                    // 役のデータを渡してスコアの計算
-                    int[] score = YakuData.CalculateScore(playerYaku);
-                    Debug.Log("beforekoikoi score [0] = " + score[0]);
-                    int winnerID = YakuData.JudgeWinner(score);
-
-                    NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
-
-                    NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
 
                     break;
 
@@ -154,7 +129,7 @@ namespace HanafudaPoker.Games
                         if (!NetworkManager.IsMasterClient())
                             return;
 
-                        List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                        var playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                         var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
                         for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)

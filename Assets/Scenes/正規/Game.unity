@@ -11373,7 +11373,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1182538492}
         m_TargetAssemblyTypeName: HanafudaPoker.Games.InputManager, Assembly-CSharp
-        m_MethodName: OnPressedNextStateButton
+        m_MethodName: OnReadyButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

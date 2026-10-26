@@ -92,13 +92,6 @@ namespace HanafudaPoker.Games
         {
             this.gameObject.GetComponent<GameManager>().koikoiIndex = num;
         }
-
-        // ho6:
-        // �{�^�����g���ď���OK���s��
-        public void OnPressedNextStateButton()
-        {
-            // �{�^�����g���ď���OK���s��
-        }
         
         public void OnReadyButtonClicked()
         {
