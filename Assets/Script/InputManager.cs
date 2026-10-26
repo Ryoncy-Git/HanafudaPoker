@@ -94,13 +94,13 @@ namespace HanafudaPoker.Games
         }
 
         // ho6:
-<<<<<<< HEAD
         // �{�^�����g���ď���OK���s��
         public void OnPressedNextStateButton()
-=======
-        // �{�^�����g���ď���OK���s��
+        {
+            // �{�^�����g���ď���OK���s��
+        }
+        
         public void OnReadyButtonClicked()
->>>>>>> develop
         {
             bool state = NetworkManager.GetIsReady();
             NetworkManager.SetIsReady(!state);
