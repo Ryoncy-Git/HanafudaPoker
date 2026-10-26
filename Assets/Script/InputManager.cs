@@ -24,7 +24,7 @@ namespace HanafudaPoker.Games
 
         private void Update()
         {
-            // €”õOK‚ÍSpace‚©AButtonUI‚Åó‚¯æ‚é
+            // ï¿½ï¿½ï¿½ï¿½OKï¿½ï¿½Spaceï¿½ï¿½ï¿½AButtonUIï¿½Åó‚¯ï¿½ï¿½
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 bool state = NetworkManager.GetIsReady();
@@ -90,7 +90,7 @@ namespace HanafudaPoker.Games
         }
 
         // ho6:
-        // ƒ{ƒ^ƒ“‚ğg‚Á‚Ä€”õOK‚ğs‚¤
+        // ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½Äï¿½ï¿½ï¿½OKï¿½ï¿½ï¿½sï¿½ï¿½
         public void OnReadyButtonClicked()
         {
             bool state = NetworkManager.GetIsReady();

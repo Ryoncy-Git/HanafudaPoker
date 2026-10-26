@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
@@ -247,11 +248,13 @@ namespace HanafudaPoker.Games
 
                             NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
-                            if (round <= GameConst.ROUND_NUMBER)
+                            if (round >= GameConst.ROUND_NUMBER)
                             {
                                 // 親が一周したら終わり
                                 // シーン遷移とか
-                                // SceneManager.LoadScene("ResultScene"); みたいな
+                                Debug.Log("round finished");
+                                SceneManager.LoadScene("ResultScene");
+
                             }
 
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
