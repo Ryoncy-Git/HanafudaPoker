@@ -245,21 +245,43 @@ namespace HanafudaPoker.Animation
 
         public void SetSelectKoikoiCardInAnimation(CardView card, int[] field)
         {
-            // ‘I‘ğ‚³‚ê‚½D‚ğèD‚©‚ç‚±‚¢‚±‚¢—p‚ÌêŠ‚Ö
-            if (card == null)
+            if (field.Length < 3)
+            {
+                Debug.LogWarning("‚±‚¢‚±‚¢Œã‚ÌêD‚ª3–‡–¢–‚Å‚·");
                 return;
-
-            cardViewKoikoiField.Add(card);
+            }
 
             // RD‚Ì2–‡‚ğê‚ÖˆÚ“®‚µ‚½‚Ì‚ğ”½‰f
-            // var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
-
-            Debug.Log($"field‚Ì–‡”={field.Length}");
+            Debug.Log($"field.Length = {field.Length}");
+            Debug.Log($"––”ö3–‡: {field[field.Length - 3]}, " +
+                      $"{field[field.Length - 2]}, " +
+                      $"{field[field.Length - 1]}");
 
             // field‚ÌŒã‚ë‚©‚ç2–‡Afield[5],[6]‚ğƒfƒbƒL‚©‚çˆÚ“®‚³‚¹‚é
             int firstDrawIndex = field.Length - 3;
+            int koikoiCardIndex = field.Length - 1;
 
-            for (int i = firstDrawIndex; i < firstDrawIndex + 2; i++)
+            // ‚±‚¢‚±‚¢‚Åo‚µ‚½D
+            if (card != null)
+            {
+
+                Debug.Log($"èD‚©‚ço‚µ‚½D‚ÌID: {card.CardID}");
+                // ŸÒ‚ÍèD‚ÌD‚ğÄ—˜—p
+                cardViewKoikoiField.Add(card);
+
+                // ˆÚ“®‚³‚ê‚½èD‚ğíœ
+                cardViewPlayer.Remove(card);
+            }
+            else
+            {
+                // ”sÒ‚Í‚±‚¢‚±‚¢‚³‚ê‚½D‚ğ¶¬
+                CardView view = cardFactory.CreateCard(CardDataBase.GetCardDataByID(field[koikoiCardIndex]));
+
+                view.Owner = CardOwner.Field;
+                cardViewKoikoiField.Add(view);
+            }
+
+            for (int i = firstDrawIndex; i < koikoiCardIndex; i++)
             {
                 CardView view = cardFactory.CreateCard(CardDataBase.GetCardDataByID(field[i]));
                 view.Owner = CardOwner.Field;
@@ -268,8 +290,6 @@ namespace HanafudaPoker.Animation
                 cardViewKoikoiField.Add(view);
             }
 
-            // ˆÚ“®‚³‚ê‚½èD‚ğíœ
-            cardViewPlayer.Remove(card);
         }
 
         // getter

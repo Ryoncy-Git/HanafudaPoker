@@ -123,7 +123,7 @@ namespace HanafudaPoker.UIs
                     break;
 
                 case TurnState.WaitForKoikoi:
-                    uiButton.Hide();
+                    //uiButton.Hide();
                     break;
 
                 case TurnState.ShowFinalResult:
@@ -231,6 +231,7 @@ namespace HanafudaPoker.UIs
 
                 case 1:     // ‚±‚¢‚±‚¢‚·‚é
                     uiKoikoi.ShowCardSelection();
+                    uiButton.Show();
                     break;
 
                 case 0:     // ‚±‚¢‚±‚¢‚µ‚È‚¢

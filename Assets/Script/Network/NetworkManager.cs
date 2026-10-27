@@ -130,7 +130,7 @@ namespace HanafudaPoker.Network
         //     props[Key_Round] = state;
         //     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         // }
-
+        
         public static void SetWinnerIDBeforeKoikoi(int seatID)
         {
             if (!PhotonNetwork.IsMasterClient)

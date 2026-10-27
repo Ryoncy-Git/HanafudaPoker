@@ -85,9 +85,7 @@ namespace HanafudaPoker.Animation
             if (selectCoroutine != null)
                 StopCoroutine(selectCoroutine);
 
-            selectCoroutine =
-                StartCoroutine(
-                    SelectedCardAnimation(defaultLocalPosition));
+            selectCoroutine = StartCoroutine(SelectedCardAnimation(defaultLocalPosition));
         }
 
         // ŽD‚ðŒðŠ·‚·‚é

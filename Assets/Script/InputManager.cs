@@ -24,10 +24,10 @@ namespace HanafudaPoker.Games
 
         private void Update()
         {
-            // ï¿½ï¿½ï¿½ï¿½OKï¿½ï¿½Spaceï¿½ï¿½ï¿½AButtonUIï¿½Åó‚¯ï¿½ï¿½
+            // E½E½E½E½OKE½E½SpaceE½E½E½AButtonUIE½Åó‚¯ï¿½E½
 
             /*
-            // ï¿½ï¿½ï¿½ï¿½OKï¿½ï¿½Spaceï¿½ï¿½ï¿½AButtonUIï¿½Åó‚¯ï¿½ï¿½
+            // E½E½E½E½OKE½E½SpaceE½E½E½AButtonUIE½Åó‚¯ï¿½E½
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 bool state = NetworkManager.GetIsReady();
@@ -92,7 +92,7 @@ namespace HanafudaPoker.Games
         {
             this.gameObject.GetComponent<GameManager>().koikoiIndex = num;
         }
-        
+
         public void OnReadyButtonClicked()
         {
             bool state = NetworkManager.GetIsReady();
