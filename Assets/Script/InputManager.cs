@@ -24,9 +24,10 @@ namespace HanafudaPoker.Games
 
         private void Update()
         {
-            // 準備OKはSpaceか、ButtonUIで受け取る
+            // ・ｽ・ｽ・ｽ・ｽOK・ｽ・ｽSpace・ｽ・ｽ・ｽAButtonUI・ｽﾅ受け趣ｿｽ・ｽ
 
             /*
+            // ・ｽ・ｽ・ｽ・ｽOK・ｽ・ｽSpace・ｽ・ｽ・ｽAButtonUI・ｽﾅ受け趣ｿｽ・ｽ
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 bool state = NetworkManager.GetIsReady();
@@ -92,8 +93,6 @@ namespace HanafudaPoker.Games
             this.gameObject.GetComponent<GameManager>().koikoiIndex = num;
         }
 
-        // ho6:
-        // ボタンを使って準備OKを行う
         public void OnReadyButtonClicked()
         {
             bool state = NetworkManager.GetIsReady();

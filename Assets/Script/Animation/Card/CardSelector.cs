@@ -145,13 +145,24 @@ namespace HanafudaPoker.Animation
         // こいこいする札を選ぶ　札生成は行わない
         private void SelectCardForKoikoi(CardView card)
         {
+            // 選択済みの札をもう一度クリックした場合は解除
+            if (cardID == card.CardID)
+            {
+                card.ToggleSelect();
+                cardID = -1;
+
+                Debug.Log("こいこいの札選択を解除しました");
+                return;
+            }
+
+            // 別の札がすでに選択されている場合は変更しない
             if (cardID != -1)
                 return;
 
-            // card.ToggleSelect();
+            card.ToggleSelect();
             cardID = card.CardID;
 
-            // visualManager.SetSelectKoikoiCardInAnimation(card);
+            Debug.Log($"こいこいに選ばれた札は: {cardID}");
         }
     }
 

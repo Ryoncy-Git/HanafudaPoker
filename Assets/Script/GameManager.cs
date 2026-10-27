@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
@@ -30,7 +31,11 @@ namespace HanafudaPoker.Games
         [SerializeField] private BetFactory betFactory;
         [SerializeField] private CardSelector cardSelector;
 
+        // ho6:
         private CardView selectedKoikoiCard;
+        // こいこいの札を選択した時に、自動的に次の状態へと進むのを並行してしまう
+        // 上記を防ぐため
+        private bool isKoikoiCardPlaced = false;
 
         private void Start()
         {
@@ -62,6 +67,7 @@ namespace HanafudaPoker.Games
             OnUpdateState(CurrentState);
         }
 
+        // この関数はマスタークライアントのみ実行される
         private void OnEnterState(TurnState turnState)
         {
             switch (turnState)
@@ -128,7 +134,7 @@ namespace HanafudaPoker.Games
                         if (!NetworkManager.IsMasterClient())
                             return;
 
-                        List<Yaku>[] playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                        var playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
                         var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
                         for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
@@ -236,6 +242,7 @@ namespace HanafudaPoker.Games
             }
         }
 
+        // この関数は全員が実行される
         private void OnUpdateState(TurnState turnState)
         {
             switch (turnState)
@@ -292,11 +299,13 @@ namespace HanafudaPoker.Games
 
                             NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
-                            if (round <= GameConst.ROUND_NUMBER)
+                            if (round >= GameConst.ROUND_NUMBER)
                             {
                                 // 親が一周したら終わり
                                 // シーン遷移とか
-                                // SceneManager.LoadScene("ResultScene"); みたいな
+                                Debug.Log("round finished");
+                                SceneManager.LoadScene("ResultScene");
+
                             }
 
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
@@ -320,25 +329,32 @@ namespace HanafudaPoker.Games
 
                     // 勝者以外は札を選べない
                     // 自分が勝者ならこいこいの選択権がある
-                    if (/*NetworkManager.GetMySeatID() == winnerID*/ true)
+
+                    // 自分がマスタークライアントじゃない場合、どうやってこいこいの進行を行うか
+                    if (NetworkManager.GetMySeatID() == winnerID)
                     {
+
                         uiDebug.SetActiveKoikoiUI(true);
 
                         //プレーヤーの入力町
                         if (NetworkManager.GetIsKoikoi() == -1) // 未選択
                             return;
 
-                        if(NetworkManager.GetIsKoikoi() == 1) // こいこいをするなら
+                        if (NetworkManager.GetIsKoikoi() == 1)
                         {
-                            // ロジック用
-                            selectedKoikoiCardID = cardSelector.SelectedKoikoiCardID;
-                            
-                            Debug.Log($"こいこいの札:{selectedKoikoiCardID}");
+                            if (!NetworkManager.GetIsReady())
+                                return;
 
-                            if (selectedKoikoiCardID != -1)
+                            if (!isKoikoiCardPlaced)
                             {
-                                // アニメーション用
-                                CardView selectedCard = visualManager.GetPlayerCardByID(selectedKoikoiCardID);
+                                // 1回目の決定：札を場に出す
+                                selectedKoikoiCardID = cardSelector.SelectedKoikoiCardID;
+
+                                if (selectedKoikoiCardID == -1)
+                                    return;
+
+                                CardView selectedCard =
+                                    visualManager.GetPlayerCardByID(selectedKoikoiCardID);
 
                                 if (selectedCard == null)
                                 {
@@ -348,24 +364,22 @@ namespace HanafudaPoker.Games
                                     return;
                                 }
 
-                                // アニメーション的に札の更新
                                 selectedKoikoiCard = selectedCard;
-
-                                // ロジック的に札の更新
                                 CardMovementManager.AddToFieldAsKoikoi(selectedKoikoiCardID);
 
-                                NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
-                                uiDebug.SetActiveKoikoiUI(false);
-                            }
-                            
-                            // ボタン制御
-                            //if (koikoiIndex != -1 /*何かカードを選択しているなら */)
-                            //{
-                            //    CardMovementManager.AddToFieldAsKoikoiButton(koikoiIndex);
-                            //    NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
-                            //    uiDebug.SetActiveKoikoiUI(false);
-                            //}
+                                isKoikoiCardPlaced = true;
 
+                                // Readyを解除し、次の決定を待つ
+                                NetworkManager.SetIsReady(false);
+                                return;
+                            }
+
+                            // 2回目の決定：次の状態へ進む
+                            NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                            NetworkManager.SetIsReady(false);
+
+                            uiDebug.SetActiveKoikoiUI(false);
+                            isKoikoiCardPlaced = false;
                         }
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {
@@ -374,6 +388,7 @@ namespace HanafudaPoker.Games
                             uiDebug.SetActiveKoikoiUI(false);
                         }
                     }
+
                     break;
 
                     // case 
@@ -397,12 +412,6 @@ namespace HanafudaPoker.Games
         private void HandleFieldUpdated(int[] field)
         {
             Debug.Log($"GameManagerが場札更新を受信: {field.Length}枚");
-
-            if (selectedKoikoiCard == null)
-            {
-                Debug.LogWarning("こいこい用の選択カードが設定されていません");
-                return;
-            }
 
             visualManager.SetSelectKoikoiCardInAnimation(
                 selectedKoikoiCard,

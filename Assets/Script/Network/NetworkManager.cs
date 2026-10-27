@@ -30,11 +30,12 @@ namespace HanafudaPoker.Network
         private const string Key_TurnState = "T";
         private const string Key_Round = "R";
         private const string Key_Deck = "D";
-        public const string Key_Field = "F";        // ho6「ほんまごめんpublicにしちゃう」
+        public const string Key_Field = "F";        // ho6「ほんまごめんpublicにしちゃう」 
         private const string Key_DiscardPile = "P";
         private const string Key_WinnerIDBeforeKoikoi = "W1";
         private const string Key_WinnerIDAfterKoikoi = "W2";
         private const string Key_IsKoikoi = "K"; // -1 = not define, 0 = false, 1 = true
+        
 
 
         // PP (Player Properties) // small letter
@@ -43,6 +44,7 @@ namespace HanafudaPoker.Network
         private const string Key_IsReady = "r";
         private const string Key_WillChangeCards = "w";
         private const string Key_yaku = "y";
+        private const string Key_Money = "m";
 
         // valuable 
         private static readonly Hashtable props = new Hashtable();
@@ -128,7 +130,7 @@ namespace HanafudaPoker.Network
         //     props[Key_Round] = state;
         //     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         // }
-
+        
         public static void SetWinnerIDBeforeKoikoi(int seatID)
         {
             if (!PhotonNetwork.IsMasterClient)
@@ -190,6 +192,23 @@ namespace HanafudaPoker.Network
         {
             Hashtable props = new Hashtable();
             props[Key_yaku] = yakus;
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            if (player == null)
+            {
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+            else
+            {
+                player.SetCustomProperties(props);
+            }
+        }
+
+        public static void SetMoney(int money, int seatID = -1)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_Money] = money;
 
             Player player = GetPlayerBySeatID(seatID);
 
@@ -325,6 +344,27 @@ namespace HanafudaPoker.Network
             }
 
             return (player.CustomProperties[Key_yaku] is bool[] value) ? value : new bool[] { };
+        }
+
+        public static int GetMoney(int seatID = -1)
+        {
+            Player player;
+
+            if(seatID == -1)
+            {
+                player = PhotonNetwork.LocalPlayer;
+            }
+            else
+            {
+                player = GetPlayerBySeatID(seatID);
+            }
+
+            if(player == null)
+            {
+                return 0;
+            }
+
+            return (player.CustomProperties[Key_Money] is int value) ? value : 0;
         }
 
         // public setter and getter
