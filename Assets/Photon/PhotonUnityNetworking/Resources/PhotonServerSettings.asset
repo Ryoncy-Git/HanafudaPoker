@@ -44,6 +44,8 @@ MonoBehaviour:
   - RPC_StartGame
   - RPCSendMessage
   - UpdatePlayerList
+  - RPC_MoveToResultScene
+  - RPC_BackToRoom
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

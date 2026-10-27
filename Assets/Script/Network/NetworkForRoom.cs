@@ -15,7 +15,7 @@ namespace HanafudaPoker.Networks
         public void Start()
         {
             // debug
-            // PhotonNetwork.ConnectUsingSettings(); Room‚É“ü‚Á‚½“_‚ÅÚ‘±Ï‚İ‚¾‚©‚ç•s•K—vH
+            // PhotonNetwork.ConnectUsingSettings(); Roomï¿½É“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ÅÚ‘ï¿½ï¿½Ï‚İ‚ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½Kï¿½vï¿½H
             UpdatePlayerList();
 
             if (PhotonNetwork.IsMasterClient)
@@ -84,7 +84,7 @@ namespace HanafudaPoker.Networks
         }
 
         // ho6:
-        // •”‰®‚ğ”²‚¯‚é
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ğ”²‚ï¿½ï¿½é
         public void OnPressedBackToTitle()
         {
             PhotonNetwork.LeaveRoom();
@@ -102,10 +102,10 @@ namespace HanafudaPoker.Networks
 
         // ---------------for debug--------------
 
-        // ƒ}ƒXƒ^[ƒT[ƒo[‚Ö‚ÌÚ‘±‚ª¬Œ÷‚µ‚½‚ÉŒÄ‚Î‚ê‚éƒR[ƒ‹ƒoƒbƒN
+        // ï¿½}ï¿½Xï¿½^ï¿½[ï¿½Tï¿½[ï¿½oï¿½[ï¿½Ö‚ÌÚ‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉŒÄ‚Î‚ï¿½ï¿½Rï¿½[ï¿½ï¿½ï¿½oï¿½bï¿½N
         public override void OnConnectedToMaster()
         {
-            // "Room"‚Æ‚¢‚¤–¼‘O‚Ìƒ‹[ƒ€‚ÉQ‰Á‚·‚éiƒ‹[ƒ€‚ª‘¶İ‚µ‚È‚¯‚ê‚Îì¬‚µ‚ÄQ‰Á‚·‚éj
+            // "Room"ï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½Ìƒï¿½ï¿½[ï¿½ï¿½ï¿½ÉQï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½Îì¬ï¿½ï¿½ï¿½ÄQï¿½ï¿½ï¿½ï¿½ï¿½ï¿½j
             PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
             Debug.Log("Joined To Master Server");
         }

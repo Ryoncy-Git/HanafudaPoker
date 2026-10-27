@@ -366,6 +366,25 @@ namespace HanafudaPoker.Network
             return list.Length;
         }
 
+        // Adder
+        public static int AddBet(int delta, int seatID = -1)
+        {
+            int bet = GetBet(seatID);
+            bet += delta;
+
+            SetBet(bet, seatID);
+            return bet;
+        }
+
+        public static int AddMoney(int delta, int seatID = -1)
+        {
+            int money = GetBet(seatID);
+            money += delta;
+
+            SetBet(money, seatID);
+            return money;
+        }
+
         // ho6:が勝手に追加
         /*
          * 場の札に、こいこいした時の札が追加されたことを確認するまでは
@@ -381,6 +400,11 @@ namespace HanafudaPoker.Network
         public static void NotifyFieldUpdated(int[] field)
         {
             OnFieldUpdated?.Invoke(field);
+        }
+
+        public static void MoveToResultScene()
+        {
+            RPCManager.Instance.MoveToResultScene();
         }
     }
 }

@@ -1,5 +1,6 @@
 using Photon.Realtime;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Network;
 
@@ -41,6 +42,17 @@ public class RPCManager : MonoBehaviourPunCallbacks
         );
     }
 
+    public void MoveToResultScene()
+    {
+        if(!PhotonNetwork.IsMasterClient)
+            return;
+
+        photonView.RPC(
+            nameof(RPC_MoveToResultScene),
+            RpcTarget.All
+        );
+    }
+
     // ho6が追加 ネットワークの場札更新を検知し、同期ズレを防ぐために泣く泣く勝手に追加しました
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
@@ -77,5 +89,11 @@ public class RPCManager : MonoBehaviourPunCallbacks
     private void RPC_SetAllPlayersWillChangeCards(bool state)
     {
         NetworkManager.SetIsReady(state);
+    }
+    
+    [PunRPC]
+    private void RPC_MoveToResultScene()
+    {
+        SceneManager.LoadScene("ResultScene");
     }
 }
