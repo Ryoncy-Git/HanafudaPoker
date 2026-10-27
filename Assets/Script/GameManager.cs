@@ -382,7 +382,7 @@ namespace HanafudaPoker.Games
 
                                 // Readyを解除し、次の決定を待つ
                                 NetworkManager.SetIsReady(false);
-                                return;
+                                // return;
                             }
 
                             // 2回目の決定：次の状態へ進む
