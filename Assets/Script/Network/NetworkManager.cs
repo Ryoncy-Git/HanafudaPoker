@@ -97,8 +97,8 @@ namespace HanafudaPoker.Network
         }
         public static void SetTurnState(int state)
         {
-            if (!PhotonNetwork.IsMasterClient)
-                return;
+            // if (!PhotonNetwork.IsMasterClient && !(state == TurnState.WaitForKoikoi))
+            //     return;
 
             Hashtable props = new Hashtable();
             props[Key_TurnState] = state;

@@ -23,6 +23,7 @@ namespace HanafudaPoker.Games
         public int koikoiIndex = -1;
         public int selectedKoikoiCardID = -1;
         private int betMoney = 0;
+        private int[] score; // スコープまたいで保持したいだけなんで大したものではない
 
         // インスタンス
         // [SerializeField]private UIManager uiManager;
@@ -151,7 +152,7 @@ namespace HanafudaPoker.Games
                     // 勝者を判定する
                     // int winnerID = 0; // デバッグ用にいったん0で
                     // 役のデータを渡してスコアの計算
-                    int[] score = YakuData.CalculateScore(playerYaku);
+                    score = YakuData.CalculateScore(playerYaku);
                     Debug.Log("beforekoikoi score [0] = " + score[0]);
                     int winnerID = YakuData.JudgeWinner(score);
 
@@ -211,7 +212,7 @@ namespace HanafudaPoker.Games
                     if(! NetworkManager.IsMasterClient())
                         return;
 
-                    
+                    Settlement.Execute(score);
                     
 
                     NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
@@ -408,6 +409,10 @@ namespace HanafudaPoker.Games
                         {
                             if (IsEveryoneReady())
                             {
+                                NetworkManager.SetAllPlayersReady(false);
+                                NetworkManager.SetAllPlayersWillChangeCards(false);
+                                NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+
                                 NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
                             }
                         }
@@ -421,6 +426,10 @@ namespace HanafudaPoker.Games
                         {
                             if (IsEveryoneReady())
                             {
+                                NetworkManager.SetAllPlayersReady(false);
+                                NetworkManager.SetAllPlayersWillChangeCards(false);
+                                NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+
                                 NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
                             }
                         }
@@ -434,6 +443,10 @@ namespace HanafudaPoker.Games
                         {
                             if (IsEveryoneReady())
                             {
+                                NetworkManager.SetAllPlayersReady(false);
+                                NetworkManager.SetAllPlayersWillChangeCards(false);
+                                NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+
                                 NetworkManager.SetTurnState((int)TurnState.ShowResult);
                             }
                         }
@@ -447,6 +460,10 @@ namespace HanafudaPoker.Games
                         {
                             if (IsEveryoneReady())
                             {
+                                NetworkManager.SetAllPlayersReady(false);
+                                NetworkManager.SetAllPlayersWillChangeCards(false);
+                                NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
+                                
                                 NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
                             }
                         }
