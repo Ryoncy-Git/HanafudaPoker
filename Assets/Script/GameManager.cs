@@ -22,6 +22,7 @@ namespace HanafudaPoker.Games
         private int MySeatID = -1;
         public int koikoiIndex = -1;
         public int selectedKoikoiCardID = -1;
+        private int betMoney = 0;
 
         // インスタンス
         // [SerializeField]private UIManager uiManager;
@@ -109,7 +110,7 @@ namespace HanafudaPoker.Games
 
                     Debug.Log("[GameManager] Show Field");
 
-                    NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
+                    NetworkManager.SetTurnState((int)TurnState.WaitForFirstBet);
                     break;
 
                 case TurnState.WaitForFirstChange:
@@ -125,45 +126,42 @@ namespace HanafudaPoker.Games
                     break;
 
                 case TurnState.ShowResult:
-                        // マスターが全員の約を判定
-                        if (!NetworkManager.IsMasterClient())
-                            return;
+                    // マスターが全員の約を判定
+                    if (!NetworkManager.IsMasterClient())
+                        return;
 
-                        var playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
-                        var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
+                    var playerYaku = new List<Yaku>[GameConst.PLAYER_NUMBER];
+                    var field = CardDataBase.GetCardDataListByID(NetworkManager.GetField());
 
-                        for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
-                        {
-                            var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
-                            playerYaku[seatID] = YakuData.YakuCheck(field, hands);
+                    for (int seatID = 0; seatID < GameConst.PLAYER_NUMBER; seatID++)
+                    {
+                        var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
+                        playerYaku[seatID] = YakuData.YakuCheck(field, hands);
 
-                            // send yaku data to network
-                            bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
-                            NetworkManager.SetYaku(yakuIDs, seatID);
-                        }
+                        // send yaku data to network
+                        bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
+                        NetworkManager.SetYaku(yakuIDs, seatID);
+                    }
 
-                        //uiDebug.ShowYaku(playerYaku);
-
-
-                        Debug.Log("[GameManager] Show Yaku");
-
-                        // 勝者を判定する
-                        // int winnerID = 0; // デバッグ用にいったん0で
-                        // 役のデータを渡してスコアの計算
-                        int[] score = YakuData.CalculateScore(playerYaku);
-                        Debug.Log("beforekoikoi score [0] = " + score[0]);
-                        int winnerID = YakuData.JudgeWinner(score);
+                    //uiDebug.ShowYaku(playerYaku);
 
 
+                    Debug.Log("[GameManager] Show Yaku");
 
-                        NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
+                    // 勝者を判定する
+                    // int winnerID = 0; // デバッグ用にいったん0で
+                    // 役のデータを渡してスコアの計算
+                    int[] score = YakuData.CalculateScore(playerYaku);
+                    Debug.Log("beforekoikoi score [0] = " + score[0]);
+                    int winnerID = YakuData.JudgeWinner(score);
+
+                    NetworkManager.SetWinnerIDBeforeKoikoi(winnerID);
 
 
-                        // こいこいはこのタイミングで
-                        // NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
-                        NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
+                    // こいこいはこのタイミングで
+                    NetworkManager.SetTurnState((int)TurnState.WaitForKoikoi);
 
-                        break;
+                    break;
 
                 case TurnState.WaitForKoikoi:
 
@@ -185,7 +183,6 @@ namespace HanafudaPoker.Games
                         var hands = CardDataBase.GetCardDataListByID(NetworkManager.GetHands(seatID));
                         playerYaku[seatID] = YakuData.YakuCheck(field, hands);
 
-                        // send yaku data to network
                         bool[] yakuIDs = YakuDataBase.GetIDsByYakuList(playerYaku[seatID]);
                         NetworkManager.SetYaku(yakuIDs, seatID);
                     }
@@ -197,14 +194,27 @@ namespace HanafudaPoker.Games
                     // 役のデータを渡してスコアの計算
                     score = YakuData.CalculateScore(playerYaku);
                     Debug.Log("afterkoikoi score [0] = " + score[0]);
-                    winnerID = YakuData.JudgeWinner(score);
 
-                    NetworkManager.SetWinnerIDAfterKoikoi(winnerID);
+                    // winnerIDはこいこい宣言権のためだけに使うのでここでは不要
+                    // NetworkManager.SetWinnerIDAfterKoikoi(winnerID);
 
-                    NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
+                    NetworkManager.SetTurnState((int)TurnState.Settlement);
 
                     Debug.Log("[GameManager] ShowFinalResult");
+                    break;
 
+                case TurnState.Settlement: 
+                    // 清算のターン
+                    // ベットした金額と役の強さによってお金の移動を行う
+
+                    // 清算はマスタークライアントのみ実行
+                    if(! NetworkManager.IsMasterClient())
+                        return;
+
+                    
+                    
+
+                    NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
                     break;
 
                 case TurnState.WaitForNextRound:
@@ -254,7 +264,7 @@ namespace HanafudaPoker.Games
                             NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
                             uiDebug.ShowWillChange();
-                            NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
+                            NetworkManager.SetTurnState((int)TurnState.WaitForSecondBet);
                         }
                     }
 
@@ -273,7 +283,7 @@ namespace HanafudaPoker.Games
                             NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
 
                             uiDebug.ShowWillChange();
-                            NetworkManager.SetTurnState((int)TurnState.ShowResult);
+                            NetworkManager.SetTurnState((int)TurnState.WaitForThirdBetAndInsurance);
                         }
                     }
 
@@ -359,7 +369,7 @@ namespace HanafudaPoker.Games
                                 // ロジック的に札の更新
                                 CardMovementManager.AddToFieldAsKoikoi(selectedKoikoiCardID);
 
-                                NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                                NetworkManager.SetTurnState((int)TurnState.WaitForKoikoiBetAndInsurance);
                                 uiDebug.SetActiveKoikoiUI(false);
                             }
                             
@@ -375,14 +385,72 @@ namespace HanafudaPoker.Games
                         else //(NetworkManager.GetIskoikoi() == 0)
                         {
                             Debug.Log("こいこいしないを選択");
-                            NetworkManager.SetTurnState((int)TurnState.WaitForNextRound);
+                            NetworkManager.SetTurnState((int)TurnState.Settlement);
                             uiDebug.SetActiveKoikoiUI(false);
                         }
                     }
                     break;
 
-                    // case 
+                    case TurnState.WaitForFirstBet:
+                        // プレイヤーのベットを待つ
+
+                        // 全員のベットが終了し、全員の準備ができたら次のステートに移動
+
+                        // ho6ho6へ
+                        // ベットはWaitFor~~Betの時だけできるようにしてほしいのでUIのボタンを出すタイミングをそちらで実装してください
+                        // 意訳：関係ないときにベットできないようにしてほしい
+
+                        // 追加関数
+                        // NetworkManager.GetBet(int seatID = -1)
+                        // NetworkManager.SetBet(int bet, seatID = -1)
+
+                        if (NetworkManager.IsMasterClient())
+                        {
+                            if (IsEveryoneReady())
+                            {
+                                NetworkManager.SetTurnState((int)TurnState.WaitForFirstChange);
+                            }
+                        }
+                    break;
+
+                    case TurnState.WaitForSecondBet:
+                        // プレイヤーのベットを待つ
+
+                        // 全員のベットが終了し、全員の準備ができたら次のステートに移動
+                        if (NetworkManager.IsMasterClient())
+                        {
+                            if (IsEveryoneReady())
+                            {
+                                NetworkManager.SetTurnState((int)TurnState.WaitForSecondChange);
+                            }
+                        }
+                    break;
+
+                    case TurnState.WaitForThirdBetAndInsurance:
+                        // プレイヤーのベットを待つ
+
+                        // 全員のベットが終了し、全員の準備ができたら次のステートに移動
+                        if (NetworkManager.IsMasterClient())
+                        {
+                            if (IsEveryoneReady())
+                            {
+                                NetworkManager.SetTurnState((int)TurnState.ShowResult);
+                            }
+                        }
+                    break;
                     
+                    case TurnState.WaitForKoikoiBetAndInsurance:
+                        // プレイヤーのベットを待つ
+
+                        // 全員のベットが終了し、全員の準備ができたら次のステートに移動
+                        if (NetworkManager.IsMasterClient())
+                        {
+                            if (IsEveryoneReady())
+                            {
+                                NetworkManager.SetTurnState((int)TurnState.ShowFinalResult);
+                            }
+                        }
+                    break;
             }
         }
 
@@ -428,6 +496,8 @@ namespace HanafudaPoker.Games
             uiDebug.SetActiveKoikoiUI(false);
             koikoiIndex = -1;
             selectedKoikoiCardID = -1;
+            
+            NetworkManager.SetBet(0);
 
             // 自分のseatIDを各クライアントが保存しておく
             // do
@@ -471,7 +541,11 @@ namespace HanafudaPoker.Games
         ShowFinalResult,
         WaitForNextRound,
         WaitForInitialize, 
-        WaitSomeSecondForResult
+        WaitSomeSecondForResult,
+        Settlement, // 清算するターンを設ける
+        WaitForFirstBet,
+        WaitForSecondBet,
+        WaitForThirdBetAndInsurance,
+        WaitForKoikoiBetAndInsurance
     }
-
 }

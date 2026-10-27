@@ -43,20 +43,28 @@ namespace HanafudaPoker.Network
         private const string Key_Hands = "h";
         private const string Key_IsReady = "r";
         private const string Key_WillChangeCards = "w";
-        private const string Key_yaku = "y";
+        private const string Key_yaku = "y";    
         private const string Key_Money = "m";
+        private const string Key_Bet = "b";
+        private const string Key_Insurance = "i";
 
         // valuable 
         private static readonly Hashtable props = new Hashtable();
+        private const int DOESNOT_EXIST = -2; // -1はもう使っているので-2で
 
         // private functions
         public /*private */static Player GetPlayerBySeatID(int seatID)
         {
-            Player player = null;
+            // 変更
+            // seatID == -1のとき、nullを返すのではなく、LocalPlayerを返すように変更
+            // 理由、こっちの方がコードがシンプルになるので
+            Player player = PhotonNetwork.LocalPlayer;
+
             var players = PhotonNetwork.PlayerList;
+
             foreach (Player p in players)
             {
-                int id = (p.CustomProperties[Key_SeatID] is int value) ? value : -1;
+                int id = (p.CustomProperties[Key_SeatID] is int value) ? value : DOESNOT_EXIST;
 
                 if (id == seatID)
                 {
@@ -165,14 +173,7 @@ namespace HanafudaPoker.Network
 
             Player player = GetPlayerBySeatID(seatID);
 
-            if (player == null)
-            {
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            }
-            else
-            {
-                player.SetCustomProperties(props);
-            }
+            player.SetCustomProperties(props);
         }
         public static void SetWillChangeCards(bool[] state)
         {
@@ -195,14 +196,7 @@ namespace HanafudaPoker.Network
 
             Player player = GetPlayerBySeatID(seatID);
 
-            if (player == null)
-            {
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            }
-            else
-            {
-                player.SetCustomProperties(props);
-            }
+            player.SetCustomProperties(props);
         }
 
         public static void SetMoney(int money, int seatID = -1)
@@ -212,14 +206,27 @@ namespace HanafudaPoker.Network
 
             Player player = GetPlayerBySeatID(seatID);
 
-            if (player == null)
-            {
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            }
-            else
-            {
-                player.SetCustomProperties(props);
-            }
+            player.SetCustomProperties(props);
+        }
+
+        public static void SetBet(int bet, int seatID = -1)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_Bet] = bet;
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            player.SetCustomProperties(props);
+        }
+
+        public static void SetInsurace(int insurance, int seatID = -1)
+        {
+            Hashtable props = new Hashtable();
+            props[Key_Insurance] = insurance;
+
+            Player player = GetPlayerBySeatID(seatID);
+
+            player.SetCustomProperties(props);
         }
 
         // getter
@@ -242,16 +249,7 @@ namespace HanafudaPoker.Network
         }
         public static bool GetIsReady(int seatID = -1)
         {
-            Player player;
-
-            if (seatID == -1) // �����i�V�Ȃ玩�����g��
-            {
-                player = PhotonNetwork.LocalPlayer;
-            }
-            else
-            {
-                player = GetPlayerBySeatID(seatID);
-            }
+            Player player = GetPlayerBySeatID(seatID);
 
             if (player == null)
                 return false;
@@ -271,16 +269,7 @@ namespace HanafudaPoker.Network
 
         public static bool[] GetWillChangeCards(int seatID = -1)
         {
-            Player player;
-
-            if (seatID == -1) // �����i�V�Ȃ玩�����g��
-            {
-                player = PhotonNetwork.LocalPlayer;
-            }
-            else
-            {
-                player = GetPlayerBySeatID(seatID);
-            }
+            Player player = GetPlayerBySeatID(seatID);
 
             if (player == null)
                 return new bool[] { false, false, false };
@@ -289,23 +278,12 @@ namespace HanafudaPoker.Network
         }
         public static int[] GetHands(int seatID = -1)
         {
-            Player player;
-
-            if (seatID == -1) // �����i�V�Ȃ玩�����g��
-            {
-                player = PhotonNetwork.LocalPlayer;
-            }
-            else
-            {
-                player = GetPlayerBySeatID(seatID);
-            }
+            Player player = GetPlayerBySeatID(seatID);
 
 
             if (player == null)
-            {
-                Debug.Log("Failed to get hand on ID : " + seatID);
                 return new int[] { };
-            }
+
             return (player.CustomProperties[Key_Hands] is int[] value) ? value : new int[] { };
         }
 
@@ -326,17 +304,7 @@ namespace HanafudaPoker.Network
 
         public static bool[] GetYaku(int seatID = -1)
         {
-            Player player;
-
-            if (seatID == -1)
-            {
-                player = PhotonNetwork.LocalPlayer;
-            }
-            else
-            {
-                player = GetPlayerBySeatID(seatID);
-            }
-
+            Player player = GetPlayerBySeatID(seatID);
 
             if (player == null)
             {
@@ -348,23 +316,32 @@ namespace HanafudaPoker.Network
 
         public static int GetMoney(int seatID = -1)
         {
-            Player player;
-
-            if(seatID == -1)
-            {
-                player = PhotonNetwork.LocalPlayer;
-            }
-            else
-            {
-                player = GetPlayerBySeatID(seatID);
-            }
+            Player player = GetPlayerBySeatID(seatID);
 
             if(player == null)
-            {
                 return 0;
-            }
 
             return (player.CustomProperties[Key_Money] is int value) ? value : 0;
+        }
+
+        public static int GetBet(int seatID = -1)
+        {
+            Player player = GetPlayerBySeatID(seatID);
+
+            if(player == null)
+                return 0;
+            
+            return (player.CustomProperties[Key_Bet] is int value) ? value : 0;
+        }
+
+        public static int GetInsurace(int seatID = -1)
+        {
+            Player player = GetPlayerBySeatID(seatID);
+
+            if(player == null)
+                return 0;
+
+            return (player.CustomProperties[Key_Insurance] is int value) ? value : 0;
         }
 
         // public setter and getter
