@@ -20,13 +20,13 @@ using HanafudaPoker.Yakus;
     ShowFinalResult
     WaitForNextRound
     
-    ƒQ[ƒ€‚Íã‹L‚Ìó‘Ô‘JˆÚ‚ğs‚Á‚Ä‚¢‚­
+    ï¿½Qï¿½[ï¿½ï¿½ï¿½Íï¿½Lï¿½Ìï¿½Ô‘Jï¿½Ú‚ï¿½ï¿½sï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½
     
-    uiYakuFShowyaku, ShowFinalResult‚Ì
-    uiKoikoi:WaitForKoikoi‚Ì
-    uiButton:BeforeGame~WaitForSecondChange, WaitForNextRound‚Ìt‹@
+    uiYakuï¿½FShowyaku, ShowFinalResultï¿½Ìï¿½
+    uiKoikoi:WaitForKoikoiï¿½Ìï¿½
+    uiButton:BeforeGame~WaitForSecondChange, WaitForNextRoundï¿½ï¿½tï¿½@
     
-    ‚É•\¦‚·‚éB
+    ï¿½É•\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
 */
 
 // ho6:
@@ -34,19 +34,19 @@ namespace HanafudaPoker.UIs
 {
     public class UIManager : MonoBehaviour
     {
-        [Header("UIƒpƒlƒ‹ŠÇ—")]
+        [Header("UIï¿½pï¿½lï¿½ï¿½ï¿½Ç—ï¿½")]
         [SerializeField] private UIYaku     uiYaku;
         [SerializeField] private UIKoikoi   uiKoikoi;
         [SerializeField] private UIButton   uiButton;
 
-        // UIManager‚ÍŒ»İ‚Ìó‘Ô‚Å§Œä‚³‚ê‚é
+        // UIManagerï¿½ÍŒï¿½ï¿½İ‚Ìï¿½Ô‚Åï¿½ï¿½ä‚³ï¿½ï¿½ï¿½
         private TurnState previousState = TurnState.Other;
         private int previousKoikoiChoice = -2;
 
-        // –ğ•\¦‚ªI‚í‚é‚Ü‚Å‚Í‚±‚¢‚±‚¢ƒ{ƒ^ƒ“‚Ö‚Ì“ü—Í‚Íó‚¯•t‚¯‚È‚¢
+        // ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½Ü‚Å‚Í‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½Ö‚Ì“ï¿½ï¿½Í‚Íó‚¯•tï¿½ï¿½ï¿½È‚ï¿½
         private bool canUpdateKoikoiUI = false;
 
-        // Croutine‚ªI‚í‚é‘O‚ÉBeforeGame‚ÉˆÚ‚Á‚½‚çI—¹‚³‚¹‚é
+        // Croutineï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½Oï¿½ï¿½BeforeGameï¿½ÉˆÚ‚ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         private Coroutine yakuCoroutineBeforeKoikoi;
         private Coroutine yakuCoroutineAfterKoikoi;
 
@@ -62,14 +62,14 @@ namespace HanafudaPoker.UIs
         {
             TurnState currentState = (TurnState)NetworkManager.GetTurnState();
 
-            // ƒQ[ƒ€‘S‘Ì‚Ìó‘Ô•Ï‰»
+            // ï¿½Qï¿½[ï¿½ï¿½ï¿½Sï¿½Ì‚Ìï¿½Ô•Ï‰ï¿½
             if (currentState != previousState)
             {
                 previousState = currentState;
                 OnStateChanged(currentState);
             }
 
-            // “¯‚¶TurnState“à‚Å‚Ì‘I‘ğ•Ï‰»‚àŠm”F
+            // ï¿½ï¿½ï¿½ï¿½TurnStateï¿½ï¿½ï¿½Å‚Ì‘Iï¿½ï¿½Ï‰ï¿½ï¿½ï¿½ï¿½mï¿½F
             if (currentState == TurnState.WaitForKoikoi && canUpdateKoikoiUI)
             {
                 UpdateKoikoiUI();
@@ -117,7 +117,7 @@ namespace HanafudaPoker.UIs
                     if (yakuCoroutineBeforeKoikoi != null)
                         StopCoroutine(yakuCoroutineBeforeKoikoi);
 
-                    // ‚±‚¢‚±‚¢‚·‚é‚©•\¦
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©ï¿½\ï¿½ï¿½
                     yakuCoroutineBeforeKoikoi = StartCoroutine(ShowYakuThenKoikoiUI(seatID));
 
                     break;
@@ -135,7 +135,7 @@ namespace HanafudaPoker.UIs
                     if (yakuCoroutineAfterKoikoi != null)
                         StopCoroutine(yakuCoroutineAfterKoikoi);
 
-                    // ‚±‚¢‚±‚¢‚àŠÜ‚ß‚½–ğ
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ß‚ï¿½ï¿½ï¿½
                     yakuCoroutineAfterKoikoi = StartCoroutine(ShowFinalYaku(seatID));
 
                     break;
@@ -144,16 +144,16 @@ namespace HanafudaPoker.UIs
         }
 
         /*
-         * –ğ‚ğ•\¦E‚±‚¢‚±‚¢‚·‚é‚©‚ğ–â‚¤ƒ^ƒCƒ~ƒ“ƒO 
+         * ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©ï¿½ï¿½â‚¤ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½O 
          * 
-         * ‚±‚¢‚±‚¢‚·‚é‘OF–ğ‚ğ•\¦->‚±‚¢‚±‚¢‚·‚é‚©H
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½Fï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½->ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©ï¿½H
          * 
-         * ‚±‚¢‚±‚¢‚µ‚½ŒãF–ğ‚ğ•\¦->Ÿ‚Ìƒ‰ƒEƒ“ƒh@or@Œ‹‰Ê”­•\
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Fï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½->ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Eï¿½ï¿½ï¿½hï¿½@orï¿½@ï¿½ï¿½ï¿½Ê”ï¿½ï¿½\
          * 
          */
 
 
-        // ‚±‚¢‚±‚¢‚·‚é‘O‚Ì–ğ‚ğo‚·B‚»‚ÌŒã‚É‚±‚¢‚±‚¢‚·‚é‚©•·‚­
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½Ì–ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½ï¿½Bï¿½ï¿½ï¿½ÌŒï¿½É‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©ï¿½ï¿½ï¿½ï¿½
         private IEnumerator ShowYakuThenKoikoiUI(int seatID)
         {
             canUpdateKoikoiUI = false;
@@ -166,32 +166,32 @@ namespace HanafudaPoker.UIs
             yakuCoroutineBeforeKoikoi = null;
         }
 
-        // ‚±‚¢‚±‚¢‚µ‚ÄA–ğ‚ğo‚·
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÄAï¿½ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½
         private IEnumerator ShowFinalYaku(int seatID)
         {
             yield return new WaitForSeconds(3f);
 
-            // –ğ‚ğ•\¦‚·‚é
+            // ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             uiYaku.Show(GetPlayerYaku(seatID));
 
-            // 2•bŒã‚ÉuŸ‚Övƒ{ƒ^ƒ“‚ğ•\¦
+            // 2ï¿½bï¿½ï¿½Éuï¿½ï¿½ï¿½Övï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
             yield return new WaitForSeconds(2f);
             uiButton.Show();
 
-            // •\¦ŠJn‚©‚ç‡Œv10•b‚É‚È‚é‚Ü‚Å‘Ò‹@
+            // ï¿½\ï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½ç‡ï¿½v10ï¿½bï¿½É‚È‚ï¿½Ü‚Å‘Ò‹@
             yield return new WaitForSeconds(8f);
 
-            // –ğ‚ğ•Â‚¶‚Ä@‚Ü‚¾ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚È‚¯‚ê‚Î©“®“I‚ÉŸ‚Ö
+            // ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½Ä@ï¿½Ü‚ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚È‚ï¿½ï¿½ï¿½Îï¿½ï¿½ï¿½ï¿½Iï¿½Éï¿½ï¿½ï¿½
             uiYaku.Hide();
 
             yakuCoroutineAfterKoikoi = null;
 
-            // TODO: Ÿ‚Ìƒ‰ƒEƒ“ƒh‚Ö‚Ìisˆ—
+            // TODO: ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Eï¿½ï¿½ï¿½hï¿½Ö‚Ìiï¿½sï¿½ï¿½ï¿½ï¿½
         }
 
 
 
-        /*-- •â•ŠÖ” --*/
+        /*-- ï¿½â•ï¿½Öï¿½ --*/
 
         private IEnumerator ShowYakuBeforeKoikoi(int seatID, float displaySeconds)
         {
@@ -209,7 +209,7 @@ namespace HanafudaPoker.UIs
             int mySeatID = NetworkManager.GetMySeatID();
             int winnerID = NetworkManager.GetWinnerIDBeforeKoikoi();
 
-            // ‘I‘ğŒ ‚Ì‚È‚¢ƒvƒŒƒCƒ„[‚É‚Í•\¦‚µ‚È‚¢
+            // ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Ì‚È‚ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½É‚Í•\ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½
             if (mySeatID != winnerID)
             {
                 uiKoikoi.WaitKoikoiSelected();
@@ -225,16 +225,16 @@ namespace HanafudaPoker.UIs
 
             switch (choice)
             {
-                case -1:    // ‚±‚¢‚±‚¢‚·‚é‚©‘I‘ğ’†
+                case -1:    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©ï¿½Iï¿½ï¿½
                     uiKoikoi.ShowKoikoiChoice();
                     break;
 
-                case 1:     // ‚±‚¢‚±‚¢‚·‚é
+                case 1:     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     uiKoikoi.ShowCardSelection();
                     uiButton.Show();
                     break;
 
-                case 0:     // ‚±‚¢‚±‚¢‚µ‚È‚¢
+                case 0:     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½
                     uiKoikoi.Hide();
                     break;
             }
