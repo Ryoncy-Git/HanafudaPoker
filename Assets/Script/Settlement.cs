@@ -25,15 +25,30 @@ namespace HanafudaPoker.Bet
             {
                 int profit = payouts[seatID] - Bets[seatID];
 
+                
+
+                // 利益を加算
+
+                if(NetworkManager.GetInsurace() > 0)
+                {
+                    // もし保険に入っていて、利益がマイナスなら
+                    if(profit < 0)
+                    {
+                        // 損失を半分に
+                        profit /= 2;
+                    }
+                }
+
                 Debug.Log(
                     $"Player {seatID} : " +
                     $"Bet = {Bets[seatID]}, " +
+                    $"Insurance = {NetworkManager.GetInsurace() > 0}, " +
                     $"Score = {score[seatID]}, " +
                     $"Payout = {payouts[seatID]}, " +
                     $"Profit = {profit}"
                 );
 
-                // 利益を加算
+
                 int money = NetworkManager.GetMoney(seatID);
                 NetworkManager.SetMoney(money + payouts[seatID], seatID);
             }
