@@ -5,7 +5,7 @@ using HanafudaPoker.Network;
 using HanafudaPoker.UIs;
 using HanafudaPoker.Games;
 
-// ho6:betSystem‚ÍAƒlƒbƒgƒ[ƒN‚©‚çæ“¾‚µ‚½Œ»İ‚Ì‚¿‹à‚É‰‚¶‚½•ª‚Ì‹àŠz‚ğ¶¬
+// ho6:betSystemï¿½ÍAï¿½lï¿½bï¿½gï¿½ï¿½ï¿½[ï¿½Nï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ‚Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‹ï¿½ï¿½zï¿½ğ¶ï¿½
 namespace HanafudaPoker.Bet
 {
     public static class BetSystem
@@ -17,16 +17,17 @@ namespace HanafudaPoker.Bet
 
         public static bool TryBet(int betAmount)
         {
-            // Œ»İ‚Ì‚¿‹à
-            int money = NetworkManager.GetBet();    // ‚±‚ê‚ÍŠ‹à‚ğæ“¾‚·‚éŠÖ”‚ª—~‚µ‚¢
+            // ï¿½ï¿½ï¿½İ‚Ìï¿½ï¿½ï¿½ï¿½ï¿½
+            int money = NetworkManager.GetBet();    // ï¿½ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½Öï¿½ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½
 
-            // BetŠz‚ªğŒ‚ğ–‚½‚µ‚Ä‚È‚¢(•s³Eƒ}ƒCƒiƒX‚É‚È‚é)
+            // Betï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ğ–‚ï¿½ï¿½ï¿½ï¿½Ä‚È‚ï¿½(ï¿½sï¿½ï¿½ï¿½Eï¿½}ï¿½Cï¿½iï¿½Xï¿½É‚È‚ï¿½)
             if (betAmount <= 0 || betAmount > money)
             {
                 return false;
             }
 
-            // BetŠz‚ğİ’è
+
+            // Betï¿½zï¿½ï¿½İ’ï¿½
             NetworkManager.SetBet(betAmount);
 
             money = money - betAmount;

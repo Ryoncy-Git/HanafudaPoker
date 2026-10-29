@@ -35,7 +35,7 @@ namespace HanafudaPoker.Bet
                     if(profit < 0)
                     {
                         // 損失を半分に
-                        profit /= 2;
+                        profit = (int)(BetConst.INSURANCE_EFFECT * profit);
                     }
                 }
 

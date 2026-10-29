@@ -435,6 +435,8 @@ namespace HanafudaPoker.Games
 
                         //GetMoney, SetMoney, AddMoneyもあるヨ
 
+                        
+
                         if (NetworkManager.IsMasterClient())
                         {
                             if (IsEveryoneReady())
