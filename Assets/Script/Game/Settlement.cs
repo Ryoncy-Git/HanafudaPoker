@@ -49,8 +49,7 @@ namespace HanafudaPoker.Bet
                 );
 
 
-                int money = NetworkManager.GetMoney(seatID);
-                NetworkManager.SetMoney(money + payouts[seatID], seatID);
+                NetworkManager.AddMoney(payouts[seatID], seatID);
             }
         }
 

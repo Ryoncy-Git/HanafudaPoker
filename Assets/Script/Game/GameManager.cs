@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 using HanafudaPoker.Cards;
 using HanafudaPoker.UIs;
@@ -168,6 +167,8 @@ namespace HanafudaPoker.Games
                 case TurnState.WaitForKoikoi:
 
                     Debug.Log("[GameManager] WaitForKoikoi");
+                    // ほけんきんの返還
+                    // NetworkManager.AddMoney(NetworkManager.GetInsurace());
 
                     break;
 
@@ -331,8 +332,8 @@ namespace HanafudaPoker.Games
                                 // 親が一周したら終わり
                                 // シーン遷移とか
                                 Debug.Log("round finished");
-                                SceneManager.LoadScene("ResultScene");
-
+                                NetworkManager.MoveToResultScene();
+                                return;
                             }
 
                             NetworkManager.SetTurnState((int)TurnState.BeforeGame);
@@ -429,7 +430,10 @@ namespace HanafudaPoker.Games
 
                         // 追加関数
                         // NetworkManager.GetBet(int seatID = -1)
-                        // NetworkManager.SetBet(int bet, seatID = -1)
+                        // NetworkManager.SetBet(int bet, int seatID = -1)
+                        // NetworkManager.AddBet(int delta, int seatID = -1)
+
+                        //GetMoney, SetMoney, AddMoneyもあるヨ
 
                         if (NetworkManager.IsMasterClient())
                         {
@@ -535,18 +539,7 @@ namespace HanafudaPoker.Games
             selectedKoikoiCardID = -1;
             
             NetworkManager.SetBet(0);
-
-            // 自分のseatIDを各クライアントが保存しておく
-            // do
-            // {
-            //     MySeatID = NetworkManager.GetMySeatID();
-            // }while(MySeatID == -1);
-
-            // 空データを入れる作業はここでは　要らないかも
-            // var Deck = new List<CardData>();
-            // var FieldCard = new List<CardData>();
-            // NetworkManager.SetDeck(CardDataBase.GetIDsByList(Deck));
-
+            NetworkManager.SetMoney(1000);
         }
 
         private bool IsEveryoneReady()
