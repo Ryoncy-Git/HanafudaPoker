@@ -378,10 +378,10 @@ namespace HanafudaPoker.Network
 
         public static int AddMoney(int delta, int seatID = -1)
         {
-            int money = GetBet(seatID);
+            int money = GetMoney(seatID);
             money += delta;
 
-            SetBet(money, seatID);
+            SetMoney(money, seatID);
             return money;
         }
 
