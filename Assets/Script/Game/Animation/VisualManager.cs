@@ -8,6 +8,7 @@ using HanafudaPoker.Games;
 
 namespace HanafudaPoker.Animation
 {
+    // Debug.Log($"{}");
     public class VisualManager : MonoBehaviour
     {
         [Header("クライアントのみで完結")]

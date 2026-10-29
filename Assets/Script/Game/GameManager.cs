@@ -39,6 +39,9 @@ namespace HanafudaPoker.Games
         // 上記を防ぐため
         private bool isKoikoiCardPlaced = false;
 
+        // クライアントでも生成すると、Updateで常に回ってるから一度だけに
+        private bool isCardsGenerated = false;
+
         private void Start()
         {
             Initialize();
@@ -83,13 +86,9 @@ namespace HanafudaPoker.Games
                     NetworkManager.SetIsKoikoi(-1);
 
                     koikoiIndex = -1;
-                    selectedKoikoiCardID = -1;
 
                     Debug.Log("[GameManager] Before Game");
 
-                    // ho6:
-                    visualManager.ResetCardObjects();
-                    betFactory.ResetBetObjects();
 
                     NetworkManager.SetTurnState((int)TurnState.CreateDeck);
                     break;
@@ -111,9 +110,6 @@ namespace HanafudaPoker.Games
                     break;
 
                 case TurnState.ShowField:
-                    // ho6:
-                    visualManager.CreateAllCardObjects();
-
                     Debug.Log("[GameManager] Show Field");
 
                     NetworkManager.SetTurnState((int)TurnState.WaitForFirstBet);
@@ -258,6 +254,26 @@ namespace HanafudaPoker.Games
         {
             switch (turnState)
             {
+                case TurnState.BeforeGame:
+
+                    selectedKoikoiCardID = -1;
+                    // ho6:
+                    visualManager.ResetCardObjects();
+                    betFactory.ResetBetObjects();
+                    isCardsGenerated = false;
+
+                    break;
+
+                case TurnState.ShowField:
+
+                    // 生成は1回のみ
+                    if (!isCardsGenerated)
+                    {
+                        visualManager.CreateAllCardObjects();
+                        isCardsGenerated = true;
+                    }
+                    break;
+
                 case TurnState.WaitForFirstChange:
                     // wait player input
                     if (NetworkManager.IsMasterClient())

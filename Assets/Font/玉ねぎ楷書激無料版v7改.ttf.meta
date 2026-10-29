@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 92427082ece4f3042908d3be4d8b8fe7
+guid: a38bce5e00efa3643a7f0f992f3eaab9
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Nicoca-v2
+  - Tamanegi Kaisho Geki FreeVer 7
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

@@ -6,7 +6,7 @@ using HanafudaPoker.Games;
 
 namespace HanafudaPoker.Animation
 {
-    // ・ｽD・ｽ・ｽI・ｽ・ｽ Debug.Log($"{}");
+    // Debug.Log($"{}");
     public class CardSelector : MonoBehaviour
     {
         [SerializeField]
@@ -39,6 +39,17 @@ namespace HanafudaPoker.Animation
             switch (currentState)
             {
                 case TurnState.BeforeGame:
+                case TurnState.WaitForFirstBet:
+                case TurnState.WaitForSecondBet:
+                case TurnState.WaitForThirdBetAndInsurance:
+                case TurnState.WaitForKoikoiBetAndInsurance:
+                case TurnState.ShowFinalResult:
+                case TurnState.WaitForNextRound:
+                case TurnState.WaitForInitialize:
+                case TurnState.ShowResult:
+                    SetSelectMode(CardSelectMode.None);
+                    break;
+
                 case TurnState.WaitForFirstChange:
                 case TurnState.WaitForSecondChange:
                     SetSelectMode(CardSelectMode.Exchange);
@@ -51,12 +62,6 @@ namespace HanafudaPoker.Animation
                         SetSelectMode(CardSelectMode.None);
                     break;
 
-                case TurnState.ShowFinalResult:
-                case TurnState.WaitForNextRound:
-                case TurnState.WaitForInitialize:
-                case TurnState.ShowResult:
-                    SetSelectMode(CardSelectMode.None);
-                    break;
             }
         }
 

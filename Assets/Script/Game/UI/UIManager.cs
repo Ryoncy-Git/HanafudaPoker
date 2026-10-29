@@ -7,26 +7,28 @@ using HanafudaPoker.Games;
 using HanafudaPoker.Yakus;
 
 /*
+ * 花札ポーカーはどのように状態遷移していくのか
 
     WaitForInitialize
     BeforeGame
     CreateDeck
     DealCards
     ShowField
+
+    WaitForFirstBet
     WaitForFirstChange
+    WaitForSecondBet
     WaitForSecondChange
-    ShowYaku
+    WaitForThirdBetAndInsurance
+
+    ShowYaku    こいこいしないときはShowFinalResultへ
+
     WaitForKoikoi
+    WaitForKoikoiBetAndInsurance
+    
     ShowFinalResult
+
     WaitForNextRound
-    
-    �Q�[���͏�L�̏�ԑJ�ڂ��s���Ă���
-    
-    uiYaku�FShowyaku, ShowFinalResult�̎�
-    uiKoikoi:WaitForKoikoi�̎�
-    uiButton:BeforeGame~WaitForSecondChange, WaitForNextRound��t�@
-    
-    �ɕ\������B
 */
 
 // ho6:
@@ -34,10 +36,11 @@ namespace HanafudaPoker.UIs
 {
     public class UIManager : MonoBehaviour
     {
-        [Header("UI�p�l���Ǘ�")]
-        [SerializeField] private UIYaku     uiYaku;
-        [SerializeField] private UIKoikoi   uiKoikoi;
-        [SerializeField] private UIButton   uiButton;
+        [Header("UI")]
+        [SerializeField] private UIYaku         uiYaku;
+        [SerializeField] private UIKoikoi       uiKoikoi;
+        [SerializeField] private UIButton       uiButton;
+        [SerializeField] private UIBetButton    uiBetButton;
 
         // UIManager�͌��݂̏�ԂŐ��䂳���
         private TurnState previousState = TurnState.Other;
@@ -53,9 +56,7 @@ namespace HanafudaPoker.UIs
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Start()
         {
-            uiKoikoi.Init();
-            uiYaku.Init();
-            uiButton.Init();
+            UIInit();
         }
 
         private void Update()
@@ -83,6 +84,7 @@ namespace HanafudaPoker.UIs
             switch (state)
             {
                 case TurnState.WaitForInitialize:
+                    UIInit();
                     uiButton.Show();
                     break;
 
@@ -104,11 +106,31 @@ namespace HanafudaPoker.UIs
 
                     uiYaku.Hide();
                     uiKoikoi.Hide();
+                    uiBetButton.Hide();
                     uiButton.Show();
-
                     break;
 
                 case TurnState.ShowField:
+                    break;
+
+                case TurnState.WaitForFirstBet:
+                    uiBetButton.Show();
+                    break;
+
+                case TurnState.WaitForFirstChange:
+                    uiBetButton.Hide();
+                    break;
+
+                case TurnState.WaitForSecondBet:
+                    uiBetButton.Show();
+                    break;
+
+                case TurnState.WaitForSecondChange:
+                    uiBetButton.Hide();
+                    break;
+
+                case TurnState.WaitForThirdBetAndInsurance:
+                    uiBetButton.Show(); // この時は保険betもあるか？を表示するq
                     break;
 
                 case TurnState.ShowResult:
@@ -120,13 +142,19 @@ namespace HanafudaPoker.UIs
                     // �����������邩�\��
                     yakuCoroutineBeforeKoikoi = StartCoroutine(ShowYakuThenKoikoiUI(seatID));
 
+                    uiBetButton.Hide();
                     break;
 
                 case TurnState.WaitForKoikoi:
                     //uiButton.Hide();
                     break;
 
+                case TurnState.WaitForKoikoiBetAndInsurance:
+                    uiBetButton.Show();
+                    break;
+
                 case TurnState.ShowFinalResult:
+                    uiBetButton.Hide();
                     uiKoikoi.Hide();
                     break;
 
@@ -240,6 +268,15 @@ namespace HanafudaPoker.UIs
             }
         }
 
+        private void UIInit()
+        {
+            uiKoikoi.Init();
+            uiYaku.Init();
+            uiButton.Init();
+            uiBetButton.Init();
+        }
+
+        // 役UIにプレイヤーが取得した役を渡す
         private List<Yaku> GetPlayerYaku(int seatID)
         {
             bool[] flags = NetworkManager.GetYaku(seatID);

@@ -3,25 +3,40 @@ using UnityEngine;
 namespace HanafudaPoker.Bet
 {
     // UIボタンから生成
-    public class UIBetChip : MonoBehaviour
+    public class BetButton : MonoBehaviour
     {
         [SerializeField] private BetFactory betFactory;
 
         public void OnBetMinCoinButton()
         {
-            Debug.Log("Create 5 Coin");
+            if (!BetSystem.TryBet(5))
+            {
+                Debug.Log("持ち金不足:5");
+                return;
+            }
+            
             betFactory.CreateBetCoin(BetCoin.BunkyuEiho);
         }
 
         public void OnBetMidCoinButton()
         {
-            Debug.Log("Create 10 Coin");
+            if (!BetSystem.TryBet(10))
+            {
+                Debug.Log("持ち金不足:10");
+                return;
+            }
+
             betFactory.CreateBetCoin(BetCoin.KaneiTsuho);
         }
 
         public void OnBetMaxCoinButton()
         {
-            Debug.Log("Create 50 Coin");
+            if (!BetSystem.TryBet(50))
+            {
+                Debug.Log("持ち金不足:50");
+                return;
+            }
+
             betFactory.CreateBetCoin(BetCoin.Wadokaichin);
         }
     }

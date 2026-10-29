@@ -17,6 +17,8 @@ namespace HanafudaPoker.Animation
         // ©•ª‚Æê‚ÌD¶¬
         public CardView CreateCard(CardData card)
         {
+            Debug.Log("CreateTrueCard");
+
             GameObject obj = Instantiate(cardPrefab);
 
             CardView view = obj.GetComponent<CardView>();

@@ -76,12 +76,12 @@ namespace HanafudaPoker.UIs
                 yakuText.text += yakuName + "\n";
 
                 int score = YakuData.GetYakuScore(yaku);
-                scoreText.text += $"+{score}点\n";
+                scoreText.text += $"+{score}文\n";
 
                 totalScore += score;
             }
 
-            totalScoreText.text = $"合計:{totalScore}点";
+            totalScoreText.text = $"合計:{totalScore}文";
         }
 
         public void Hide()
