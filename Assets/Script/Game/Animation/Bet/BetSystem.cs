@@ -10,26 +10,23 @@ namespace HanafudaPoker.Bet
 {
     public static class BetSystem
     {
-        private static void Start()
-        {
-            // NetworkManager.SetBet(100);
-        }
-
+        // task:Šebetƒ^[ƒ“‚ÅA“q‚¯‚ê‚éÅ‘å‹àŠz‚ğ§ŒÀ‚·‚é
         public static bool TryBet(int betAmount)
         {
             // Œ»İ‚Ì‚¿‹à
-            int money = NetworkManager.GetBet();    // ‚±‚ê‚ÍŠ‹à‚ğæ“¾‚·‚éŠÖ”‚ª—~‚µ‚¢
+            int money = NetworkManager.GetMoney();    // ‚±‚ê‚ÍŠ‹à‚ğæ“¾‚·‚éŠÖ”‚ª—~‚µ‚¢
+            int allBetValue = NetworkManager.GetBet(); 
 
             // BetŠz‚ªğŒ‚ğ–‚½‚µ‚Ä‚È‚¢(•s³Eƒ}ƒCƒiƒX‚É‚È‚é)
-            if (betAmount <= 0 || betAmount > money)
+            if (betAmount + allBetValue > 100 /*‚±‚Ì100‚ÍGameConst‚ÅŒˆ‚ß‚ç‚ê‚Ä‚é*/|| betAmount > money)
             {
                 return false;
             }
 
             // BetŠz‚ğİ’è
-            NetworkManager.SetBet(betAmount);
-
-            money = money - betAmount;
+            NetworkManager.SetBet(betAmount);       // Š|‚¯‚½‹àŠz
+            NetworkManager.AddBet(betAmount);       // ‚±‚ê‚Ü‚ÅŠ|‚¯‚½‹àŠz
+            NetworkManager.AddMoney(-betAmount);    // Š‹à
 
             return true;
         }
