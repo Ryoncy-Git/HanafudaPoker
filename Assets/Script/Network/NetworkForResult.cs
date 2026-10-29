@@ -14,7 +14,7 @@ namespace HanafudaPoker.Networks
         [SerializeField] private TextMeshProUGUI resultText;
         public void OnPressedBackToRoom()
         {
-            SceneManager.LoadScene("InWaitngRoom");
+            SceneManager.LoadScene("InWaitingRoom");
         }
 
         [PunRPC]
