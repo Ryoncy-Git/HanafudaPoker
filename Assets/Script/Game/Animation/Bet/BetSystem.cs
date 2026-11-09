@@ -5,31 +5,101 @@ using HanafudaPoker.Network;
 using HanafudaPoker.UIs;
 using HanafudaPoker.Games;
 
-// ho6:betSystem‚ÍAƒlƒbƒgƒ[ƒN‚©‚çæ“¾‚µ‚½Œ»İ‚Ì‚¿‹à‚É‰‚¶‚½•ª‚Ì‹àŠz‚ğ¶¬
+// ho6:betSystemï¿½ÍAï¿½lï¿½bï¿½gï¿½ï¿½ï¿½[ï¿½Nï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ‚Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‹ï¿½ï¿½zï¿½ğ¶ï¿½
 namespace HanafudaPoker.Bet
 {
     public static class BetSystem
     {
-        // task:Šebetƒ^[ƒ“‚ÅA“q‚¯‚ê‚éÅ‘å‹àŠz‚ğ§ŒÀ‚·‚é
+        // task:ï¿½ebetï¿½^ï¿½[ï¿½ï¿½ï¿½ÅAï¿½qï¿½ï¿½ï¿½ï¿½ï¿½Å‘ï¿½ï¿½ï¿½zï¿½ğ§Œï¿½ï¿½ï¿½ï¿½ï¿½
+
         public static bool TryBet(int betAmount)
         {
-            // Œ»İ‚Ì‚¿‹à
-            int money = NetworkManager.GetMoney();    // ‚±‚ê‚ÍŠ‹à‚ğæ“¾‚·‚éŠÖ”‚ª—~‚µ‚¢
+            // ï¿½ï¿½ï¿½İ‚Ìï¿½ï¿½ï¿½ï¿½ï¿½
+            int money = NetworkManager.GetMoney();    // ï¿½ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½Öï¿½ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½
             int allBetValue = NetworkManager.GetBet(); 
 
-            // BetŠz‚ªğŒ‚ğ–‚½‚µ‚Ä‚È‚¢(•s³Eƒ}ƒCƒiƒX‚É‚È‚é)
-            if (betAmount + allBetValue > 100 /*‚±‚Ì100‚ÍGameConst‚ÅŒˆ‚ß‚ç‚ê‚Ä‚é*/|| betAmount > money)
+
+            // ç¾åœ¨ã®ã‚¿ãƒ¼ãƒ³ã‹ã‚‰æœ€å¤§ãƒ™ãƒƒãƒˆæ•°ã‚’ç¢ºèª
+            TurnState currentTurn = (TurnState)NetworkManager.GetTurnState();
+            int betMaximun = 0;
+            switch (currentTurn)
+            {
+                case TurnState.WaitForFirstBet:
+                    betMaximun = BetConst.FIRST_BET_MAXIMUM;
+                    break;
+                
+                case TurnState.WaitForSecondBet:
+                    betMaximun = BetConst.SECOND_BET_MAXIMUM;
+                    break;
+                
+                case TurnState.WaitForThirdBetAndInsurance:
+                    betMaximun = BetConst.THIRD_BET_MAXIMUM;
+                    break;
+
+                case TurnState.WaitForKoikoiBetAndInsurance:
+                    betMaximun = BetConst.KOIKOI_BET_MAMIMUM; 
+                    break;
+
+                default :
+                    Debug.Log("ãƒ™ãƒƒãƒˆã‚¿ãƒ¼ãƒ³ã§ã¯ã‚ã‚Šã¾ã›ã‚“");
+                    break;
+            }
+
+
+            // é‡‘é¡ä¸è¶³ã‹æœ€å¤§ãƒ™ãƒƒãƒˆæ•°ã‚’è¶…ãˆã¦ã„ãŸã‚‰çµ‚äº†
+            if (betAmount + allBetValue > betMaximun || betAmount > money)
             {
                 return false;
             }
 
-            // BetŠz‚ğİ’è
-            NetworkManager.SetBet(betAmount);       // Š|‚¯‚½‹àŠz
-            NetworkManager.AddBet(betAmount);       // ‚±‚ê‚Ü‚ÅŠ|‚¯‚½‹àŠz
-            NetworkManager.AddMoney(-betAmount);    // Š‹à
+            // Betï¿½zï¿½ï¿½İ’ï¿½ 
+            NetworkManager.AddBet(betAmount);       // ï¿½ï¿½ï¿½ï¿½Ü‚ÅŠ|ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½z
+            NetworkManager.AddMoney(-betAmount);    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
             return true;
         }
 
+        public static void ResetBetMount()
+        {
+            NetworkManager.SetBet(0);
+        }
+
+        public static void DistributeInitFunds()
+        {
+            NetworkManager.SetMoney(BetConst.INIT_FUNDS);
+        }
+
+        public static void SetInsurance()
+        {
+            // å°æ•°åˆ‡ã‚Šæ¨ã¦
+            int insuranceAmount = 
+                (int)((float)NetworkManager.GetBet() * BetConst.INSURANCE_COST_MULTIPLIER);
+
+            
+            if(insuranceAmount < 0)
+            {
+                Debug.Log("Failed To Set Insurance");
+                return;
+            }
+
+            NetworkManager.SetInsurace(insuranceAmount);
+        }
+
+        public static void ResetInsurance()
+        {
+            NetworkManager.SetInsurace(0);
+        }
+
+        public static void OnInsuranceButton()
+        {
+            if(NetworkManager.GetInsurace() > 0)
+            {
+                ResetInsurance();
+            }
+            else
+            {
+                SetInsurance();
+            }
+        }
     }
 }

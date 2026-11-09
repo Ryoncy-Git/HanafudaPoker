@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace HanafudaPoker.Bet
 {
-    // UIƒ{ƒ^ƒ“‚©‚ç¶¬
+    // UIï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ç¶ï¿½ï¿½
     public class BetButton : MonoBehaviour
     {
         [SerializeField] private BetFactory betFactory;
@@ -11,7 +11,7 @@ namespace HanafudaPoker.Bet
         {
             if (!BetSystem.TryBet(5))
             {
-                Debug.Log("‚¿‹à•s‘«:5");
+                Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½:5");
                 return;
             }
             
@@ -22,7 +22,7 @@ namespace HanafudaPoker.Bet
         {
             if (!BetSystem.TryBet(10))
             {
-                Debug.Log("‚¿‹à•s‘«:10");
+                Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½:10");
                 return;
             }
 
@@ -33,11 +33,17 @@ namespace HanafudaPoker.Bet
         {
             if (!BetSystem.TryBet(50))
             {
-                Debug.Log("‚¿‹à•s‘«:50");
+                Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½:50");
                 return;
             }
 
             betFactory.CreateBetCoin(BetCoin.Wadokaichin);
+        }
+
+        public void OnInsuranceButton()
+        {
+            // NetworkManager.Hogehoge()ã‚’ä½¿ã„ãŸã„ã®ã§ã„ã£ãŸã‚“BetSystemã«ãŸã‚‰ã„ã¾ã‚ã—
+            BetSystem.OnInsuranceButton();
         }
     }
 }

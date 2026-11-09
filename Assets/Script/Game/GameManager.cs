@@ -29,9 +29,8 @@ namespace HanafudaPoker.Games
         [SerializeField] private UIDebug uiDebug;
 
         [SerializeField] private VisualManager visualManager;
-        [SerializeField] private BetFactory betFactory;
         [SerializeField] private CardSelector cardSelector;
-
+        private BetFactory betFactory; 
         // ho6:
         private CardView selectedKoikoiCard;
         // こいこいの札を選択した時に、自動的に次の状態へと進むのを並行してしまう
@@ -84,7 +83,12 @@ namespace HanafudaPoker.Games
                     NetworkManager.SetWillChangeCards(new bool[] { false, false, false });
                     NetworkManager.SetIsKoikoi(-1);
 
+                    BetSystem.ResetBetMount();
+
                     koikoiIndex = -1;
+
+                    // Roncy 移動させました
+                    
 
                     Debug.Log("[GameManager] Before Game");
 
@@ -256,13 +260,11 @@ namespace HanafudaPoker.Games
             switch (turnState)
             {
                 case TurnState.BeforeGame:
-
                     selectedKoikoiCardID = -1;
                     // ho6:
                     visualManager.ResetCardObjects();
                     betFactory.ResetBetObjects();
                     isCardsGenerated = false;
-
                     break;
 
                 case TurnState.ShowField:
@@ -435,6 +437,8 @@ namespace HanafudaPoker.Games
 
                         //GetMoney, SetMoney, AddMoneyもあるヨ
 
+                        
+
                         if (NetworkManager.IsMasterClient())
                         {
                             if (IsEveryoneReady())
@@ -537,9 +541,9 @@ namespace HanafudaPoker.Games
             uiDebug.SetActiveKoikoiUI(false);
             koikoiIndex = -1;
             selectedKoikoiCardID = -1;
-            
-            NetworkManager.SetBet(0);
-            NetworkManager.SetMoney(1000);
+
+            BetSystem.ResetBetMount();
+            BetSystem.DistributeInitFunds(); // 初期金額を設定
         }
 
         private bool IsEveryoneReady()
