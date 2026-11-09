@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using HanafudaPoker.Network;
 
@@ -20,10 +21,19 @@ namespace HanafudaPoker.Bet
             // 各プレイヤーの受取額を計算
             int[] payouts = CalculatePayouts(Bets, score);
 
+            // 一位の人にはこいこいボーナスを付ける
+            // こいこい後のみ実行
+            if(NetworkManager.GetIsKoikoi() == 1)
+            {   
+                int winnerID = Array.IndexOf(score, score.Max());
+                payouts[winnerID] *= BetConst.KOIKOI_MULTIPLIER;
+            }
+
             // 清算処理
             for (int seatID = 0; seatID < Bets.Length; seatID++)
             {
                 int profit = payouts[seatID] - Bets[seatID];
+
 
                 
 

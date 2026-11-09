@@ -4,7 +4,8 @@ namespace HanafudaPoker.Bet
 {
     public static class BetConst
     {
-        public const float INSURANCE_COST = 0.1f; // 保険にかかる金額比（ベット額に対して）(例；100 Bet -> Insurance 100 * 0.1 = 10)
+        public const int INIT_FUNDS = 1000; 
+        public const float INSURANCE_COST_MULTIPLIER = 0.1f; // 保険にかかる金額比（ベット額に対して）(例；100 Bet -> Insurance 100 * 0.1 = 10)
         public const float INSURANCE_EFFECT = 0.5f; // 減額を0.5倍にする
         public const int FIRST_BET_MAXIMUM = 100;
         public const int SECOND_BET_MAXIMUM = 200;
